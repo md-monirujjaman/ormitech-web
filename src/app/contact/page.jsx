@@ -1,0 +1,1 @@
+import Navbar from "@/components/common/Navbar";import Footer from "@/components/common/Footer";import Contact from "@/components/sections/Contact";export const metadata={title:'Contact | OrmiTech'};export default function ContactPage(){return <><Navbar/><main className="pt-20"><Contact/></main><Footer/></>}
