@@ -1,4 +1,4 @@
-import "./globals.css";
+import "@/styles/globals.css";
 import ChatWidget from "@/components/common/ChatWidget";
 
 export const metadata = {
@@ -19,10 +19,10 @@ export const metadata = {
   robots: { index: true, follow: true },
   icons: {
     icon: [
-      { url: "/icon0.svg", type: "image/svg+xml" },
-      { url: "/icon1.png", type: "image/png", sizes: "96x96" }
+      { url: "/icons/icon0.svg", type: "image/svg+xml" },
+      { url: "/icons/icon1.png", type: "image/png", sizes: "96x96" }
     ],
-    apple: [{ url: "/apple-icon.png" }]
+    apple: [{ url: "/icons/apple-icon.png" }]
   },
   appleWebApp: {
     title: "OrmiTech"
