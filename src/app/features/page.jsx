@@ -1,3 +1,39 @@
-import Navbar from "@/components/common/Navbar";import Footer from "@/components/common/Footer";import PageHero from "@/components/common/PageHero";import Features from "@/components/sections/Features";import SimpleCTA from "@/components/common/SimpleCTA";
-const details=[['Unified Inbox','Bring conversations into one team workspace with channel, status, ownership and customer context.'],['AI Automation','Automate predictable questions, qualification and approved workflows while keeping the behavior controllable.'],['Human Handover','Escalate conversations without losing context. Human takeover is part of the workflow, not an exception.'],['Lead Management','Turn useful conversations into structured leads with intent, tags, ownership and follow-up opportunities.'],['Real-Time Conversations','The future dashboard/backend can use live events and Socket.io to keep conversations synchronized across agents.'],['Analytics','Measure conversation volume, response performance, automation activity and lead outcomes as the platform grows.']];
-export default function FeaturesPage(){return <><Navbar/><main><PageHero eyebrow="Features" title="Everything needed to run a modern conversation workflow." description="OrmiTech is not only a chatbot or an inbox. It connects channels, automation, people and operational data."/><Features/><section className="border-y border-black/10 bg-[#F7F8FA] py-24"><div className="container-x grid gap-5 md:grid-cols-2">{details.map(([t,d])=><article key={t} className="rounded-2xl border border-black/10 bg-black/[.02] p-7"><h2 className="text-xl font-semibold">{t}</h2><p className="mt-3 leading-7 text-black/45">{d}</p></article>)}</div></section><SimpleCTA/></main><Footer/></>}
+import Footer from "@/components/common/Footer";
+import Navbar from "@/components/common/Navbar";
+import SimpleCTA from "@/components/common/SimpleCTA";
+import AIShowcase from "@/components/features/AIShowcase";
+import { ScrollProgress } from "@/components/ui/effects";
+import FeatureGrid from "@/components/features/FeatureGrid";
+import FeaturesHero from "@/components/features/FeaturesHero";
+import InboxHighlight from "@/components/features/InboxHighlight";
+import { MotionProvider } from "@/components/ui/Reveal";
+import SolutionsGrid from "@/components/features/SolutionsGrid";
+import WorkflowSteps from "@/components/features/WorkflowSteps";
+import { featuresHero } from "@/data/features";
+import { interTight } from "@/styles/fonts";
+
+export const metadata = {
+  title: "Features",
+  description: featuresHero.description
+};
+
+export default function FeaturesPage() {
+  return (
+    <>
+      <Navbar />
+      <main className={`${interTight.className} overflow-x-clip bg-white text-navy antialiased`}>
+        <MotionProvider>
+          <ScrollProgress />
+          <FeaturesHero />
+          <FeatureGrid />
+          <InboxHighlight />
+          <WorkflowSteps />
+          <AIShowcase />
+          <SolutionsGrid />
+          <SimpleCTA secondaryLabel="See pricing" secondaryHref="/pricing" />
+        </MotionProvider>
+      </main>
+      <Footer />
+    </>
+  );
+}

@@ -2,7 +2,7 @@ import "@/styles/globals.css";
 import ChatWidget from "@/components/common/ChatWidget";
 
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://ormitech.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://ormitech-web.monirujjaman.me"),
   title: {
     default: "OrmiTech — AI-Powered Customer Communication",
     template: "%s | OrmiTech"
@@ -12,7 +12,7 @@ export const metadata = {
   openGraph: {
     title: "OrmiTech — Every conversation. One powerful workspace.",
     description: "Unify conversations, automate with AI and hand over to humans when it matters.",
-    url: "https://ormitech.com",
+    url: "https://ormitech-web.monirujjaman.me",
     siteName: "OrmiTech",
     type: "website"
   },

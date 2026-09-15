@@ -16,6 +16,7 @@ export async function POST(request) {
       email: email || "",
       phone: phone || "",
       company: body.company || "",
+      topic: body.topic || "",
       message
     });
 

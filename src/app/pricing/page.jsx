@@ -1,2 +1,58 @@
-import Navbar from "@/components/common/Navbar";import Footer from "@/components/common/Footer";import PageHero from "@/components/common/PageHero";import Pricing from "@/components/sections/Pricing";import SimpleCTA from "@/components/common/SimpleCTA";
-export default function PricingPage(){return <><Navbar/><main><PageHero eyebrow="Pricing" title="Plans that can scale with your conversation volume." description="The pricing model can be configured around channels, team size, automation requirements and usage. We do not publish made-up prices."/><Pricing/><section className="border-y border-black/10 bg-[#F7F8FA] py-20"><div className="container-x grid gap-5 md:grid-cols-3">{[['Channels','Choose the customer channels your team needs.'],['Usage','Scale with conversation volume and automation activity.'],['Support','Match your integration and support needs as operations grow.']].map(([t,d])=><article className="glass rounded-2xl p-6" key={t}><h2 className="font-semibold">{t}</h2><p className="mt-2 text-sm leading-6 text-black/45">{d}</p></article>)}</div></section><SimpleCTA title="Need a custom setup?" text="For multi-channel, high-volume or custom integration requirements, talk to the OrmiTech team."/></main><Footer/></>}
+import Footer from "@/components/common/Footer";
+import Navbar from "@/components/common/Navbar";
+import SimpleCTA from "@/components/common/SimpleCTA";
+import BusinessImpact from "@/components/pricing/BusinessImpact";
+import EnterpriseSection from "@/components/pricing/EnterpriseSection";
+import PlanComparison from "@/components/pricing/PlanComparison";
+import PlanFinder from "@/components/pricing/PlanFinder";
+import PricingPlans from "@/components/pricing/PricingPlans";
+import PricingValue from "@/components/pricing/PricingValue";
+import { ScrollProgress } from "@/components/ui/effects";
+import FaqJsonLd from "@/components/ui/FaqJsonLd";
+import FaqSection from "@/components/ui/FaqSection";
+import { MotionProvider } from "@/components/ui/Reveal";
+import { enterprisePlan, faq, plans } from "@/data/pricing";
+import { interTight } from "@/styles/fonts";
+
+const title = "OrmiTech Pricing | Plans for Growing Businesses";
+const description =
+  "Explore OrmiTech pricing plans for customer conversations, AI assistance, automation and team collaboration. Start free and scale with your business.";
+
+export const metadata = {
+  title: { absolute: title },
+  description,
+  alternates: { canonical: "/pricing" },
+  openGraph: { title, description, url: "/pricing", siteName: "OrmiTech", type: "website" }
+};
+
+const freePlan = plans.find(plan => plan.id === "free");
+
+export default function PricingPage() {
+  return (
+    <>
+      <Navbar />
+      <main className={`${interTight.className} overflow-x-clip bg-white text-navy antialiased`}>
+        <MotionProvider>
+          <ScrollProgress />
+          <PricingPlans />
+          <PlanComparison />
+          <PricingValue />
+          <BusinessImpact />
+          <PlanFinder />
+          <EnterpriseSection />
+          <FaqSection eyebrow={faq.eyebrow} title={faq.title} description={faq.description} items={faq.items} contactText="Tell us about your business and we’ll help you choose." />
+          <SimpleCTA
+            title="Start with what you need. Scale when you’re ready."
+            text="Explore OrmiTech for free and upgrade when your business is ready for more."
+            primaryLabel={freePlan.cta.label}
+            primaryHref={freePlan.cta.href}
+            secondaryLabel={enterprisePlan.cta.label}
+            secondaryHref={enterprisePlan.cta.href}
+          />
+        </MotionProvider>
+      </main>
+      <Footer />
+      <FaqJsonLd items={faq.items} />
+    </>
+  );
+}

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { markPath, markViewBox } from "@/data/ormitechMark";
@@ -94,6 +95,7 @@ export default function ChatWidget() {
   const inputRef = useRef(null);
   const nameRef = useRef(null);
   const timers = useRef([]);
+  const pathname = usePathname();
 
   useEffect(() => {
     try {
@@ -183,6 +185,9 @@ export default function ChatWidget() {
     addMessage({ from: "user", text });
     forwardToTeam(text);
   };
+
+  // Account pages are focused forms; the floating widget would cover their fields on small screens.
+  if (["/login", "/signup", "/forgot-password"].includes(pathname)) return null;
 
   return (
     <div className="fixed bottom-4 right-4 z-[60] flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">

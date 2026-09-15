@@ -1,3 +1,77 @@
-import Navbar from "@/components/common/Navbar";import Footer from "@/components/common/Footer";import PageHero from "@/components/common/PageHero";import ArchitectureFlow from "@/components/sections/ArchitectureFlow";import SimpleCTA from "@/components/common/SimpleCTA";
-const steps=[['Phase 01 — Connect','Connect the channels where customers already contact your business.'],['Phase 02 — Configure','Set roles, routing, tags, business context and automation rules.'],['Phase 03 — Automate','Allow AI to answer predictable questions and perform approved workflows.'],['Phase 04 — Human takeover','Escalate complex, sensitive or high-value conversations to the right person.'],['Phase 05 — Improve','Use conversation outcomes and analytics to refine workflows and automation.']];
-export default function HowItWorks(){return <><Navbar/><main><PageHero eyebrow="How it works" title="Five phases. One continuous customer journey." description="From the first message to the final outcome, OrmiTech is designed around a predictable flow that teams can understand and improve."/><ArchitectureFlow/><section className="border-y border-black/10 bg-[#F7F8FA] py-24"><div className="container-x max-w-4xl space-y-4">{steps.map(([t,d],i)=><article key={t} className="glass rounded-2xl p-6"><div className="flex gap-5"><span className="font-bold text-brand">0{i+1}</span><div><h2 className="font-semibold">{t}</h2><p className="mt-2 text-sm leading-6 text-black/45">{d}</p></div></div></article>)}</div></section><SimpleCTA/></main><Footer/></>}
+import Footer from "@/components/common/Footer";
+import Navbar from "@/components/common/Navbar";
+import SimpleCTA from "@/components/common/SimpleCTA";
+import AIRecommendation from "@/components/how-it-works/AIRecommendation";
+import AIUnderstanding from "@/components/how-it-works/AIUnderstanding";
+import AutomationWorkflow from "@/components/how-it-works/AutomationWorkflow";
+import BackendArchitecture from "@/components/how-it-works/BackendArchitecture";
+import BigPicture from "@/components/how-it-works/BigPicture";
+import ChapterNav from "@/components/how-it-works/ChapterNav";
+import ConnectChannels from "@/components/how-it-works/ConnectChannels";
+import HowHero from "@/components/how-it-works/HowHero";
+import HumanHandover from "@/components/how-it-works/HumanHandover";
+import LeadConversion from "@/components/how-it-works/LeadConversion";
+import MessageInbox from "@/components/how-it-works/MessageInbox";
+import OrderFlow from "@/components/how-it-works/OrderFlow";
+import Retention from "@/components/how-it-works/Retention";
+import SystemOverview from "@/components/how-it-works/SystemOverview";
+import UseCases from "@/components/how-it-works/UseCases";
+import WorkspaceTour from "@/components/how-it-works/WorkspaceTour";
+import { ScrollProgress } from "@/components/ui/effects";
+import FaqJsonLd from "@/components/ui/FaqJsonLd";
+import FaqSection from "@/components/ui/FaqSection";
+import { MotionProvider } from "@/components/ui/Reveal";
+import { faq, howMeta } from "@/data/howItWorks";
+import { interTight } from "@/styles/fonts";
+
+export const metadata = {
+  title: { absolute: howMeta.title },
+  description: howMeta.description,
+  alternates: { canonical: "/how-it-works" },
+  openGraph: {
+    title: howMeta.title,
+    description: howMeta.description,
+    url: "/how-it-works",
+    siteName: "OrmiTech",
+    type: "website"
+  }
+};
+
+export default function HowItWorksPage() {
+  return (
+    <>
+      <Navbar />
+      <main className={`${interTight.className} overflow-x-clip bg-white text-navy antialiased`}>
+        <MotionProvider>
+          <ScrollProgress />
+          <HowHero />
+          <ChapterNav />
+          <BigPicture />
+          <ConnectChannels />
+          <MessageInbox />
+          <AIUnderstanding />
+          <AIRecommendation />
+          <AutomationWorkflow />
+          <BackendArchitecture />
+          <HumanHandover />
+          <WorkspaceTour />
+          <LeadConversion />
+          <OrderFlow />
+          <Retention />
+          <SystemOverview />
+          <UseCases />
+          <SimpleCTA
+            title="Connect your business. Let OrmiTech do the rest."
+            text="Connect your channels, configure your AI and start turning customer conversations into business growth."
+            primaryLabel="Get started"
+            secondaryLabel="Explore features"
+            secondaryHref="/features"
+          />
+          <FaqSection eyebrow={faq.eyebrow} title={faq.title} description={faq.description} items={faq.items} contactText="Tell us about your channels and we’ll walk you through setup." />
+        </MotionProvider>
+      </main>
+      <Footer />
+      <FaqJsonLd items={faq.items} />
+    </>
+  );
+}

@@ -1,3 +1,15 @@
+// Other OrmiTech apps (see README: client dashboard and documentation).
+export const appLinks = {
+  docs: "https://ormitech-docs.monirujjaman.me"
+};
+
+// Account pages on this site. They are a frontend preview until authentication is connected.
+export const authLinks = {
+  login: "/login",
+  signup: "/signup",
+  forgotPassword: "/forgot-password"
+};
+
 export const channels = [
   { name: "Facebook" },
   { name: "Instagram" },

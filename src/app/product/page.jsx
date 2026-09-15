@@ -1,3 +1,67 @@
-import Navbar from "@/components/common/Navbar";import Footer from "@/components/common/Footer";import PageHero from "@/components/common/PageHero";import ArchitectureFlow from "@/components/sections/ArchitectureFlow";import SimpleCTA from "@/components/common/SimpleCTA";
-const items=[['Unified communication layer','One product story for social channels, website chat, AI automation and human teams.'],['AI + human collaboration','Automation handles repeatable work while agents can take over when context, empathy or judgment is required.'],['Operational data','Conversation activity can become structured leads, events and analytics for the future dashboard and backend.'],['Built for expansion','The landing experience maps cleanly to app.ormitech.com, admin.ormitech.com, api.ormitech.com and docs.ormitech.com without pretending those systems already exist.']];
-export default function Product(){return <><Navbar/><main><PageHero eyebrow="Product" title="The communication layer between customers, AI and your team." description="OrmiTech is designed to make every customer message traceable from channel to response, automation, human ownership and measurable outcome."/><section className="py-24"><div className="container-x grid gap-5 md:grid-cols-2">{items.map(([t,d])=><article key={t} className="glass rounded-2xl p-7"><h2 className="text-xl font-semibold">{t}</h2><p className="mt-3 leading-7 text-black/45">{d}</p></article>)}</div></section><ArchitectureFlow/><SimpleCTA/></main><Footer/></>}
+import Footer from "@/components/common/Footer";
+import Navbar from "@/components/common/Navbar";
+import SimpleCTA from "@/components/common/SimpleCTA";
+import AIAssistant from "@/components/product/AIAssistant";
+import AnalyticsShowcase from "@/components/product/AnalyticsShowcase";
+import AutomationShowcase from "@/components/product/AutomationShowcase";
+import CoreFeatures from "@/components/product/CoreFeatures";
+import HowItWorks from "@/components/product/HowItWorks";
+import Industries from "@/components/product/Industries";
+import ProductHero from "@/components/product/ProductHero";
+import ProductOverview from "@/components/product/ProductOverview";
+import Testimonials from "@/components/product/Testimonials";
+import TrustPrinciples from "@/components/product/TrustPrinciples";
+import UnifiedWorkspace from "@/components/product/UnifiedWorkspace";
+import { ScrollProgress } from "@/components/ui/effects";
+import FaqJsonLd from "@/components/ui/FaqJsonLd";
+import FaqSection from "@/components/ui/FaqSection";
+import { MotionProvider } from "@/components/ui/Reveal";
+import { faq, productMeta } from "@/data/product";
+import { interTight } from "@/styles/fonts";
+
+export const metadata = {
+  title: productMeta.title,
+  description: productMeta.description,
+  alternates: { canonical: "/product" },
+  openGraph: {
+    title: "OrmiTech Product — Every conversation. One powerful workspace.",
+    description: productMeta.description,
+    url: "/product",
+    siteName: "OrmiTech",
+    type: "website"
+  }
+};
+
+export default function ProductPage() {
+  return (
+    <>
+      <Navbar />
+      <main className={`${interTight.className} overflow-x-clip bg-white text-navy antialiased`}>
+        <MotionProvider>
+          <ScrollProgress />
+          <ProductHero />
+          <ProductOverview />
+          <CoreFeatures />
+          <AutomationShowcase />
+          <HowItWorks />
+          <AIAssistant />
+          <UnifiedWorkspace />
+          <Industries />
+          <AnalyticsShowcase />
+          <TrustPrinciples />
+          <Testimonials />
+          <FaqSection eyebrow={faq.eyebrow} title={faq.title} description={faq.description} items={faq.items} />
+          <SimpleCTA
+            title="Turn your conversations into real business growth."
+            text="Start with the channels you use today and give every customer a faster, more personal experience with OrmiTech."
+            primaryLabel="Get started"
+            secondaryLabel="See pricing"
+            secondaryHref="/pricing"
+          />
+        </MotionProvider>
+      </main>
+      <Footer />
+      <FaqJsonLd items={faq.items} />
+    </>
+  );
+}
