@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import Link from "next/link";
 import { getPriceLabel, plans } from "@/data/pricing";
 
@@ -24,7 +25,7 @@ export default function Pricing() {
               <div className="flex-1 space-y-3 text-sm text-black/65">
                 {plan.features.slice(0, 4).map(feature => (
                   <div key={feature} className="flex gap-2">
-                    <span className="text-brand">✓</span>
+                    <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-brand" />
                     {feature}
                   </div>
                 ))}

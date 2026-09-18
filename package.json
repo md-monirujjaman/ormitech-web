@@ -9,6 +9,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@thesvg/react": "^3.3.8",
     "framer-motion": "^12.23.12",
     "gsap": "^3.15.0",
     "lucide-react": "^0.468.0",
