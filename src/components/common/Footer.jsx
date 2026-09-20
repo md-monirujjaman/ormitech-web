@@ -11,7 +11,7 @@ const columns = [
   ["Resources", [["Documentation", appLinks.docs], ["Log in", authLinks.login], ["Sign up", authLinks.signup]]]
 ];
 
-const legal = [["Privacy Policy", "/privacy"], ["Terms of Service", "/terms"]];
+const legal = [["Privacy Policy", "/privacy"], ["Terms of Service", "/terms"], ["Data Deletion", "/data-deletion"]];
 
 // Monochrome brand marks: they inherit the link's text colour, including the hover state.
 const socials = [
