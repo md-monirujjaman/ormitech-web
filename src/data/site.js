@@ -1,6 +1,8 @@
 // Other OrmiTech apps (see README: client dashboard and documentation).
+const trimSlash = value => value.replace(/\/+$/, "");
+
 export const appLinks = {
-  docs: "https://ormitech-docs.monirujjaman.me"
+  docs: trimSlash(process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.ormitechit.com")
 };
 
 // Account pages on this site. They are a frontend preview until authentication is connected.

@@ -12,11 +12,11 @@ Premium Next.js App Router landing page for OrmiTech.
 ## Public architecture
 This project intentionally implements the **landing layer only** while keeping the future OrmiTech architecture visible in the messaging:
 
-- `ormitech-web.monirujjaman.me` — public marketing site (this project)
-- `ormitech-client.monirujjaman.me` — future customer workspace/dashboard
-- `ormitech-admin.monirujjaman.me` — future super-admin
-- `ormitech-api.monirujjaman.me` — future Node.js backend/API
-- `ormitech-docs.monirujjaman.me` — future documentation
+- `www.ormitechit.com` — public marketing site (this project)
+- `app.ormitechit.com` — customer workspace/dashboard
+- `panel.ormitechit.com` — super-admin
+- `api.ormitechit.com` — Node.js backend/API
+- `docs.ormitechit.com` — documentation
 
 Do not place dashboard/admin/backend implementation into this landing project unless the scope explicitly changes.
 
@@ -49,4 +49,4 @@ Public routes now include `/product`, `/features`, `/how-it-works`, `/pricing`, 
 The supplied OrmiTech IT red/black logo is rendered on a white plate in the navbar/footer so the black lettering stays visible against the near-black industrial theme.
 
 ## Architecture alignment
-The landing page communicates the future five-part ecosystem: `ormitech-web.monirujjaman.me` marketing, `ormitech-client.monirujjaman.me` dashboard, `ormitech-admin.monirujjaman.me` super admin, `ormitech-api.monirujjaman.me` backend, and `ormitech-docs.monirujjaman.me` documentation. Only the marketing site is implemented here.
+The landing page communicates the five-part ecosystem: `www.ormitechit.com` marketing, `app.ormitechit.com` dashboard, `panel.ormitechit.com` super admin, `api.ormitechit.com` backend, and `docs.ormitechit.com` documentation. Only the marketing site is implemented here.
