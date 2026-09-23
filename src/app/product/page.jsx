@@ -14,21 +14,14 @@ import { ScrollProgress } from "@/components/ui/effects";
 import FaqJsonLd from "@/components/ui/FaqJsonLd";
 import FaqSection from "@/components/ui/FaqSection";
 import { MotionProvider } from "@/components/ui/Reveal";
-import { faq, productMeta } from "@/data/product";
+import { faq } from "@/data/product";
 import { interTight } from "@/styles/fonts";
+import { buildMetadata } from "@/lib/seo";
+import AnswerBlock from "@/components/seo/AnswerBlock";
+import RelatedLinks from "@/components/seo/RelatedLinks";
+import { answerBlocks } from "@/data/solutions";
 
-export const metadata = {
-  title: productMeta.title,
-  description: productMeta.description,
-  alternates: { canonical: "/product" },
-  openGraph: {
-    title: "OrmiTech Product — Every conversation. One powerful workspace.",
-    description: productMeta.description,
-    url: "/product",
-    siteName: "OrmiTech",
-    type: "website"
-  }
-};
+export const metadata = buildMetadata({ title: "Product: AI Customer Communication Platform", description: "OrmiTech is an AI customer communication platform. Manage Facebook, Instagram, WhatsApp and website chat in one inbox and automate routine replies.", path: "/product", ogTitle: "OrmiTech Product: AI customer communication platform" });
 
 export default function ProductPage() {
   return (
@@ -39,9 +32,11 @@ export default function ProductPage() {
           <ScrollProgress />
           <ProductHero />
           <ProductOverview />
+          <AnswerBlock id="platform" eyebrow="The short answer" heading={answerBlocks.product.heading} definition={answerBlocks.product.definition} facts={answerBlocks.product.facts} />
           <CoreFeatures />
           <HowItWorks />
           <ProductEcosystem />
+          <RelatedLinks paths={["/solutions/whatsapp-ai-chatbot", "/solutions/facebook-messenger-automation", "/solutions/instagram-dm-automation", "/solutions/ecommerce-chatbot"]} eyebrow="Solutions" title="Solutions by channel and use case" />
           <Industries />
           <AnalyticsShowcase />
           <TrustPrinciples />

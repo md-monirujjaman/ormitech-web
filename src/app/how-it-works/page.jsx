@@ -23,19 +23,9 @@ import FaqSection from "@/components/ui/FaqSection";
 import { MotionProvider } from "@/components/ui/Reveal";
 import { faq, howMeta } from "@/data/howItWorks";
 import { interTight } from "@/styles/fonts";
+import { buildMetadata } from "@/lib/seo";
 
-export const metadata = {
-  title: { absolute: howMeta.title },
-  description: howMeta.description,
-  alternates: { canonical: "/how-it-works" },
-  openGraph: {
-    title: howMeta.title,
-    description: howMeta.description,
-    url: "/how-it-works",
-    siteName: "OrmiTech",
-    type: "website"
-  }
-};
+export const metadata = buildMetadata({ title: howMeta.title, description: howMeta.description, path: "/how-it-works", absoluteTitle: true });
 
 export default function HowItWorksPage() {
   return (
@@ -65,7 +55,7 @@ export default function HowItWorksPage() {
             text="Connect your channels, configure your AI and start turning customer conversations into business growth."
             primaryLabel="Get started"
             secondaryLabel="Explore features"
-            secondaryHref="/features"
+            secondaryHref="/features/ai-chatbot"
           />
           <FaqSection eyebrow={faq.eyebrow} title={faq.title} description={faq.description} items={faq.items} contactText="Tell us about your channels and we’ll walk you through setup." />
         </MotionProvider>

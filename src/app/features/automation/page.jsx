@@ -6,23 +6,17 @@ import { ScrollProgress } from "@/components/ui/effects";
 import { MotionProvider } from "@/components/ui/Reveal";
 import { automationPage } from "@/data/featurePages";
 import { interTight } from "@/styles/fonts";
+import { buildMetadata } from "@/lib/seo";
+import JsonLd from "@/components/seo/JsonLd";
+import { crumbsByPath } from "@/data/crumbs";
+import { breadcrumbSchema, webPageSchema } from "@/lib/seo";
 
-export const metadata = {
-  title: "Automation",
-  description: "Automate customer communication with workflows that detect intent, route conversations, reply instantly and follow up — approved by your team.",
-  alternates: { canonical: "/features/automation" },
-  openGraph: {
-    title: "OrmiTech Automation — Chat & workflow automation",
-    description: "Automate customer communication with workflows that detect intent, route conversations, reply instantly and follow up — approved by your team.",
-    url: "/features/automation",
-    siteName: "OrmiTech",
-    type: "website"
-  }
-};
+export const metadata = buildMetadata({ title: "Customer Communication Automation", description: "Automate customer conversations with workflows that detect intent, route chats, send replies and schedule follow-ups, using rules your team approves.", path: "/features/automation" });
 
 export default function AutomationPage() {
   return (
     <>
+      <JsonLd nodes={[webPageSchema({ path: "/features/automation", name: metadata.title.absolute ?? metadata.title, description: metadata.description }), breadcrumbSchema(crumbsByPath["/features/automation"])]} />
       <Navbar />
       <main className={`${interTight.className} overflow-x-clip bg-white text-navy antialiased`}>
         <MotionProvider>

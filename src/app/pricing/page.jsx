@@ -13,17 +13,13 @@ import FaqSection from "@/components/ui/FaqSection";
 import { MotionProvider } from "@/components/ui/Reveal";
 import { enterprisePlan, faq, plans } from "@/data/pricing";
 import { interTight } from "@/styles/fonts";
+import { buildMetadata } from "@/lib/seo";
 
 const title = "OrmiTech Pricing | Plans for Growing Businesses";
 const description =
   "Explore OrmiTech pricing plans for customer conversations, AI assistance, automation and team collaboration. Start free and scale with your business.";
 
-export const metadata = {
-  title: { absolute: title },
-  description,
-  alternates: { canonical: "/pricing" },
-  openGraph: { title, description, url: "/pricing", siteName: "OrmiTech", type: "website" }
-};
+export const metadata = buildMetadata({ title, description, path: "/pricing", absoluteTitle: true });
 
 const freePlan = plans.find(plan => plan.id === "free");
 

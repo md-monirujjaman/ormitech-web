@@ -8,13 +8,14 @@ import UseCaseGrid from "@/components/ui/UseCaseGrid";
 import BridgeCallout from "./BridgeCallout";
 import CheckList from "./CheckList";
 import FeaturePageHero from "./FeaturePageHero";
+import { crumbsByPath } from "@/data/crumbs";
 
 export default function AutomationContent() {
   const { hero, fitPoints, chatbotBridge, useCases } = automationPage;
 
   return (
     <>
-      <FeaturePageHero eyebrow={hero.eyebrow} title={hero.title} description={hero.description} secondaryHref="/how-it-works" secondaryLabel="See how it works" />
+      <FeaturePageHero breadcrumbs={crumbsByPath["/features/automation"]} eyebrow={hero.eyebrow} title={hero.title} description={hero.description} secondaryHref="/how-it-works" secondaryLabel="See how it works" />
 
       <AutomationShowcase />
 

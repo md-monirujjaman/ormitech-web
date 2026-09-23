@@ -24,6 +24,16 @@ export default function OrganizationJsonLd() {
         name: "OrmiTech",
         alternateName: "OrmiTech IT",
         publisher: { "@id": `${siteUrl}/#organization` }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": `${siteUrl}/#software`,
+        name: "OrmiTech",
+        url: `${siteUrl}/`,
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
+        description: "AI-powered customer communication platform that brings Facebook, Instagram, WhatsApp and website chat into one shared inbox, answers routine questions with AI and hands conversations to a team.",
+        publisher: { "@id": `${siteUrl}/#organization` }
       }
     ]
   };

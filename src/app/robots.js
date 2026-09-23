@@ -1,9 +1,9 @@
 import { siteUrl } from "@/data/site";
 
-// No robots.txt existed before this — this only adds the sitemap reference, with a default allow-all.
+// Allow all crawling except the API route. Auth pages are kept out of the index with noindex (not robots).
 export default function robots() {
   return {
-    rules: { userAgent: "*", allow: "/" },
+    rules: { userAgent: "*", allow: "/", disallow: ["/api/"] },
     sitemap: `${siteUrl}/sitemap.xml`
   };
 }

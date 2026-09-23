@@ -6,23 +6,17 @@ import { ScrollProgress } from "@/components/ui/effects";
 import { MotionProvider } from "@/components/ui/Reveal";
 import { omnichannelInboxPage } from "@/data/productPages";
 import { interTight } from "@/styles/fonts";
+import { buildMetadata } from "@/lib/seo";
+import JsonLd from "@/components/seo/JsonLd";
+import { crumbsByPath } from "@/data/crumbs";
+import { breadcrumbSchema, webPageSchema } from "@/lib/seo";
 
-export const metadata = {
-  title: "Omnichannel Inbox",
-  description: "Bring Facebook, Instagram, WhatsApp and website chat into one omnichannel inbox for your team, with full customer context on every conversation.",
-  alternates: { canonical: "/product/omnichannel-inbox" },
-  openGraph: {
-    title: "OrmiTech Omnichannel Inbox",
-    description: "Bring Facebook, Instagram, WhatsApp and website chat into one omnichannel inbox for your team, with full customer context on every conversation.",
-    url: "/product/omnichannel-inbox",
-    siteName: "OrmiTech",
-    type: "website"
-  }
-};
+export const metadata = buildMetadata({ title: "Omnichannel Inbox for Social Media and Website Chat", description: "One unified inbox for Facebook, Instagram, WhatsApp and website chat. Share conversations with your team and keep full customer context on every chat.", path: "/product/omnichannel-inbox" });
 
 export default function OmnichannelInboxPage() {
   return (
     <>
+      <JsonLd nodes={[webPageSchema({ path: "/product/omnichannel-inbox", name: metadata.title.absolute ?? metadata.title, description: metadata.description }), breadcrumbSchema(crumbsByPath["/product/omnichannel-inbox"])]} />
       <Navbar />
       <main className={`${interTight.className} overflow-x-clip bg-white text-navy antialiased`}>
         <MotionProvider>

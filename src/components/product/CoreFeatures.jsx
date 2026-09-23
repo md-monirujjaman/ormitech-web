@@ -25,7 +25,7 @@ export default function CoreFeatures() {
 
         <Reveal className="mt-10 text-center">
           <Link
-            href="/features"
+            href="/features/ai-chatbot"
             className="group inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-navy transition-colors duration-200 hover:border-brand/30 hover:text-brandInk focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/25"
           >
             Explore every feature

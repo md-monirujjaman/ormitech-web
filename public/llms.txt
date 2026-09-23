@@ -1,0 +1,49 @@
+# OrmiTech
+
+> OrmiTech is an AI-powered customer communication platform. It brings Facebook, Instagram, WhatsApp and website chat into one shared inbox, answers routine customer questions with AI, and hands conversations to a human team when a person is needed.
+
+Website: https://www.ormitechit.com/
+Documentation: https://docs.ormitechit.com/
+
+## Product
+- [Product overview](https://www.ormitechit.com/product): the full platform
+- [AI customer support](https://www.ormitechit.com/product/ai-customer-support): AI replies, drafted responses and handover
+- [Omnichannel inbox](https://www.ormitechit.com/product/omnichannel-inbox): all channels in one team inbox
+- [Lead and order management](https://www.ormitechit.com/product/lead-order-management): capture leads and orders from chats
+
+## Features
+- [AI chatbot](https://www.ormitechit.com/features/ai-chatbot)
+- [Human handover](https://www.ormitechit.com/features/human-handover)
+- [Automation](https://www.ormitechit.com/features/automation)
+- [Team collaboration](https://www.ormitechit.com/features/team-collaboration)
+- [Analytics](https://www.ormitechit.com/features/analytics)
+
+## Solutions
+- [WhatsApp AI chatbot](https://www.ormitechit.com/solutions/whatsapp-ai-chatbot)
+- [Facebook Messenger automation](https://www.ormitechit.com/solutions/facebook-messenger-automation)
+- [Instagram DM automation](https://www.ormitechit.com/solutions/instagram-dm-automation)
+- [AI chatbot for ecommerce](https://www.ormitechit.com/solutions/ecommerce-chatbot)
+- [AI chatbot for Bangladesh](https://www.ormitechit.com/ai-chatbot-bangladesh)
+- [Facebook Page auto-reply, in Bangla](https://www.ormitechit.com/bn/facebook-page-auto-reply)
+
+## Guides
+- [What is an AI chatbot for business?](https://www.ormitechit.com/blog/what-is-an-ai-chatbot-for-business)
+- [How does a WhatsApp chatbot work?](https://www.ormitechit.com/blog/how-does-a-whatsapp-chatbot-work)
+- [Omnichannel vs multichannel](https://www.ormitechit.com/blog/omnichannel-vs-multichannel)
+- [What is F-commerce?](https://www.ormitechit.com/blog/what-is-f-commerce)
+- [Why a unified customer inbox matters](https://www.ormitechit.com/blog/why-unified-inbox-matters)
+- [AI automation should know when to hand over](https://www.ormitechit.com/blog/ai-with-human-handover)
+- [Designing an omnichannel support workflow](https://www.ormitechit.com/blog/omnichannel-customer-support)
+- [চ্যাটবট কী এবং এটি কীভাবে কাজ করে?](https://www.ormitechit.com/blog/chatbot-ki)
+
+## More
+- [Pricing](https://www.ormitechit.com/pricing)
+- [How it works](https://www.ormitechit.com/how-it-works)
+- [Blog](https://www.ormitechit.com/blog)
+- [FAQ](https://www.ormitechit.com/faq)
+- [Contact](https://www.ormitechit.com/contact)
+
+## Facts
+- Channels: Facebook, Instagram, WhatsApp, website chat
+- Core capabilities: shared inbox, AI replies, human handover, automation, lead and order tracking, analytics, team collaboration
+- Plans: Free, Starter, Growth, Enterprise (see the pricing page for current details)

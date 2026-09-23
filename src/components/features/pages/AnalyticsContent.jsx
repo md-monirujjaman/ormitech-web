@@ -8,13 +8,14 @@ import SectionHeading, { IconTile } from "@/components/ui/SectionHeading";
 import UseCaseGrid from "@/components/ui/UseCaseGrid";
 import BridgeCallout from "./BridgeCallout";
 import FeaturePageHero from "./FeaturePageHero";
+import { crumbsByPath } from "@/data/crumbs";
 
 export default function AnalyticsContent() {
   const { hero, measurePoints, teamBridge, useCases } = analyticsPage;
 
   return (
     <>
-      <FeaturePageHero eyebrow={hero.eyebrow} title={hero.title} description={hero.description} secondaryHref="/how-it-works" secondaryLabel="See how it works" />
+      <FeaturePageHero breadcrumbs={crumbsByPath["/features/analytics"]} eyebrow={hero.eyebrow} title={hero.title} description={hero.description} secondaryHref="/how-it-works" secondaryLabel="See how it works" />
 
       <AnalyticsShowcase />
 

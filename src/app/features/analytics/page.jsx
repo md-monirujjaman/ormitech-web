@@ -6,23 +6,17 @@ import { ScrollProgress } from "@/components/ui/effects";
 import { MotionProvider } from "@/components/ui/Reveal";
 import { analyticsPage } from "@/data/featurePages";
 import { interTight } from "@/styles/fonts";
+import { buildMetadata } from "@/lib/seo";
+import JsonLd from "@/components/seo/JsonLd";
+import { crumbsByPath } from "@/data/crumbs";
+import { breadcrumbSchema, webPageSchema } from "@/lib/seo";
 
-export const metadata = {
-  title: "Analytics",
-  description: "Conversation analytics for response time, lead flow, automation results and team performance in one dashboard.",
-  alternates: { canonical: "/features/analytics" },
-  openGraph: {
-    title: "OrmiTech Analytics — Conversation & business insights",
-    description: "Conversation analytics for response time, lead flow, automation results and team performance in one dashboard.",
-    url: "/features/analytics",
-    siteName: "OrmiTech",
-    type: "website"
-  }
-};
+export const metadata = buildMetadata({ title: "Conversation Analytics", description: "Conversation analytics for response time, lead flow, automation results and team performance in one dashboard.", path: "/features/analytics" });
 
 export default function AnalyticsPage() {
   return (
     <>
+      <JsonLd nodes={[webPageSchema({ path: "/features/analytics", name: metadata.title.absolute ?? metadata.title, description: metadata.description }), breadcrumbSchema(crumbsByPath["/features/analytics"])]} />
       <Navbar />
       <main className={`${interTight.className} overflow-x-clip bg-white text-navy antialiased`}>
         <MotionProvider>

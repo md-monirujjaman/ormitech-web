@@ -7,7 +7,7 @@ const TOPICS = {
   enterprise: { label: "Enterprise enquiry", message: "I’d like to discuss Enterprise pricing for my business." }
 };
 
-export default function Contact() {
+export default function Contact({ headingLevel: Heading = "h2" }) {
   const [status, setStatus] = useState("");
   const [topic, setTopic] = useState("");
   const messageRef = useRef(null);
@@ -37,7 +37,7 @@ export default function Contact() {
   return (
     <section id="contact" className="border-t border-black/5 bg-[#F7F8FA] py-24">
       <div className="container-x grid gap-10 lg:grid-cols-[.8fr_1.2fr]">
-        <div><p className="text-sm font-semibold uppercase tracking-[.22em] text-brand">Get started</p><h2 className="mt-4 text-4xl font-bold sm:text-5xl">Build a better conversation workflow.</h2><p className="mt-5 text-black/50">Tell us what you want to connect and automate. The landing page is ready to hand off into the future OrmiTech platform architecture.</p></div>
+        <div><p className="text-sm font-semibold uppercase tracking-[.22em] text-brand">Get started</p><Heading className="mt-4 text-4xl font-bold sm:text-5xl">Build a better conversation workflow.</Heading><p className="mt-5 text-black/50">Tell us what you want to connect and automate. The landing page is ready to hand off into the future OrmiTech platform architecture.</p></div>
         <form onSubmit={submit} className="glass rounded-3xl p-6 sm:p-8">
           {topic && (
             <>

@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 
 export const howMeta = {
-  title: "How OrmiTech Works | AI-Powered Customer Conversations & Automation",
+  title: "How OrmiTech Works | AI Conversations and Automation",
   description:
     "See how OrmiTech connects your website, Facebook, Instagram and WhatsApp with AI-powered conversations, automation and a unified business workspace."
 };

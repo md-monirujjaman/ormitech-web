@@ -9,6 +9,7 @@ import UseCaseGrid from "@/components/ui/UseCaseGrid";
 import BridgeCallout from "./BridgeCallout";
 import CheckList from "./CheckList";
 import FeaturePageHero from "./FeaturePageHero";
+import { crumbsByPath } from "@/data/crumbs";
 
 function HandoverMockup() {
   return (
@@ -50,7 +51,7 @@ export default function HumanHandoverContent() {
 
   return (
     <>
-      <FeaturePageHero
+      <FeaturePageHero breadcrumbs={crumbsByPath["/features/human-handover"]}
         eyebrow={hero.eyebrow}
         title={hero.title}
         description={hero.description}

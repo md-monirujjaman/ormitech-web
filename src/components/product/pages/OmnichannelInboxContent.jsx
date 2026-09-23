@@ -8,13 +8,19 @@ import Reveal from "@/components/ui/Reveal";
 import SectionHeading from "@/components/ui/SectionHeading";
 import UseCaseGrid from "@/components/ui/UseCaseGrid";
 import { omnichannelInboxPage } from "@/data/productPages";
+import { crumbsByPath } from "@/data/crumbs";
+import AnswerBlock from "@/components/seo/AnswerBlock";
+import RelatedLinks from "@/components/seo/RelatedLinks";
+import { answerBlocks } from "@/data/solutions";
 
 export default function OmnichannelInboxContent() {
   const { hero, channelPoints, aiSupportBridge, leadOrderBridge, useCases } = omnichannelInboxPage;
 
   return (
     <>
-      <FeaturePageHero eyebrow={hero.eyebrow} title={hero.title} description={hero.description} secondaryHref="/how-it-works" secondaryLabel="See how it works" />
+      <FeaturePageHero breadcrumbs={crumbsByPath["/product/omnichannel-inbox"]} eyebrow={hero.eyebrow} title={hero.title} description={hero.description} secondaryHref="/how-it-works" secondaryLabel="See how it works" />
+
+      <AnswerBlock id="answer" eyebrow="The short answer" heading={answerBlocks["/product/omnichannel-inbox"].heading} definition={answerBlocks["/product/omnichannel-inbox"].definition} facts={answerBlocks["/product/omnichannel-inbox"].facts} />
 
       <UnifiedWorkspace />
 
@@ -29,6 +35,8 @@ export default function OmnichannelInboxContent() {
 
       <BridgeCallout {...aiSupportBridge} />
       <BridgeCallout {...leadOrderBridge} />
+
+      <RelatedLinks paths={["/solutions/whatsapp-ai-chatbot", "/solutions/facebook-messenger-automation", "/solutions/instagram-dm-automation", "/ai-chatbot-bangladesh","/blog/omnichannel-vs-multichannel","/blog/why-unified-inbox-matters"]} eyebrow="Solutions" title="Related solutions" />
 
       <UseCaseGrid id={useCases.id} eyebrow={useCases.eyebrow} title={useCases.title} description={useCases.description} items={useCases.items} columns={useCases.columns} />
     </>

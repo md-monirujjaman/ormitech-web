@@ -12,4 +12,14 @@ import ArchitectureFlow from "@/components/sections/ArchitectureFlow";
 import HowItWorks from "@/components/sections/HowItWorks";
 import Pricing from "@/components/sections/Pricing";
 import Contact from "@/components/sections/Contact";
-export default function Home(){return <><Navbar/><main><Hero/><DashboardShowcase/><FeaturesBento/><Solutions/><section className="border-b border-black/10 py-7"><div className="container-x flex flex-wrap justify-center gap-x-10 gap-y-3 text-xs font-semibold uppercase tracking-[.18em] text-black/30"><span>Facebook</span><span>Instagram</span><span>WhatsApp</span><span>Website Chat</span><span>AI Automation</span><span>Human Teams</span></div></section><Features/><Steps/><OmnichannelDemo/><AIIntegration/><ArchitectureFlow/><HowItWorks/><Pricing/><Contact/></main><Footer/></>}
+import AnswerBlock from "@/components/seo/AnswerBlock";
+import JsonLd from "@/components/seo/JsonLd";
+import FaqSection from "@/components/ui/FaqSection";
+import { answerBlocks, homeFaq } from "@/data/solutions";
+import { buildMetadata, faqSchema, webPageSchema } from "@/lib/seo";
+
+const homeTitle = "OrmiTech | AI Customer Communication Platform";
+const homeDescription = "OrmiTech brings Facebook, Instagram, WhatsApp and website chat into one shared inbox, answers routine questions with AI and hands over to your team when it matters.";
+export const metadata = buildMetadata({ title: homeTitle, description: homeDescription, path: "/", absoluteTitle: true, ogTitle: "OrmiTech: Every conversation. One powerful workspace." });
+
+export default function Home(){return <><JsonLd nodes={[webPageSchema({ path: "/", name: homeTitle, description: homeDescription }), faqSchema(homeFaq)]}/><Navbar/><main><Hero/><DashboardShowcase/><FeaturesBento/><Solutions/><section className="border-b border-black/10 py-7"><div className="container-x flex flex-wrap justify-center gap-x-10 gap-y-3 text-xs font-semibold uppercase tracking-[.18em] text-black/30"><span>Facebook</span><span>Instagram</span><span>WhatsApp</span><span>Website Chat</span><span>AI Automation</span><span>Human Teams</span></div></section><Features/><Steps/><AnswerBlock id="what-is-ormitech" eyebrow="OrmiTech at a glance" heading={answerBlocks.home.heading} definition={answerBlocks.home.definition} facts={answerBlocks.home.facts}/><OmnichannelDemo/><AIIntegration/><ArchitectureFlow/><HowItWorks/><Pricing/><FaqSection eyebrow="FAQ" title="Questions about OrmiTech" items={homeFaq}/><Contact/></main><Footer/></>}

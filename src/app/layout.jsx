@@ -9,14 +9,15 @@ export const metadata = {
     template: "%s | OrmiTech"
   },
   description: "One workspace for customer conversations across Facebook, Instagram, WhatsApp and your website — powered by AI and backed by your team.",
-  keywords: ["OrmiTech", "omnichannel inbox", "AI customer communication", "customer support", "lead management"],
   openGraph: {
     title: "OrmiTech — Every conversation. One powerful workspace.",
     description: "Unify conversations, automate with AI and hand over to humans when it matters.",
     url: process.env.NEXT_PUBLIC_SITE_URL || "https://www.ormitechit.com",
     siteName: "OrmiTech",
-    type: "website"
+    type: "website",
+    images: [{ url: "/images/ormitech-dashboard.webp", width: 1483, height: 1061, alt: "OrmiTech unified inbox showing customer conversations across channels" }]
   },
+  twitter: { card: "summary_large_image", title: "OrmiTech: Every conversation. One powerful workspace.", images: ["/images/ormitech-dashboard.webp"] },
   robots: { index: true, follow: true },
   icons: {
     icon: [

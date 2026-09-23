@@ -12,6 +12,7 @@ import BridgeCallout from "./BridgeCallout";
 import CapabilityGrid from "./CapabilityGrid";
 import CheckList from "./CheckList";
 import FeaturePageHero from "./FeaturePageHero";
+import { crumbsByPath } from "@/data/crumbs";
 
 const PHASE = { question: 1, typing: 2, reply: 3 };
 const bubble = visible => ({ opacity: visible ? 1 : 0, y: visible ? 0 : 8 });
@@ -91,7 +92,7 @@ export default function AiChatbotContent() {
 
   return (
     <>
-      <FeaturePageHero
+      <FeaturePageHero breadcrumbs={crumbsByPath["/features/ai-chatbot"]}
         eyebrow={hero.eyebrow}
         title={hero.title}
         description={hero.description}

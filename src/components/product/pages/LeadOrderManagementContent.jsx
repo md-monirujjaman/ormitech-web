@@ -8,13 +8,19 @@ import Reveal from "@/components/ui/Reveal";
 import SectionHeading from "@/components/ui/SectionHeading";
 import UseCaseGrid from "@/components/ui/UseCaseGrid";
 import { leadOrderPage } from "@/data/productPages";
+import { crumbsByPath } from "@/data/crumbs";
+import AnswerBlock from "@/components/seo/AnswerBlock";
+import RelatedLinks from "@/components/seo/RelatedLinks";
+import { answerBlocks } from "@/data/solutions";
 
 export default function LeadOrderManagementContent() {
   const { hero, workflowPoints, aiSupportBridge, omnichannelBridge, useCases } = leadOrderPage;
 
   return (
     <>
-      <FeaturePageHero eyebrow={hero.eyebrow} title={hero.title} description={hero.description} secondaryHref="/pricing" secondaryLabel="See pricing" />
+      <FeaturePageHero breadcrumbs={crumbsByPath["/product/lead-order-management"]} eyebrow={hero.eyebrow} title={hero.title} description={hero.description} secondaryHref="/pricing" secondaryLabel="See pricing" />
+
+      <AnswerBlock id="answer" eyebrow="The short answer" heading={answerBlocks["/product/lead-order-management"].heading} definition={answerBlocks["/product/lead-order-management"].definition} facts={answerBlocks["/product/lead-order-management"].facts} />
 
       <AutomationShowcase />
 
@@ -29,6 +35,8 @@ export default function LeadOrderManagementContent() {
 
       <BridgeCallout {...aiSupportBridge} />
       <BridgeCallout {...omnichannelBridge} />
+
+      <RelatedLinks paths={["/solutions/ecommerce-chatbot", "/solutions/facebook-messenger-automation", "/features/automation", "/pricing","/blog/omnichannel-customer-support"]} eyebrow="Solutions" title="Related solutions" />
 
       <UseCaseGrid id={useCases.id} eyebrow={useCases.eyebrow} title={useCases.title} description={useCases.description} items={useCases.items} columns={useCases.columns} />
     </>

@@ -1,11 +1,12 @@
 "use client";
 
 import ButtonLink from "@/components/common/ButtonLink";
+import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { Stagger, StaggerItem, ease } from "@/components/ui/Reveal";
 import { Eyebrow } from "@/components/ui/SectionHeading";
 
 // Shared hero shell for the five dedicated feature pages. `visual` is the feature-specific mockup.
-export default function FeaturePageHero({ eyebrow, title, description, visual, ctaHref = "/contact", ctaLabel = "Get started", secondaryHref, secondaryLabel, secondaryIcon }) {
+export default function FeaturePageHero({ eyebrow, title, description, visual, ctaHref = "/contact", ctaLabel = "Get started", secondaryHref, secondaryLabel, secondaryIcon, breadcrumbs }) {
   return (
     <section aria-labelledby="feature-hero-title" className="relative overflow-hidden border-b border-slate-100 bg-gradient-to-b from-[#F7F9FC] to-white pb-16 pt-32 lg:pb-20 lg:pt-40">
       <div aria-hidden className="grid-bg absolute inset-0 opacity-40 [mask-image:linear-gradient(to_bottom,black,transparent_70%)]" />
@@ -14,6 +15,11 @@ export default function FeaturePageHero({ eyebrow, title, description, visual, c
 
       <div className={`container-x relative grid items-center gap-14 ${visual ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,.9fr)] lg:gap-12" : ""}`}>
         <Stagger stagger={0.09}>
+          {breadcrumbs && (
+            <StaggerItem className="mb-5">
+              <Breadcrumbs items={breadcrumbs} />
+            </StaggerItem>
+          )}
           <StaggerItem>
             <Eyebrow dot>{eyebrow}</Eyebrow>
           </StaggerItem>

@@ -8,6 +8,7 @@ import SectionHeading, { IconTile } from "@/components/ui/SectionHeading";
 import UseCaseGrid from "@/components/ui/UseCaseGrid";
 import BridgeCallout from "./BridgeCallout";
 import FeaturePageHero from "./FeaturePageHero";
+import { crumbsByPath } from "@/data/crumbs";
 
 function AssignMockup({ step }) {
   return (
@@ -47,7 +48,7 @@ export default function TeamCollaborationContent() {
 
   return (
     <>
-      <FeaturePageHero eyebrow={hero.eyebrow} title={hero.title} description={hero.description} visual={<AssignMockup step={assignExample} />} secondaryHref="/how-it-works" secondaryLabel="See how it works" />
+      <FeaturePageHero breadcrumbs={crumbsByPath["/features/team-collaboration"]} eyebrow={hero.eyebrow} title={hero.title} description={hero.description} visual={<AssignMockup step={assignExample} />} secondaryHref="/how-it-works" secondaryLabel="See how it works" />
 
       <section id="workspace" aria-labelledby="workspace-title" className="scroll-mt-24 py-20 lg:py-28">
         <div className="container-x">

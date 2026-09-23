@@ -1,24 +1,25 @@
-import { Facebook, Instagram, Linkedin, Whatsapp, X } from "@thesvg/react";
+import { Facebook, Instagram, Linkedin, X, Youtube } from "@thesvg/react";
 import Image from "next/image";
 import Link from "next/link";
 import FooterWordmark from "@/components/common/FooterWordmark";
-import { appLinks, authLinks } from "@/data/site";
+import { appLinks, authLinks, socialProfiles } from "@/data/site";
 import { interTight } from "@/styles/fonts";
 
 const columns = [
-  ["Product", [["Overview", "/product"], ["Features", "/features"], ["How it works", "/how-it-works"], ["Pricing", "/pricing"]]],
-  ["Company", [["Blog", "/blog"], ["Contact", "/contact"]]],
+  ["Product", [["Overview", "/product"], ["AI Chatbot", "/features/ai-chatbot"], ["How it works", "/how-it-works"], ["Pricing", "/pricing"]]],
+  ["Solutions", [["WhatsApp AI chatbot", "/solutions/whatsapp-ai-chatbot"], ["Facebook automation", "/solutions/facebook-messenger-automation"], ["Instagram DM automation", "/solutions/instagram-dm-automation"], ["Ecommerce chatbot", "/solutions/ecommerce-chatbot"]]],
+  ["Company", [["Blog", "/blog"], ["FAQ", "/faq"], ["Contact", "/contact"]]],
   ["Resources", [["Documentation", appLinks.docs], ["Log in", authLinks.login], ["Sign up", authLinks.signup]]],
   ["Legal", [["Privacy Policy", "/privacy"], ["Terms of Service", "/terms"], ["Data Deletion", "/data-deletion"]]]
 ];
 
 // Full-colour official brand marks (thesvg.org "default" variant), each already a self-contained badge.
 const socials = [
-  ["Facebook", "#", Facebook],
-  ["WhatsApp", "#", Whatsapp],
-  ["Instagram", "#", Instagram],
-  ["LinkedIn", "#", Linkedin],
-  ["X", "#", X]
+  ["Facebook", socialProfiles[0], Facebook],
+  ["Instagram", socialProfiles[1], Instagram],
+  ["LinkedIn", socialProfiles[2], Linkedin],
+  ["YouTube", socialProfiles[3], Youtube],
+  ["X", socialProfiles[4], X]
 ];
 
 const isExternal = href => href.startsWith("http");
@@ -43,7 +44,7 @@ export default function Footer() {
 
       <div className="container-x py-12 lg:py-14">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-8">
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-3">
             <Link href="/" aria-label="OrmiTech home" className="inline-block">
               <Image src="/images/ormitech-logo.webp" alt="OrmiTech IT" width={160} height={80} className="h-9 w-auto object-contain" />
             </Link>
@@ -55,7 +56,7 @@ export default function Footer() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 lg:col-span-8 lg:col-start-5">
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-9 lg:col-start-4 lg:grid-cols-5">
             {columns.map(([title, links]) => (
               <nav key={title} aria-label={title}>
                 <h3 className="text-sm font-semibold">{title}</h3>
@@ -78,6 +79,8 @@ export default function Footer() {
               <li key={name}>
                 <a
                   href={href}
+                  target="_blank"
+                  rel="noopener noreferrer me"
                   aria-label={`OrmiTech on ${name}`}
                   className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-50 ring-1 ring-slate-200 transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_20px_-12px_rgba(13,27,61,.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy/30"
                 >
