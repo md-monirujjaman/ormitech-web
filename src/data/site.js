@@ -4,6 +4,9 @@ const trimSlash = value => value.replace(/\/+$/, "");
 // Canonical production domain, shared by metadata, JSON-LD and the sitemap.
 export const siteUrl = trimSlash(process.env.NEXT_PUBLIC_SITE_URL || "https://www.ormitechit.com");
 
+// GA4 measurement ID. Public by design (embedded in the page), so a fallback here is safe.
+export const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-HFH88XV2FG";
+
 export const appLinks = {
   docs: trimSlash(process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.ormitechit.com")
 };

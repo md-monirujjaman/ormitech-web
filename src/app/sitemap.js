@@ -25,12 +25,12 @@ const staticRoutes = [
 
 export default function sitemap() {
   const staticEntries = staticRoutes.map(route => ({
-    url: `${siteUrl}${route === "/" ? "/" : route}`
+    url: `${siteUrl}${route}`
   }));
 
   const blogEntries = blogPosts.map(post => ({
     url: `${siteUrl}/blog/${post.slug}`,
-    lastModified: post.date
+    lastModified: new Date(post.date)
   }));
 
   return [...staticEntries, ...blogEntries];

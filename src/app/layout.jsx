@@ -1,4 +1,5 @@
 import "@/styles/globals.css";
+import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import OrganizationJsonLd from "@/components/ui/OrganizationJsonLd";
 
 export const metadata = {
@@ -35,6 +36,7 @@ export default function RootLayout({ children }) {
       <body>
         {children}
         <OrganizationJsonLd />
+        <GoogleAnalytics />
       </body>
     </html>
   );
