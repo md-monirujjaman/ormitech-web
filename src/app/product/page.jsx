@@ -1,17 +1,15 @@
 import Footer from "@/components/common/Footer";
 import Navbar from "@/components/common/Navbar";
 import SimpleCTA from "@/components/common/SimpleCTA";
-import AIAssistant from "@/components/product/AIAssistant";
 import AnalyticsShowcase from "@/components/product/AnalyticsShowcase";
-import AutomationShowcase from "@/components/product/AutomationShowcase";
 import CoreFeatures from "@/components/product/CoreFeatures";
 import HowItWorks from "@/components/product/HowItWorks";
 import Industries from "@/components/product/Industries";
+import ProductEcosystem from "@/components/product/ProductEcosystem";
 import ProductHero from "@/components/product/ProductHero";
 import ProductOverview from "@/components/product/ProductOverview";
 import Testimonials from "@/components/product/Testimonials";
 import TrustPrinciples from "@/components/product/TrustPrinciples";
-import UnifiedWorkspace from "@/components/product/UnifiedWorkspace";
 import { ScrollProgress } from "@/components/ui/effects";
 import FaqJsonLd from "@/components/ui/FaqJsonLd";
 import FaqSection from "@/components/ui/FaqSection";
@@ -42,10 +40,8 @@ export default function ProductPage() {
           <ProductHero />
           <ProductOverview />
           <CoreFeatures />
-          <AutomationShowcase />
           <HowItWorks />
-          <AIAssistant />
-          <UnifiedWorkspace />
+          <ProductEcosystem />
           <Industries />
           <AnalyticsShowcase />
           <TrustPrinciples />

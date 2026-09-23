@@ -59,10 +59,10 @@ export const overview = {
   description:
     "OrmiTech connects your channels, AI and team in one operational workspace, so every message can become a resolved question, a qualified lead or a new order.",
   cards: [
-    { number: "01", title: "Centralized Communication", text: "Facebook, Instagram, WhatsApp and website chat arrive in one shared inbox.", icon: MessagesSquare, href: "#workspace" },
-    { number: "02", title: "Workflow Automation", text: "Route, tag, reply and follow up automatically with rules your team approves.", icon: Workflow, href: "#automation" },
+    { number: "01", title: "Centralized Communication", text: "Facebook, Instagram, WhatsApp and website chat arrive in one shared inbox.", icon: MessagesSquare, href: "/product/omnichannel-inbox" },
+    { number: "02", title: "Workflow Automation", text: "Route, tag, reply and follow up automatically with rules your team approves.", icon: Workflow, href: "/product/lead-order-management" },
     { number: "03", title: "Customer Insights", text: "Conversations, orders and notes build a customer record everyone can use.", icon: Lightbulb, href: "#analytics" },
-    { number: "04", title: "Team Collaboration", text: "Assign owners, hand over with context and work from the same view.", icon: UsersRound, href: "#how-it-works" }
+    { number: "04", title: "Team Collaboration", text: "Assign owners, hand over with context and work from the same view.", icon: UsersRound, href: "/features/team-collaboration" }
   ]
 };
 
@@ -71,14 +71,14 @@ export const coreFeatures = {
   title: "Powerful features designed to make your work easier.",
   description: "Everything your team needs to manage conversations, automate routine work and understand customers.",
   items: [
-    { title: "Unified Inbox", text: "Bring Facebook, Instagram, WhatsApp and website conversations into one team workspace.", icon: Inbox, href: "#workspace" },
-    { title: "AI Assistant", text: "Suggest replies, summarize conversations and answer common questions around the clock.", icon: Bot, href: "#ai-assistant" },
-    { title: "Smart Automation", text: "Trigger routing, tags, auto-replies and follow-ups from what customers actually say.", icon: Zap, href: "#automation" },
-    { title: "Customer Management", text: "Keep contact details, conversation history, tags and notes on one customer record.", icon: ContactRound, href: "#workspace" },
-    { title: "Order Handling", text: "Start orders from a conversation and keep order history right next to the chat.", icon: ShoppingBag, href: "#workspace" },
+    { title: "Unified Inbox", text: "Bring Facebook, Instagram, WhatsApp and website conversations into one team workspace.", icon: Inbox, href: "/product/omnichannel-inbox" },
+    { title: "AI Assistant", text: "Suggest replies, summarize conversations and answer common questions around the clock.", icon: Bot, href: "/product/ai-customer-support" },
+    { title: "Smart Automation", text: "Trigger routing, tags, auto-replies and follow-ups from what customers actually say.", icon: Zap, href: "/features/automation" },
+    { title: "Customer Management", text: "Keep contact details, conversation history, tags and notes on one customer record.", icon: ContactRound, href: "/product/omnichannel-inbox" },
+    { title: "Order Handling", text: "Start orders from a conversation and keep order history right next to the chat.", icon: ShoppingBag, href: "/product/lead-order-management" },
     { title: "Analytics & Reports", text: "Understand response time, lead flow, automation results and team performance.", icon: ChartNoAxesColumnIncreasing, href: "#analytics" },
-    { title: "Team Collaboration", text: "Assign conversations, leave notes and hand chats to the right person with full context.", icon: UsersRound, href: "#how-it-works" },
-    { title: "Roles & Access", text: "Set roles, routing and team access so everyone handles the conversations meant for them.", icon: ShieldCheck, href: "/features" }
+    { title: "Team Collaboration", text: "Assign conversations, leave notes and hand chats to the right person with full context.", icon: UsersRound, href: "/features/team-collaboration" },
+    { title: "Roles & Access", text: "Set roles, routing and team access so everyone handles the conversations meant for them.", icon: ShieldCheck, href: "/features/team-collaboration" }
   ]
 };
 

@@ -9,6 +9,7 @@ import SectionHeading from "./SectionHeading";
 
 const COLUMNS = {
   3: "lg:grid-cols-3",
+  4: "lg:grid-cols-4",
   5: "lg:grid-cols-5"
 };
 

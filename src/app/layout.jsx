@@ -1,5 +1,5 @@
 import "@/styles/globals.css";
-import ChatWidget from "@/components/common/ChatWidget";
+import OrganizationJsonLd from "@/components/ui/OrganizationJsonLd";
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.ormitechit.com"),
@@ -32,7 +32,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>{children}<ChatWidget /></body>
+      <body>
+        {children}
+        <OrganizationJsonLd />
+      </body>
     </html>
   );
 }

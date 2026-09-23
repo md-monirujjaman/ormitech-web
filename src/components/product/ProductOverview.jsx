@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import ButtonLink from "@/components/common/ButtonLink";
 import { Highlight, Spotlight } from "@/components/ui/effects";
@@ -35,7 +36,7 @@ export default function ProductOverview() {
               {overview.cards.map(card => (
                 <StaggerItem as="li" key={card.title}>
                   <Spotlight
-                    as="a"
+                    as={card.href.startsWith("/") ? Link : "a"}
                     href={card.href}
                     className="flex h-full flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_1px_2px_rgba(13,27,61,.04)] transition-[transform,box-shadow,border-color] duration-300 hover:border-brand/25 hover:shadow-[0_22px_44px_-26px_rgba(13,27,61,.32)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/25 motion-safe:hover:-translate-y-1.5"
                   >

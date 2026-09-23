@@ -1,9 +1,21 @@
 // Other OrmiTech apps (see README: client dashboard and documentation).
 const trimSlash = value => value.replace(/\/+$/, "");
 
+// Canonical production domain, shared by metadata, JSON-LD and the sitemap.
+export const siteUrl = trimSlash(process.env.NEXT_PUBLIC_SITE_URL || "https://www.ormitechit.com");
+
 export const appLinks = {
   docs: trimSlash(process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.ormitechit.com")
 };
+
+// Official OrmiTech social profiles, used in the Organization JSON-LD `sameAs`.
+export const socialProfiles = [
+  "https://www.facebook.com/ormitechit",
+  "https://www.instagram.com/ormitechit",
+  "https://www.linkedin.com/in/ormitechit",
+  "https://www.youtube.com/@ormitechit",
+  "https://x.com/ormitechit"
+];
 
 // Account pages on this site. They are a frontend preview until authentication is connected.
 export const authLinks = {
