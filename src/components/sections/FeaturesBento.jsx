@@ -1,227 +1,163 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
-const channelTone = { web: "#2196F3", whatsapp: "#22A75D", instagram: "#E1306C", facebook: "#1877F2" };
-
-function Avatar({ name, tone = "from-rose-400 to-red-600", size = "h-7 w-7 text-[10px]" }) {
-  const initials = name.split(" ").map(part => part[0]).join("").slice(0, 2);
-  return <span aria-hidden className={`flex flex-none items-center justify-center rounded-full bg-gradient-to-br font-semibold text-white ${tone} ${size}`}>{initials}</span>;
-}
-
-function PanelHead({ label, meta }) {
-  return (
-    <div className="mb-3 flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.16em]">
-      <span className="text-brand">{label}</span>
-      <span className="text-black/40">{meta}</span>
-    </div>
-  );
-}
-
-function Window({ children }) {
-  return (
-    <div className="relative overflow-hidden rounded-2xl border border-black/[.08] bg-white shadow-[0_24px_60px_-28px_rgba(15,23,42,.28)]">
-      <div className="flex items-center gap-1.5 border-b border-black/[.08] bg-black/[.02] px-3.5 py-2.5">
-        <span className="h-2 w-2 rounded-full bg-black/15" />
-        <span className="h-2 w-2 rounded-full bg-black/15" />
-        <span className="h-2 w-2 rounded-full bg-black/15" />
-        <span className="mx-auto font-mono text-[9px] uppercase tracking-[0.12em] text-black/40">ormitech · workspace</span>
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function Row({ label, value }) {
-  return (
-    <div className="flex items-center justify-between gap-4 py-2 text-[11.5px]">
-      <span className="text-black/40">{label}</span>
-      <span className="text-right text-black/60">{value}</span>
-    </div>
-  );
-}
-
-function InboxGraphic() {
-  const rows = [
-    { name: "Nusrat J.", channel: "web", text: "Is this refundable if it doesn't fit?", time: "2m", unread: true, tone: "from-rose-400 to-red-600" },
-    { name: "Tanvir H.", channel: "whatsapp", typing: true, time: "5m", tone: "from-emerald-400 to-emerald-700" },
-    { name: "Sadia R.", channel: "instagram", text: "Do you have this in blue?", time: "12m", tone: "from-fuchsia-400 to-pink-600" },
-    { name: "Rahim U.", channel: "facebook", text: "Can I get a wholesale price?", time: "18m", tone: "from-sky-400 to-blue-600" }
-  ];
-  return (
-    <div>
-      <PanelHead label="Unified inbox" meta="4 unread" />
-      <div className="divide-y divide-black/[.08]">
-        {rows.map(row => (
-          <div key={row.name} className="flex items-center gap-2.5 py-2.5">
-            <Avatar name={row.name} tone={row.tone} />
-            <div className="min-w-0 flex-1">
-              <div className="flex items-baseline">
-                <span className="text-[12px] font-medium text-[#0B0D12]">{row.name}</span>
-                <span className="ml-2 rounded-full px-1.5 py-px font-mono text-[8.5px] uppercase tracking-[0.1em]" style={{ color: channelTone[row.channel], background: `${channelTone[row.channel]}1f` }}>{row.channel}</span>
-              </div>
-              {row.typing ? (
-                <div className="mt-1 flex items-center gap-1.5">
-                  <span className="flex gap-0.5">
-                    {[0, 0.2, 0.4].map(delay => <span key={delay} className="h-1 w-1 animate-pulse rounded-full bg-black/40" style={{ animationDelay: `${delay}s` }} />)}
-                  </span>
-                  <span className="text-[10px] italic text-black/40">typing…</span>
-                </div>
-              ) : (
-                <div className="mt-0.5 truncate text-[11px] text-black/60">{row.text}</div>
-              )}
-            </div>
-            <span className="flex-none font-mono text-[10px] text-black/40">{row.time}</span>
-            {row.unread && <span className="h-1.5 w-1.5 flex-none animate-pulse rounded-full bg-brand" />}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ContactGraphic() {
-  return (
-    <div>
-      <PanelHead label="Contact record" meta="auto-built" />
-      <div className="mb-3 flex items-center gap-2.5">
-        <Avatar name="Nusrat J." size="h-9 w-9 text-[11px]" />
-        <div>
-          <div className="text-[13px] font-semibold text-[#0B0D12]">Nusrat J.</div>
-          <div className="text-[11px] text-black/60">nusrat@brightloom.co</div>
-        </div>
-      </div>
-      <div className="divide-y divide-black/[.08]">
-        <Row label="First seen" value="Live chat · Mar 2026" />
-        <Row label="Conversations" value="7 across 3 channels" />
-        <Row label="Last order" value="#4821 · swapped to M" />
-        <Row label="Notes" value="Prefers WhatsApp follow-up" />
-      </div>
-    </div>
-  );
-}
-
-function AssistantGraphic() {
-  return (
-    <div>
-      <PanelHead label="AI assistant" meta="active" />
-      <div className="space-y-2.5">
-        <div className="flex items-end gap-2">
-          <Avatar name="Sadia R." tone="from-fuchsia-400 to-pink-600" size="h-6 w-6 text-[9px]" />
-          <div className="max-w-[75%] rounded-xl rounded-bl-sm border border-black/[.08] bg-black/[.02] px-3 py-2 text-[11.5px] text-black/60">Do you deliver to Khulna?</div>
-        </div>
-        <div className="ml-auto max-w-[80%] rounded-xl rounded-br-sm border border-brand/30 bg-brand/[.06] px-3 py-2 text-[11.5px] text-black/70">
-          <div className="mb-1 font-mono text-[9px] uppercase tracking-[0.08em] text-brand">OrmiTech AI</div>
-          Yes — delivery to Khulna takes 2–3 days. Want me to start your order?
-        </div>
-        <div className="flex flex-wrap justify-end gap-1.5">
-          <span className="rounded-full border border-brand/30 bg-white px-2.5 py-1 text-[10px] font-semibold text-brand">Start order</span>
-          <span className="rounded-full border border-black/[.08] bg-white px-2.5 py-1 text-[10px] font-semibold text-black/60">Talk to a human</span>
-        </div>
-      </div>
-      <div className="mt-3 flex items-center justify-between rounded-lg border border-black/[.08] bg-black/[.02] px-3 py-2 text-[11px]">
-        <span className="text-black/40">Handled by AI</span>
-        <span className="font-mono text-[10px] text-black/60">no agent needed</span>
-      </div>
-    </div>
-  );
-}
-
-function HandoverGraphic() {
-  return (
-    <div>
-      <PanelHead label="Handover" meta="context intact" />
-      <div className="mb-2.5 text-[13px] font-semibold text-[#0B0D12]">Wholesale pricing request</div>
-      <div className="mb-3 flex flex-wrap items-center gap-1.5">
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-black/[.08] px-2 py-1 text-[10px] font-semibold text-black/60"><span className="h-1.5 w-1.5 rounded-full bg-black/40" />Rahim U.</span>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-black/[.08] px-2 py-1 text-[10px] font-semibold text-black/60"><span className="h-1.5 w-1.5 rounded-full bg-brand" />Farhan A.</span>
-        <span className="rounded-full border border-[#f7caca] bg-[#fde8e8] px-2 py-1 text-[10px] font-semibold text-[#b91c1c]">High intent</span>
-      </div>
-      <div className="mb-2 rounded-lg border border-black/[.08] bg-black/[.02] px-3 py-2 text-[11.5px] text-black/60">
-        <div className="mb-1 font-mono text-[9px] uppercase tracking-[0.08em] text-black/40">AI summary · Facebook</div>
-        Wants 50 units every month and asked about bulk discounts.
-      </div>
-      <div className="rounded-lg border border-brand/30 bg-brand/[.06] px-3 py-2 text-[11.5px] text-black/60">
-        <div className="mb-1 font-mono text-[9px] uppercase tracking-[0.08em] text-brand">Farhan A. · reply</div>
-        Hi Rahim — I’ll send you a custom quote within the hour.
-      </div>
-    </div>
-  );
-}
-
-function PipelineGraphic() {
-  const columns = [
-    { title: "New", deals: [["Corner Studio", "৳12,000"], ["The Daily Co", "৳9,000"]] },
-    { title: "Qualified", deals: [["Brightloom · Nusrat", "৳24,000", true], ["Bloom & Co", "৳16,000"]] },
-    { title: "Won", deals: [["Harbour Studio", "৳25,000"]] }
-  ];
-  return (
-    <div>
-      <PanelHead label="Lead pipeline" meta="wholesale" />
-      <div className="mb-2.5 flex items-center justify-between text-[11px]">
-        <span className="text-black/40">Open value <b className="text-[#0B0D12]">৳86,000</b></span>
-        <span className="text-black/40">6 open</span>
-      </div>
-      <div className="grid grid-cols-3 gap-2">
-        {columns.map(column => (
-          <div key={column.title} className="rounded-lg border border-black/[.08] bg-black/[.02] p-2">
-            <div className="mb-2 flex items-center justify-between font-mono text-[8px] uppercase tracking-[0.08em] text-black/40">
-              {column.title}
-              <span className="rounded-full border border-black/[.08] bg-white px-1.5 text-[8px]">{column.deals.length}</span>
-            </div>
-            {column.deals.map(([name, value, highlight]) => (
-              <div key={name} className={`mb-1.5 rounded-md border bg-white px-2 py-1.5 last:mb-0 ${highlight ? "border-brand/40 shadow-[0_8px_18px_-8px_rgba(242,13,69,.45)]" : "border-black/[.08]"}`}>
-                <div className="text-[10px] font-semibold leading-tight text-[#0B0D12]">{name}</div>
-                <div className="mt-0.5 text-[10px] font-bold text-brand">{value}</div>
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function AnalyticsGraphic() {
-  const stats = [["Avg first reply", "38s"], ["Handled by AI", "64%"], ["New leads", "142"]];
-  const bars = [42, 58, 50, 72, 64, 88, 76];
-  return (
-    <div>
-      <PanelHead label="Analytics" meta="this week" />
-      <div className="mb-3 grid grid-cols-3 gap-2">
-        {stats.map(([label, value]) => (
-          <div key={label} className="rounded-lg border border-black/[.08] bg-black/[.02] px-2.5 py-2">
-            <div className="font-mono text-[8px] uppercase tracking-[0.08em] text-black/40">{label}</div>
-            <div className="mt-1 text-[15px] font-bold text-[#0B0D12]">{value}</div>
-          </div>
-        ))}
-      </div>
-      <div className="rounded-lg border border-black/[.08] bg-black/[.02] px-3 pb-2 pt-3">
-        <div className="flex h-24 items-end justify-between gap-2">
-          {bars.map((height, i) => (
-            <div key={i} className={`w-full rounded-t-md ${i === 5 ? "bg-brand" : "bg-brand/25"}`} style={{ height: `${height}%` }} />
-          ))}
-        </div>
-        <div className="mt-1.5 flex justify-between font-mono text-[8px] uppercase tracking-[0.08em] text-black/40">
-          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => <span key={day} className="w-full text-center">{day}</span>)}
-        </div>
-      </div>
-    </div>
-  );
-}
+import { AnimatePresence, MotionConfig, motion, useScroll, useTransform } from "framer-motion";
+import { Bot, FileText, MessageCircleMore, Paperclip, Send, Smile, UserRound } from "lucide-react";
+import ChannelLogo from "@/components/common/ChannelLogo";
+import { TypingDots } from "@/components/ui/effects";
+import { ease } from "@/components/ui/Reveal";
+import { caveat, interTight } from "@/styles/fonts";
 
 const steps = [
-  { title: "Every conversation, one inbox", text: "You stop juggling apps just to keep up.", chips: ["Facebook", "Instagram", "WhatsApp", "Website"], caption: "inbox · every channel", Graphic: InboxGraphic },
-  { title: "Conversations turn into contacts", text: "Talk to someone once, and their history sits on the contact for next time.", chips: ["Tags", "Notes", "History"], caption: "contact record · auto-built", Graphic: ContactGraphic },
-  { title: "AI handles the routine", text: "Common questions get instant, accurate answers — day or night.", chips: ["Auto-reply", "Qualification", "24/7"], caption: "ai assistant · always on", Graphic: AssistantGraphic },
-  { title: "Hand over when it matters", text: "Complex or high-value chats move to the right person with the full context.", chips: ["Assign", "Summary", "Takeover"], caption: "handover · context intact", Graphic: HandoverGraphic },
-  { title: "Move leads through your stages", text: "Every enquiry becomes a lead you can follow from first message to won.", chips: ["Board view", "Totals", "Filters"], caption: "pipeline · every lead", Graphic: PipelineGraphic },
-  { title: "See what’s working", text: "Response times, lead flow and automation results, all in one view.", chips: ["Response time", "Leads", "Automation"], caption: "analytics · what’s working", Graphic: AnalyticsGraphic }
+  { label: "Incoming", title: "Every conversation, one inbox.", text: "See all customer messages from every channel in one place, so you never miss a thing.", chips: ["Facebook", "Instagram", "WhatsApp", "Website"], icon: MessageCircleMore },
+  { label: "Contacts", title: "Conversations turn into contacts.", text: "Talk to someone once, and their history sits on the contact for next time.", chips: ["Tags", "Notes", "History"], icon: Send },
+  { label: "AI automation", title: "AI handles the routine.", text: "Automate replies, qualify leads and save hours with intelligent workflows.", chips: ["Auto-reply", "Lead qualify", "Smart tags"], icon: Bot },
+  { label: "Handover", title: "Hand over when it matters.", text: "Complex queries get routed to your team with the full conversation history.", chips: ["Human support", "Context", "Full history"], icon: UserRound },
+  { label: "Internal notes", title: "Move leads through your stages.", text: "Keep your team aligned with internal notes, tags and custom stages.", chips: ["Notes", "Tags", "Pipeline"], icon: FileText }
 ];
 
+const channels = ["Facebook", "Instagram", "WhatsApp", "Website"];
+
+const rise = { hidden: { opacity: 0, y: 12, scale: 0.98 }, show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease } }, exit: { opacity: 0, transition: { duration: 0.15 } } };
+
+function DotGrid({ className = "", cols = 3, rows = 3 }) {
+  return (
+    <div aria-hidden className={`pointer-events-none absolute grid gap-3 ${className}`} style={{ gridTemplateColumns: `repeat(${cols}, 4px)` }}>
+      {Array.from({ length: cols * rows }).map((_, index) => (
+        <span key={index} className="h-1 w-1 rounded-full bg-brand/60" />
+      ))}
+    </div>
+  );
+}
+
+// Conversation that grows as the visitor scrolls through the five steps.
+function LiveWindow({ step }) {
+  const [aiShown, setAiShown] = useState(false);
+
+  useEffect(() => {
+    if (step < 2) {
+      setAiShown(false);
+      return undefined;
+    }
+    if (step > 2) {
+      setAiShown(true);
+      return undefined;
+    }
+    const timer = setTimeout(() => setAiShown(true), 1200);
+    return () => clearTimeout(timer);
+  }, [step]);
+
+  return (
+    <div role="img" aria-label="Example live conversation: a customer asks about pricing, the message becomes a contact, AI replies, a teammate takes over and the lead is tracked with internal notes" className="relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-[0_40px_80px_-36px_rgba(13,27,61,.35)]">
+      <div className="flex items-center gap-1.5 border-b border-slate-100 bg-slate-50/80 px-4 py-3">
+        <span className="h-2.5 w-2.5 rounded-full bg-[#FF6B6B]" />
+        <span className="h-2.5 w-2.5 rounded-full bg-[#FFC145]" />
+        <span className="h-2.5 w-2.5 rounded-full bg-[#3DD68C]" />
+      </div>
+      <div className="flex items-center justify-between px-5 py-3.5">
+        <p className="flex items-center gap-2 text-[14px] font-semibold text-[#0B0D12]">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inset-0 rounded-full bg-emerald-500 opacity-60 motion-safe:animate-ping" />
+            <span className="relative h-2 w-2 rounded-full bg-emerald-500" />
+          </span>
+          Live Conversation
+        </p>
+        <span className="flex items-center gap-1.5 text-[11.5px] text-slate-500">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          Online
+        </span>
+      </div>
+
+      <div className="border-t border-slate-100 px-5 pb-4 pt-3.5">
+        <div className="flex items-center gap-3">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-rose-400 to-red-600 text-[12px] font-semibold text-white">SJ</span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[13px] font-semibold text-[#0B0D12]">Sarah Johnson</p>
+            <p className="text-[11px] text-slate-400">Active 2m ago</p>
+          </div>
+          <AnimatePresence>
+            {step >= 4 && (
+              <motion.span key="stage" initial="hidden" animate="show" exit="exit" variants={rise} className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10.5px] font-semibold text-emerald-700">
+                Lead · Qualified
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className="mt-3 flex h-[376px] flex-col justify-start gap-2.5 overflow-hidden">
+          <AnimatePresence initial={false}>
+            <motion.div key="customer" initial="hidden" animate="show" variants={rise} className="max-w-[86%] self-start rounded-2xl rounded-tl-md bg-slate-100 px-3.5 py-2.5">
+              <p className="text-[12px] leading-5 text-slate-600">Hi, I&apos;m interested in your product. Can you tell me more about the pricing?</p>
+              <p className="mt-1 text-right text-[9.5px] text-slate-400">10:24 AM</p>
+            </motion.div>
+
+            {step >= 1 && (
+              <motion.div key="contact" initial="hidden" animate="show" exit="exit" variants={rise} className="flex flex-wrap items-center gap-1.5 self-start">
+                <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10.5px] font-semibold text-slate-500">Saved to contacts</span>
+                <span className="rounded-full bg-brand/10 px-2.5 py-1 text-[10.5px] font-semibold text-brand">Interested</span>
+              </motion.div>
+            )}
+
+            {step >= 2 && aiShown && (
+              <motion.div key="ai" initial="hidden" animate="show" exit="exit" variants={rise} className="max-w-[88%] self-end rounded-2xl rounded-tr-md bg-[#FFE3EA] px-3.5 py-2.5">
+                <p className="mb-0.5 flex items-center gap-1 text-[9.5px] font-bold uppercase tracking-[.1em] text-brand">
+                  <Bot className="h-3 w-3" /> OrmiTech AI
+                </p>
+                <p className="text-[12px] leading-5 text-[#8A1230]">Yes, of course! Here&apos;s an overview of our plans. Would you like to see the full details?</p>
+                <p className="mt-1 text-right text-[9.5px] text-[#C97A8E]">10:25 AM ✓✓</p>
+              </motion.div>
+            )}
+
+            {step >= 2 && !aiShown && (
+              <motion.div key="typing" initial="hidden" animate="show" exit="exit" variants={rise} className="self-end rounded-2xl bg-[#FFE3EA] px-3.5 py-3">
+                <TypingDots dotClassName="bg-brand" />
+              </motion.div>
+            )}
+
+            {step >= 3 && aiShown && (
+              <motion.p key="handover" initial="hidden" animate="show" exit="exit" variants={rise} className="self-center rounded-full border border-dashed border-slate-300 px-3 py-1 text-[10.5px] font-medium text-slate-500">
+                Handed over to Farhan A. · full history attached
+              </motion.p>
+            )}
+
+            {step >= 3 && aiShown && (
+              <motion.div key="agent" initial="hidden" animate="show" exit="exit" variants={rise} className="max-w-[88%] self-end rounded-2xl rounded-tr-md bg-[#FFE3EA] px-3.5 py-2.5">
+                <p className="mb-0.5 text-[9.5px] font-bold uppercase tracking-[.1em] text-brand">Farhan A.</p>
+                <p className="text-[12px] leading-5 text-[#8A1230]">Hi Sarah, I&apos;ll walk you through the plans.</p>
+              </motion.div>
+            )}
+
+            {step >= 4 && (
+              <motion.div key="note" initial="hidden" animate="show" exit="exit" variants={rise} className="rounded-xl border border-amber-100 bg-amber-50 px-3.5 py-2">
+                <p className="text-[9.5px] font-bold uppercase tracking-[.1em] text-amber-700">Internal note</p>
+                <p className="text-[11.5px] leading-5 text-slate-600">Wants a plan for her team. Follow up tomorrow.</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 border-t border-slate-100 px-4 py-3">
+        <span className="flex h-10 flex-1 items-center rounded-xl border border-slate-200 px-3 text-[12px] text-slate-400">Type your message...</span>
+        <Smile aria-hidden className="h-[18px] w-[18px] text-slate-400" />
+        <Paperclip aria-hidden className="h-[18px] w-[18px] text-slate-400" />
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand text-white shadow-[0_10px_20px_-10px_rgba(242,13,69,.9)]">
+          <Send aria-hidden className="h-4 w-4" />
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function FeaturesBento() {
+  const sectionRef = useRef(null);
+  const cardRefs = useRef([]);
   const [active, setActive] = useState(0);
-  const stepRefs = useRef([]);
+
+  // Soft parallax on the background shapes as the section scrolls past.
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
+  const blobY = useTransform(scrollYProgress, [0, 1], [50, -50]);
+  const circleY = useTransform(scrollYProgress, [0, 1], [-30, 60]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -230,90 +166,136 @@ export default function FeaturesBento() {
           if (entry.isIntersecting) setActive(Number(entry.target.dataset.index));
         });
       },
-      { rootMargin: "-45% 0px -45% 0px" }
+      { rootMargin: "-38% 0px -50% 0px" }
     );
-    stepRefs.current.forEach(el => el && observer.observe(el));
+    cardRefs.current.forEach(node => node && observer.observe(node));
     return () => observer.disconnect();
   }, []);
 
   return (
-    <section id="features-bento" className="relative mx-auto max-w-6xl px-6 py-10 sm:py-20 md:py-24">
-      <div aria-hidden className="pointer-events-none absolute left-1/2 top-0 h-px w-[60%] -translate-x-1/2" style={{ background: "linear-gradient(to right, transparent, rgba(242,13,69,0.25), transparent)" }} />
+    <MotionConfig reducedMotion="user">
+      <section ref={sectionRef} id="features-bento" aria-labelledby="connected-title" className={`${interTight.className} relative overflow-hidden bg-[radial-gradient(ellipse_at_top,#FFF3F6_0%,#FFFFFF_55%)] py-16 sm:py-20 lg:py-28`}>
+        <motion.div aria-hidden style={{ y: blobY }} className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-gradient-to-br from-[#FFC3D0] to-transparent opacity-70 blur-2xl" />
+        <motion.div aria-hidden style={{ y: circleY }} className="pointer-events-none absolute -bottom-32 -left-[170px] h-[300px] w-[300px] rounded-full bg-gradient-to-br from-brand to-[#C1093A]" />
+        <DotGrid className="left-[8%] top-40 hidden lg:grid" />
+        <DotGrid className="right-[10%] top-28 hidden lg:grid" />
 
-      <div className="mx-auto hidden max-w-3xl text-center sm:block">
-        <div className="mb-5 font-mono text-[11px] uppercase tracking-[0.22em] text-brand">· 01 / Complete control</div>
-        <h2 className="text-3xl font-bold leading-[1.05] tracking-[-0.03em] text-[#0B0D12] [text-wrap:balance] md:text-[40px]">Finally, everything’s connected</h2>
-        <p className="mx-auto mt-4 max-w-2xl text-sm leading-[1.6] text-black/60 md:text-[14px]">Every conversation, lead and handover links back to one customer record. One workspace, start to finish.</p>
-      </div>
+        <div className="container-x relative">
+          <motion.div className="mx-auto max-w-3xl text-center" initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.55, ease }}>
+            <span className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-white px-4 py-1.5 text-[11px] font-bold uppercase tracking-[.16em] text-brand shadow-[0_8px_20px_-14px_rgba(242,13,69,.5)]">
+              <span aria-hidden className="relative flex h-1.5 w-1.5">
+                <span className="absolute inset-0 rounded-full bg-brand opacity-60 motion-safe:animate-ping" />
+                <span className="relative h-1.5 w-1.5 rounded-full bg-brand" />
+              </span>
+              AI chat examples
+            </span>
+            <h2 id="connected-title" className="mt-5 text-[34px] font-bold leading-[1.08] tracking-[-0.025em] text-[#0B0D12] [text-wrap:balance] sm:text-[46px]">
+              Finally, <span className="text-brand">everything&apos;s</span> connected
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-[15px] leading-7 text-slate-500">
+              Every conversation, task and handover flows back to one customer record. One workspace, one tool, total clarity.
+            </p>
+          </motion.div>
 
-      <div className="sm:mt-6 md:mt-14 md:grid md:grid-cols-[1fr_1.1fr] md:gap-14">
-        <div className="relative md:pl-9">
-          <div aria-hidden className="absolute bottom-24 left-[9px] top-24 hidden w-px bg-black/[.08] md:block">
-            <div className="w-full bg-gradient-to-b from-brand/40 to-brand transition-[height] duration-300" style={{ height: `${((active + 0.5) / steps.length) * 100}%` }} />
-          </div>
-
-          {steps.map((step, i) => {
-            const isActive = i === active;
-            const { Graphic } = step;
-            return (
-              <div
-                key={step.title}
-                ref={el => { stepRefs.current[i] = el; }}
-                data-index={i}
-                className={`relative py-12 transition-opacity duration-300 md:py-24 ${isActive ? "md:opacity-100" : "md:opacity-30"}`}
-              >
-                <span
-                  aria-hidden
-                  className={`absolute -left-9 top-[104px] hidden h-5 w-5 items-center justify-center rounded-full border-2 bg-white transition-all duration-300 md:flex ${isActive ? "border-brand shadow-[0_0_14px_rgba(242,13,69,.45)]" : "border-black/[.08]"}`}
-                >
-                  <span className={`h-1.5 w-1.5 rounded-full transition-colors duration-300 ${isActive ? "bg-brand" : "bg-transparent"}`} />
-                </span>
-                <div className="text-center font-mono text-[10px] uppercase tracking-[0.2em] text-brand md:text-left">· {String(i + 1).padStart(2, "0")}</div>
-                <h3 className="mt-2.5 text-center text-xl font-semibold tracking-[-0.015em] text-[#0B0D12] md:text-left md:text-[22px]">{step.title}</h3>
-                <p className="mx-auto mt-2 max-w-sm text-center text-sm leading-[1.65] text-black/60 md:mx-0 md:text-left">{step.text}</p>
-                <div className="mt-4 flex flex-wrap justify-center gap-1.5 md:justify-start">
-                  {step.chips.map(chip => (
-                    <span key={chip} className="rounded-full border border-black/[.08] bg-black/[.03] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] text-black/60">{chip}</span>
-                  ))}
-                </div>
-                <div className="mt-6 hidden sm:block md:hidden">
-                  <Window><div className="p-4"><Graphic /></div></Window>
-                </div>
-              </div>
-            );
-          })}
-          <div className="mt-2 sm:hidden">
-            <Window><div className="p-4"><InboxGraphic /></div></Window>
-          </div>
-        </div>
-
-        <div className="hidden md:block">
-          <div className="sticky top-[max(6rem,calc(50vh-200px))]">
-            <Window>
-              <div className="relative h-[330px]">
-                {steps.map((step, i) => {
-                  const isActive = i === active;
-                  const { Graphic } = step;
-                  return (
-                    <div
-                      key={step.title}
-                      aria-hidden={!isActive}
-                      className={`absolute inset-0 p-5 transition-all duration-300 ${isActive ? "translate-y-0 scale-100 opacity-100" : "pointer-events-none translate-y-3 scale-[0.985] opacity-0"}`}
+          <div className="mt-12 grid items-start gap-10 lg:mt-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-14">
+            <ol className="space-y-4">
+              {steps.map((step, index) => {
+                const isActive = index === active;
+                const Icon = step.icon;
+                return (
+                  <motion.li
+                    key={step.title}
+                    ref={node => {
+                      cardRefs.current[index] = node;
+                    }}
+                    data-index={index}
+                    initial={{ opacity: 0, y: 28 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-40px" }}
+                    transition={{ duration: 0.55, delay: 0.05, ease }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setActive(index)}
+                      aria-pressed={isActive}
+                      className={`group relative flex w-full items-start gap-4 overflow-hidden rounded-2xl border p-5 text-left transition-[transform,box-shadow,background-color,border-color] duration-500 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20 sm:p-6 ${
+                        isActive
+                          ? "border-brand/60 bg-[#FFF0F4] shadow-[0_24px_50px_-26px_rgba(242,13,69,.55)] motion-safe:scale-[1.015]"
+                          : "border-transparent bg-white shadow-[0_1px_2px_rgba(13,27,61,.05),0_20px_40px_-30px_rgba(13,27,61,.3)] hover:border-brand/15 motion-safe:hover:-translate-y-0.5"
+                      }`}
                     >
-                      <Graphic />
-                    </div>
-                  );
-                })}
-              </div>
-            </Window>
-            <div className="mt-3 text-center font-mono text-[9.5px] uppercase tracking-[0.14em] text-black/40">{steps[active].caption}</div>
-          </div>
-        </div>
-      </div>
+                      <span aria-hidden className={`absolute bottom-0 left-0 top-0 w-1.5 origin-top rounded-l-2xl bg-brand transition-transform duration-500 ${isActive ? "scale-y-100" : "scale-y-0"}`} />
+                      <span aria-hidden className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand to-[#C1093A] text-[13px] font-bold text-white ring-[6px] transition-[box-shadow] duration-500 ${isActive ? "ring-brand/20" : "ring-brand/10"}`}>
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-[10.5px] font-bold uppercase tracking-[.14em] text-brand">{step.label}</span>
+                        <span className="mt-1.5 block text-[17px] font-semibold tracking-[-0.01em] text-[#0B0D12]">{step.title}</span>
+                        <span className="mt-1.5 block max-w-sm text-[13.5px] leading-6 text-slate-500">{step.text}</span>
+                        <span className="mt-4 flex flex-wrap gap-2">
+                          {step.chips.map(chip => (
+                            <span key={chip} className={`rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors duration-300 ${isActive ? "border-brand/20 bg-white text-slate-700" : "border-slate-200 bg-slate-50 text-slate-600"}`}>
+                              {chip}
+                            </span>
+                          ))}
+                        </span>
+                      </span>
+                      <span aria-hidden className={`hidden h-14 w-14 shrink-0 items-center justify-center rounded-full transition-[background-color,color,transform] duration-500 sm:flex ${isActive ? "bg-white text-brand motion-safe:scale-110" : "bg-brand/10 text-brand"}`}>
+                        <Icon className="h-6 w-6" strokeWidth={2} />
+                      </span>
+                    </button>
+                  </motion.li>
+                );
+              })}
+            </ol>
 
-      <p className="mx-auto mt-4 hidden max-w-xl text-center sm:block text-[15px] font-medium leading-[1.6] text-[#0B0D12] md:mt-8 md:text-[16px]">
-        All the tools you need. <span className="text-[#0B0D12]">For every step of the customer journey.</span>
-      </p>
-    </section>
+            <motion.div className="relative lg:sticky lg:top-28" initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.7, delay: 0.1, ease }}>
+              <div aria-hidden className="pointer-events-none absolute -top-10 left-[28%] h-48 w-48 rounded-full bg-gradient-to-br from-brand to-[#C1093A] opacity-90" />
+              <div aria-hidden className="pointer-events-none absolute -right-14 top-[32%] h-44 w-44 rounded-full bg-gradient-to-br from-brand to-[#C1093A] opacity-90" />
+              <div aria-hidden className="pointer-events-none absolute -bottom-6 left-1/4 h-56 w-56 rounded-full bg-[#FFC9D5] opacity-50 blur-3xl" />
+              <DotGrid className="-right-4 top-20 hidden xl:grid" cols={4} rows={3} />
+
+              <div className="relative motion-safe:animate-float">
+                <LiveWindow step={active} />
+              </div>
+
+              <div className="relative mt-8 flex flex-wrap items-center justify-center gap-3.5">
+                {channels.map((name, index) => (
+                  <motion.span
+                    key={name}
+                    initial={{ opacity: 0, y: 14, scale: 0.9 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: 0.3 + index * 0.08, ease }}
+                    whileHover={{ y: -4 }}
+                    className="flex h-[52px] w-[52px] items-center justify-center rounded-xl bg-white shadow-[0_14px_30px_-16px_rgba(13,27,61,.35)] ring-1 ring-slate-100"
+                  >
+                    <ChannelLogo name={name} className="h-7 w-7" />
+                  </motion.span>
+                ))}
+              </div>
+
+              <div className="relative mt-4 flex items-start justify-center gap-2">
+                <svg aria-hidden viewBox="0 0 60 50" className="mt-2 h-10 w-12 shrink-0 text-brand" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M52 40 C 34 46, 12 36, 10 10" />
+                  <path d="M3 18 L10 8 L18 16" />
+                </svg>
+                <p className={`${caveat.className} -rotate-3 text-[23px] leading-tight text-brand`}>
+                  All your channels,
+                  <br />
+                  one inbox.
+                </p>
+              </div>
+            </motion.div>
+          </div>
+
+          <motion.div className="mx-auto mt-14 flex max-w-3xl items-center gap-5 text-center lg:mt-20" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
+            <span aria-hidden className="hidden h-px flex-1 bg-slate-200 sm:block" />
+            <p className="text-[14.5px] text-slate-500">All the tools you need. For every step of the customer journey.</p>
+            <span aria-hidden className="hidden h-px flex-1 bg-slate-200 sm:block" />
+          </motion.div>
+        </div>
+      </section>
+    </MotionConfig>
   );
 }

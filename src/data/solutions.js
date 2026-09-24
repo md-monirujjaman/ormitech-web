@@ -397,13 +397,6 @@ export const answerBlocks = {
   }
 };
 
-export const homeFaq = [
-  { question: "What is OrmiTech?", answer: coreEntity },
-  { question: "Which channels does OrmiTech support?", answer: "OrmiTech supports Facebook, Instagram, WhatsApp and website chat, and shows every conversation in one shared inbox." },
-  { question: "Can an AI chatbot work with WhatsApp, Facebook and Instagram?", answer: "Yes. OrmiTech AI answers routine questions on all three, and your team can take over any conversation with the full history attached." },
-  { question: "Does OrmiTech replace my support team?", answer: "No. AI handles repetitive questions. Your team handles sensitive, complex and high-value conversations, and you decide the rules." }
-];
-
 // Extra FAQ items for /faq. They are distinct from the questions on the Product and Pricing pages.
 export const generalFaq = [
   { question: "What is an AI chatbot for business?", answer: "An AI chatbot for business answers customer questions automatically in a chat, using information about your business. It reads what the customer wrote instead of following a fixed script." },
