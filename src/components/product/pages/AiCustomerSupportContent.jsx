@@ -30,7 +30,7 @@ export default function AiCustomerSupportContent() {
       <BridgeCallout {...handoverBridge} />
       <BridgeCallout {...omnichannelBridge} />
 
-      <RelatedLinks paths={["/solutions/whatsapp-ai-chatbot", "/solutions/facebook-messenger-automation", "/solutions/instagram-dm-automation", "/features/ai-chatbot","/blog/what-is-an-ai-chatbot-for-business","/blog/ai-with-human-handover"]} eyebrow="Solutions" title="Related solutions" />
+      <RelatedLinks paths={["/solutions/whatsapp-ai-chatbot", "/solutions/facebook-messenger-automation", "/solutions/instagram-dm-automation", "/features/ai-chatbot","/blog/ai-with-human-handover"]} eyebrow="Solutions" title="Related solutions" />
 
       <UseCaseGrid id={useCases.id} eyebrow={useCases.eyebrow} title={useCases.title} description={useCases.description} items={useCases.items} columns={useCases.columns} />
     </>

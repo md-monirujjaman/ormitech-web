@@ -48,11 +48,287 @@ export const features = [
 // `related` lists product pages the article links to. `lang` is set only for non-English posts.
 export const blogPosts = [
   {
+    "slug": "what-is-omnichannel-inbox",
+    "title": "What Is an Omnichannel Inbox? Meaning, Benefits, and How It Works",
+    "seoTitle": "What Is an Omnichannel Inbox? Meaning & Benefits",
+    "metaDescription": "An omnichannel inbox brings WhatsApp, Messenger, Instagram, and live chat into one dashboard. Learn what it means, how it works, and if your team needs one.",
+    "excerpt": "Juggling customer messages across Facebook, Instagram, WhatsApp, and live chat? Here's what an omnichannel inbox actually means, how it works behind the scenes, and how to tell if your team is ready for one.",
+    "date": "2026-09-25",
+    "category": "Customer Communication",
+    "image": {
+      "src": "https://res.cloudinary.com/pnlsyo5i/image/upload/v1790315286/ChatGPT_Image_Sep_25_2026_11_21_36_AM.png",
+      "alt": "Small team reviewing an OrmiTech unified inbox with Messenger, Instagram, WhatsApp and email conversations in one dashboard",
+      "caption": "An omnichannel inbox brings every customer channel into a single dashboard.",
+      "width": 1536,
+      "height": 1024
+    },
+    "answer": "An omnichannel inbox is a single dashboard that pulls in messages from every channel a business uses — Facebook Messenger, Instagram DMs, WhatsApp, live chat, and email — so a team can read and reply to all of them from one place, with one shared view of each customer's history. The omnichannel inbox meaning goes beyond simply \"seeing everything together\": it also means every reply, no matter which app it came from, is tracked, assigned, and searchable in one system.",
+    "intro": [
+      "If your team currently keeps four browser tabs open just to answer customers, this is the concept that fixes that."
+    ],
+    "sections": [
+      {
+        "heading": "Why an Omnichannel Inbox Exists in the First Place",
+        "blocks": [
+          {
+            "p": "Most small and midsize businesses didn't choose to be scattered across five apps. It happened gradually — a Facebook Page for the business, an Instagram account because customers asked for one, WhatsApp because it's how people in many markets prefer to message, and a live chat widget on the website because visitors expect instant answers."
+          },
+          {
+            "p": "Each channel on its own is manageable. All of them together, without a shared inbox, creates the same problem every growing business runs into: messages get missed, two teammates accidentally reply to the same customer, and nobody can say for certain what was already promised to a client without digging through five different login screens."
+          },
+          {
+            "p": "An omnichannel inbox exists to remove that friction. Instead of managing five separate inboxes, a team manages one."
+          }
+        ]
+      },
+      {
+        "heading": "Omnichannel Inbox vs. Multichannel: What's the Difference?",
+        "blocks": [
+          {
+            "p": "This distinction trips people up, so it's worth answering directly."
+          },
+          {
+            "p": "**Multichannel** means a business is present on several channels — Facebook, Instagram, WhatsApp, email — but each one is managed separately, often by different people, with no shared record between them."
+          },
+          {
+            "p": "**Omnichannel** means those same channels are connected into one system, so a conversation that starts on Instagram and continues on WhatsApp still reads as one continuous history, and any team member can pick it up with full context."
+          },
+          {
+            "image": {
+              "src": "https://res.cloudinary.com/pnlsyo5i/image/upload/v1790315284/ChatGPT_Image_Sep_25_2026_11_23_21_AM.png",
+              "alt": "Diagram comparing disconnected multichannel apps with a connected omnichannel inbox",
+              "caption": "Multichannel means presence on many apps. Omnichannel means those apps are connected.",
+              "width": 1536,
+              "height": 1024
+            }
+          },
+          {
+            "table": {
+              "caption": "Comparison table: multichannel vs. omnichannel",
+              "headers": [
+                "",
+                "Multichannel",
+                "Omnichannel"
+              ],
+              "rows": [
+                [
+                  "Channels used",
+                  "Several, independently",
+                  "Several, connected"
+                ],
+                [
+                  "Customer history",
+                  "Scattered across apps",
+                  "Unified per customer"
+                ],
+                [
+                  "Team visibility",
+                  "Limited to whoever owns that app",
+                  "Shared across the team"
+                ],
+                [
+                  "Risk of duplicate replies",
+                  "High",
+                  "Low"
+                ],
+                [
+                  "Reporting",
+                  "Per-channel only",
+                  "Combined, cross-channel"
+                ]
+              ]
+            }
+          },
+          {
+            "p": "In short: multichannel is about presence. Omnichannel is about connection. An [all-in-one social media inbox](/product/omnichannel-inbox) is what makes that connection possible in practice. For a shorter side-by-side, see [how omnichannel differs from multichannel](/blog/omnichannel-vs-multichannel)."
+          }
+        ]
+      },
+      {
+        "heading": "How an Omnichannel Inbox Actually Works",
+        "blocks": [
+          {
+            "p": "Mechanically, an omnichannel unified inbox works through three layers:"
+          },
+          {
+            "image": {
+              "src": "https://res.cloudinary.com/pnlsyo5i/image/upload/v1790315394/ggggg.png",
+              "alt": "Diagram of how an omnichannel inbox combines Instagram, WhatsApp and live chat messages into one customer conversation",
+              "caption": "Behind the scenes, an omnichannel inbox works in three layers: connect, unify, and route.",
+              "width": 1312,
+              "height": 1199
+            }
+          },
+          {
+            "h3": "1. Channel Connections"
+          },
+          {
+            "p": "The tool connects to each platform's official API — Meta's API for [Facebook Messenger](https://developers.facebook.com/documentation/business-messaging/messenger-platform) and [Instagram](https://developers.facebook.com/documentation/instagram-platform), the [WhatsApp Business API](https://developers.facebook.com/documentation/business-messaging/whatsapp/overview), plus email and website chat — so messages flow in without anyone needing to log into each app separately. If WhatsApp is your busiest channel, here is how to [connect WhatsApp Business to a shared inbox](/solutions/whatsapp-ai-chatbot) with OrmiTech."
+          },
+          {
+            "h3": "2. A Unified Conversation View"
+          },
+          {
+            "p": "Every message, regardless of source, lands in one queue. Most shared inbox software tags each conversation with its origin channel, so a team can still filter by platform when needed, while still seeing everything in one social media inbox management tool."
+          },
+          {
+            "h3": "3. Assignment and Routing"
+          },
+          {
+            "p": "Conversations get [assigned to a specific team member](/features/team-collaboration) or team, based on rules like channel, keyword, or working hours. This is the part that turns a pile of messages into an actual workflow, and it's the core of most shared inbox management strategies."
+          },
+          {
+            "p": "Many modern platforms — OrmiTech included — add a fourth layer: an [AI chatbot](/features/ai-chatbot) that can answer common questions automatically inside that same unified inbox, escalating to a human only when needed."
+          }
+        ]
+      },
+      {
+        "heading": "Who Actually Needs a Unified Inbox for Social Media",
+        "blocks": [
+          {
+            "p": "Not every business needs this on day one. A unified inbox for social media makes the most sense when a business hits one or more of these signals:"
+          },
+          {
+            "ul": [
+              "More than one person replies to customer messages",
+              "Customers reach out across two or more channels regularly (for example, WhatsApp and Instagram)",
+              "Messages are getting missed or answered late",
+              "There's no way to see a customer's full conversation history in one place",
+              "The business is scaling outreach or ad spend and expects message volume to grow"
+            ]
+          },
+          {
+            "image": {
+              "src": "https://res.cloudinary.com/pnlsyo5i/image/upload/v1790315280/ChatGPT_Image_Sep_25_2026_11_25_12_AM.png",
+              "alt": "Team of three reviewing customer messages together in a shared omnichannel inbox",
+              "caption": "Once messages start coming from more than one channel, a shared inbox becomes a team necessity, not a luxury.",
+              "width": 1536,
+              "height": 1024
+            }
+          },
+          {
+            "p": "A solo shop answering a dozen messages a day on one platform probably doesn't need this yet. A business fielding hundreds of messages a week across WhatsApp, Instagram, and the website almost certainly does."
+          }
+        ]
+      },
+      {
+        "heading": "Key Benefits of an Omnichannel Shared Inbox",
+        "blocks": [
+          {
+            "image": {
+              "src": "https://res.cloudinary.com/pnlsyo5i/image/upload/v1790315400/hhhh.png",
+              "alt": "Six key benefits of an omnichannel inbox: faster response times, no duplicate replies, full customer history, better team coordination, unified reporting and easier onboarding",
+              "caption": "The practical payoff of an omnichannel inbox, at a glance.",
+              "width": 1254,
+              "height": 1254
+            }
+          },
+          {
+            "p": "**Faster response times.** Nothing sits unseen in a separate app. Every message is visible the moment it arrives."
+          },
+          {
+            "p": "**Fewer duplicate or conflicting replies.** Since the whole team sees the same conversation, two people don't accidentally answer the same question differently."
+          },
+          {
+            "p": "**Better customer experience.** A customer who messages on Instagram and later switches to WhatsApp doesn't have to repeat themselves — the history follows them."
+          },
+          {
+            "p": "**Cleaner reporting.** Combined data across channels shows which platform actually drives conversations and sales, instead of guessing from five separate dashboards."
+          },
+          {
+            "p": "**Easier onboarding.** New team members learn one system instead of five, which matters more than it sounds like once a support team grows past two people."
+          }
+        ]
+      },
+      {
+        "heading": "Limitations and Things to Consider",
+        "blocks": [
+          {
+            "p": "An omnichannel inbox isn't automatically the right fit for everyone, and it's worth being clear-eyed about the trade-offs:"
+          },
+          {
+            "ul": [
+              "**Setup takes real time.** Connecting official APIs (especially WhatsApp Business API) usually involves a verification step that isn't instant.",
+              "**Cost.** Most shared inbox software is priced per seat or per conversation volume, so it needs to be weighed against current message volume. You can [compare OrmiTech plans](/pricing) to see how that works here.",
+              "**Not every channel integrates equally well.** Some platforms offer richer APIs than others, which can limit certain features on specific channels."
+            ]
+          },
+          {
+            "p": "None of these are reasons to avoid an omnichannel inbox — they're just part of realistic omnichannel setup planning."
+          }
+        ]
+      },
+      {
+        "heading": "Shared Inbox Best Practices Once You Have One",
+        "blocks": [
+          {
+            "p": "Getting the tool is step one. A few shared inbox best practices make the difference between a tidy system and a new kind of mess:"
+          },
+          {
+            "ol": [
+              "Set clear assignment rules from day one (by channel, keyword, or team).",
+              "Agree on response-time targets (an SLA) so messages don't sit unanswered.",
+              "Use tags or labels consistently so reporting stays useful.",
+              "Review unanswered or overdue conversations daily, not weekly.",
+              "Let an [AI chatbot for customer support](/product/ai-customer-support) handle repetitive questions so the team focuses on the messages that need a human."
+            ]
+          }
+        ]
+      }
+    ],
+    "faqHeading": "Frequently Asked Questions",
+    "faq": [
+      {
+        "question": "What does \"omnichannel inbox\" actually mean?",
+        "answer": "It means every customer message — from Facebook, Instagram, WhatsApp, live chat, or email — arrives in one shared dashboard instead of separate apps, with each customer's full history kept together."
+      },
+      {
+        "question": "What is the difference between omnichannel and multichannel?",
+        "answer": "Multichannel means being present on several platforms that are managed separately. Omnichannel means those platforms are connected, so conversations and customer history carry over between them."
+      },
+      {
+        "question": "Do small businesses need an omnichannel inbox, or is it just for large teams?",
+        "answer": "Team size matters less than message volume and channel spread. A small team fielding messages across two or more channels regularly benefits just as much as a larger one — often more, since they have fewer people to catch what falls through the cracks."
+      },
+      {
+        "question": "Is an omnichannel inbox the same as a shared inbox?",
+        "answer": "They're closely related. A shared inbox lets a team share one inbox for a single channel (like one email address). An omnichannel inbox extends that idea across multiple channels at once."
+      },
+      {
+        "question": "How long does it take to set up an omnichannel inbox?",
+        "answer": "Connecting email or Facebook/Instagram is usually quick. WhatsApp Business API access typically takes longer because of Meta's verification process, so it's worth starting that step early in an omnichannel setup."
+      }
+    ],
+    "closing": [
+      {
+        "heading": "Conclusion",
+        "blocks": [
+          {
+            "p": "The omnichannel inbox meaning is simple once it's broken down: one dashboard, every channel, one shared history per customer. The bigger question isn't what it means — it's whether a growing team can still keep up without one. For a business already juggling Facebook, Instagram, WhatsApp, and live chat separately, an [omnichannel unified inbox](/product/omnichannel-inbox) usually isn't a luxury upgrade; it's the fix for a problem that's already slowing the team down."
+          }
+        ]
+      }
+    ],
+    "cta": {
+      "text": "OrmiTech brings WhatsApp, Messenger, Instagram, and website chat into exactly this kind of single dashboard, with an AI chatbot layered in to handle repetitive questions automatically. See how it looks with a free OrmiTech trial to get a feel for it with your own channels connected.",
+      "label": "Get started with OrmiTech",
+      "href": "/contact",
+      "secondaryLabel": "Compare plans",
+      "secondaryHref": "/pricing"
+    },
+    "related": [
+      "/product/omnichannel-inbox",
+      "/features/team-collaboration",
+      "/blog/omnichannel-vs-multichannel"
+    ]
+  },
+  {
     slug: "why-unified-inbox-matters",
     title: "Why a unified customer inbox matters",
     excerpt: "What happens when every customer channel becomes one operational workspace.",
     date: "2026-09-12",
     category: "Product",
+    image: { src: "https://res.cloudinary.com/pnlsyo5i/image/upload/v1790315400/hhhh.png", alt: "Six key benefits of an omnichannel inbox: faster response times, no duplicate replies, full customer history, better team coordination, unified reporting and easier onboarding", caption: "The practical payoff of a unified inbox, at a glance.", width: 1254, height: 1254 },
     answer: "A unified customer inbox puts messages from every channel into one place, so your team answers customers from a single view instead of switching between apps and losing context.",
     sections: [
       { heading: "The problem with one app per channel", paragraphs: ["Most small businesses talk to customers on several channels at once: a Facebook Page, Instagram DMs, WhatsApp and a website chat. When each lives in its own app, replies depend on who happens to have that app open.", "The customer sees one business. Your team sees four inboxes. The gap between those two views is where messages get missed and conversations get repeated."] },
@@ -68,6 +344,7 @@ export const blogPosts = [
     excerpt: "The best customer automation is not AI-only. It knows when a human should step in.",
     date: "2026-09-10",
     category: "AI",
+    image: { src: "https://res.cloudinary.com/pnlsyo5i/image/upload/v1790315280/ChatGPT_Image_Sep_25_2026_11_25_12_AM.png", alt: "Team of three reviewing customer messages together in a shared omnichannel inbox", caption: "Automation handles the routine, and the team steps in with full context.", width: 1536, height: 1024 },
     answer: "Good AI customer support answers routine questions on its own and hands the conversation to a person when the topic is sensitive, complex or high value, with the full history attached.",
     sections: [
       { heading: "Why AI-only support fails", paragraphs: ["Automation is good at repetition: delivery times, opening hours, stock questions. It is a poor fit for complaints, custom quotes or anything where the customer needs to feel heard.", "When an automated reply tries to handle those, customers get stuck in a loop and the business loses the very conversations that matter most."] },
@@ -75,7 +352,7 @@ export const blogPosts = [
       { heading: "What a good handover looks like", paragraphs: ["The person who takes over should not have to ask the customer to repeat themselves. That means a short summary of what was asked, the earlier messages, and any tags or order details already attached to the contact.", "OrmiTech treats human takeover as part of the workflow rather than an exception, so the handover keeps context intact."] },
       { heading: "Keep control of the rules", paragraphs: ["Decide in advance which topics AI may answer and which always go to a teammate. Review those rules as you see real conversations."] }
     ],
-    related: ["/features/human-handover", "/product/ai-customer-support", "/blog/what-is-an-ai-chatbot-for-business"]
+    related: ["/features/human-handover", "/product/ai-customer-support"]
   },
   {
     slug: "omnichannel-customer-support",
@@ -83,6 +360,7 @@ export const blogPosts = [
     excerpt: "A practical framework for connecting social, messaging and website conversations.",
     date: "2026-09-07",
     category: "Guide",
+    image: { src: "https://res.cloudinary.com/pnlsyo5i/image/upload/v1790315394/ggggg.png", alt: "Diagram of how an omnichannel inbox combines Instagram, WhatsApp and live chat messages into one customer conversation", caption: "Different channels, one customer, one conversation.", width: 1312, height: 1199 },
     answer: "An omnichannel support workflow connects every customer channel to one inbox, one customer record and one set of routing rules, so a conversation can move between channels without starting over.",
     sections: [
       { heading: "Step 1: list where customers actually write", paragraphs: ["Start with the channels your customers already use, not every channel available. For many businesses that is Facebook, Instagram, WhatsApp and website chat."] },
@@ -93,30 +371,12 @@ export const blogPosts = [
     related: ["/product/omnichannel-inbox", "/features/automation", "/solutions/facebook-messenger-automation"]
   },
   {
-    slug: "what-is-an-ai-chatbot-for-business",
-    title: "What is an AI chatbot for business?",
-    excerpt: "A plain-language explanation of what a business AI chatbot does, how it works and where it fits.",
-    date: "2026-09-23",
-    category: "Guide",
-    answer: "An AI chatbot for business is software that answers customer questions automatically in a chat, using information about your business. Unlike a fixed script, it reads the customer's message and responds to what was actually asked.",
-    sections: [
-      { heading: "How an AI chatbot works", paragraphs: ["The chatbot receives a customer's message, works out what the customer wants, and replies using information you have provided, such as delivery details, prices or opening hours.", "If the question is outside what it has been given, a well-designed chatbot passes the conversation to a person instead of guessing."] },
-      { heading: "AI chatbot versus a traditional chatbot", list: ["A traditional chatbot follows fixed menus or keyword rules; an AI chatbot reads free-form messages", "A traditional chatbot fails when wording changes; an AI chatbot copes with different phrasing", "Both should hand over to a person when needed"] },
-      { heading: "What businesses use it for", list: ["Answering repeat questions about price, delivery and availability", "Replying outside working hours", "Collecting details from interested customers", "Routing conversations to the right teammate"] },
-      { heading: "What it does not replace", paragraphs: ["A chatbot does not replace judgment. Complaints, custom quotes and sensitive conversations still belong with your team. That is why OrmiTech pairs AI replies with a shared inbox and human handover."] }
-    ],
-    faq: [
-      { question: "Is an AI chatbot the same as a live chat tool?", answer: "No. Live chat connects a visitor to a person. An AI chatbot can answer on its own, and in OrmiTech a person can join the same conversation at any time." },
-      { question: "Which channels can an AI chatbot work on?", answer: "OrmiTech supports Facebook, Instagram, WhatsApp and website chat." }
-    ],
-    related: ["/features/ai-chatbot", "/product/ai-customer-support", "/solutions/whatsapp-ai-chatbot"]
-  },
-  {
     slug: "omnichannel-vs-multichannel",
     title: "Omnichannel vs multichannel: key differences",
     excerpt: "Both use several channels. Only one connects them into a single customer experience.",
     date: "2026-09-23",
     category: "Guide",
+    image: { src: "https://res.cloudinary.com/pnlsyo5i/image/upload/v1790315284/ChatGPT_Image_Sep_25_2026_11_23_21_AM.png", alt: "Diagram comparing disconnected multichannel apps with a connected omnichannel inbox", caption: "Multichannel means presence on many apps. Omnichannel means those apps are connected.", width: 1536, height: 1024 },
     answer: "Multichannel means a business is present on several channels that run separately. Omnichannel means those channels are connected, so a customer's history and context follow them from one channel to another.",
     sections: [
       { heading: "Multichannel in practice", paragraphs: ["A business with a Facebook Page, an Instagram account and a WhatsApp number is multichannel. Each channel may be managed by a different person, and a message on one channel is invisible on the others."] },
@@ -126,56 +386,4 @@ export const blogPosts = [
     ],
     related: ["/product/omnichannel-inbox", "/features/team-collaboration", "/blog/why-unified-inbox-matters"]
   },
-  {
-    slug: "how-does-a-whatsapp-chatbot-work",
-    title: "How does a WhatsApp chatbot work?",
-    excerpt: "What happens between a customer's WhatsApp message and the reply, and where your team fits in.",
-    date: "2026-09-23",
-    category: "Guide",
-    answer: "A WhatsApp chatbot receives the messages customers send to your business number, works out what they are asking, and replies automatically for routine questions. Anything it should not handle is passed to a person.",
-    sections: [
-      { heading: "The flow, step by step", list: ["A customer sends a message to your business on WhatsApp", "The message appears in your inbox", "AI reads the message and identifies the intent", "For routine questions, an answer is sent using your business information", "For everything else, the chat is assigned to a teammate with a summary"] },
-      { heading: "Benefits of a WhatsApp chatbot", list: ["Customers get an answer at any hour", "Your team spends less time on repeat questions", "Every WhatsApp conversation is kept in a shared inbox", "Leads and orders can be captured from the chat"] },
-      { heading: "What to prepare before you start", paragraphs: ["Write down the questions customers ask most often and the correct answers. The better the information you give the chatbot, the better its replies. Decide which topics must always go to a person."] },
-      { heading: "Things to keep in mind", paragraphs: ["WhatsApp has its own rules for business messaging, and what is possible follows those rules. Keep a person available for conversations the chatbot should not handle."] }
-    ],
-    faq: [
-      { question: "Is a WhatsApp chatbot free?", answer: "Pricing depends on the provider. OrmiTech has a Free plan to start with; see the pricing page for current plans." }
-    ],
-    related: ["/solutions/whatsapp-ai-chatbot", "/features/human-handover", "/blog/what-is-an-ai-chatbot-for-business"]
-  },
-  {
-    slug: "what-is-f-commerce",
-    title: "What is F-commerce? A guide for Bangladeshi sellers",
-    excerpt: "F-commerce means selling through Facebook. Here is how it works and how sellers manage the messages.",
-    date: "2026-09-23",
-    category: "Guide",
-    answer: "F-commerce means selling products through Facebook, usually with a Facebook Page where customers browse posts and place orders by messaging the seller. It is common with small online businesses in Bangladesh.",
-    sections: [
-      { heading: "How F-commerce works", paragraphs: ["A seller posts products on a Facebook Page. A customer sends a message asking about price or size, the seller replies, and the order is agreed in the chat. Delivery and payment, often cash on delivery, follow."] },
-      { heading: "The hard part: managing messages", paragraphs: ["Because the sale happens in the inbox, a slow or missed reply is a lost order. As a Page grows, the same questions arrive again and again, and orders are hard to track across long chats."] },
-      { heading: "How sellers make it easier", list: ["Answer repeat questions automatically", "Keep Facebook, Instagram and WhatsApp chats in one inbox", "Capture order details from the conversation", "Let more than one person manage the Page inbox"] },
-      { heading: "Where OrmiTech fits", paragraphs: ["OrmiTech gives F-commerce sellers a shared inbox, AI replies for routine questions and order tracking beside each chat."] }
-    ],
-    faq: [
-      { question: "F-commerce কী?", answer: "F-commerce মানে ফেসবুকের মাধ্যমে পণ্য বিক্রি করা, সাধারণত একটি ফেসবুক পেজ ও মেসেজের মাধ্যমে অর্ডার নেওয়া।" }
-    ],
-    related: ["/ai-chatbot-bangladesh", "/solutions/ecommerce-chatbot", "/solutions/facebook-messenger-automation"]
-  },
-  {
-    slug: "chatbot-ki",
-    lang: "bn",
-    title: "চ্যাটবট কী এবং এটি কীভাবে কাজ করে?",
-    excerpt: "চ্যাটবট কী, কীভাবে কাজ করে এবং ব্যবসায় কোথায় কাজে লাগে, সহজ ভাষায়।",
-    date: "2026-09-23",
-    category: "গাইড",
-    answer: "চ্যাটবট এমন একটি সফটওয়্যার যা চ্যাটে কাস্টমারের প্রশ্নের উত্তর নিজে নিজে দেয়। AI চ্যাটবট কাস্টমারের লেখা বুঝে উত্তর দেয়, ফলে শুধু নির্দিষ্ট কিছু শব্দের ওপর নির্ভর করতে হয় না।",
-    sections: [
-      { heading: "চ্যাটবট কীভাবে কাজ করে", paragraphs: ["কাস্টমার মেসেজ পাঠালে চ্যাটবট সেটি পড়ে বোঝার চেষ্টা করে কাস্টমার কী জানতে চান। তারপর আপনার দেওয়া তথ্য থেকে উত্তর পাঠায়, যেমন ডেলিভারির সময় বা দাম।", "যে প্রশ্নের উত্তর তার কাছে নেই, ভালো চ্যাটবট সেখানে আন্দাজে না বলে কথোপকথন একজন মানুষের কাছে পাঠিয়ে দেয়।"] },
-      { heading: "সাধারণ চ্যাটবট আর AI চ্যাটবটের পার্থক্য", list: ["সাধারণ চ্যাটবট নির্দিষ্ট মেনু বা শব্দ ধরে চলে, AI চ্যাটবট নিজের ভাষায় লেখা মেসেজ বোঝে", "একই প্রশ্ন ভিন্নভাবে লিখলে সাধারণ চ্যাটবট আটকে যেতে পারে, AI চ্যাটবট সামলাতে পারে"] },
-      { heading: "ব্যবসায় কোথায় কাজে লাগে", list: ["দাম, ডেলিভারি ও প্রাপ্যতার মতো বারবার আসা প্রশ্নের উত্তর দিতে", "অফিস সময়ের বাইরেও কাস্টমারকে উত্তর দিতে", "আগ্রহী কাস্টমারের তথ্য সংগ্রহ করতে"] },
-      { heading: "চ্যাটবট যা বদলে দিতে পারে না", paragraphs: ["অভিযোগ, বিশেষ দামের অনুরোধ বা স্পর্শকাতর কথোপকথনে মানুষের বিবেচনা লাগে। তাই OrmiTech-এ AI-র উত্তরের পাশাপাশি শেয়ার্ড ইনবক্স ও মানুষের কাছে হস্তান্তরের ব্যবস্থা রাখা হয়েছে।"] }
-    ],
-    related: ["/bn/facebook-page-auto-reply", "/ai-chatbot-bangladesh", "/blog/what-is-an-ai-chatbot-for-business"]
-  }
 ];

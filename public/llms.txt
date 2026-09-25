@@ -27,14 +27,10 @@ Documentation: https://docs.ormitechit.com/
 - [Facebook Page auto-reply, in Bangla](https://www.ormitechit.com/bn/facebook-page-auto-reply)
 
 ## Guides
-- [What is an AI chatbot for business?](https://www.ormitechit.com/blog/what-is-an-ai-chatbot-for-business)
-- [How does a WhatsApp chatbot work?](https://www.ormitechit.com/blog/how-does-a-whatsapp-chatbot-work)
 - [Omnichannel vs multichannel](https://www.ormitechit.com/blog/omnichannel-vs-multichannel)
-- [What is F-commerce?](https://www.ormitechit.com/blog/what-is-f-commerce)
 - [Why a unified customer inbox matters](https://www.ormitechit.com/blog/why-unified-inbox-matters)
 - [AI automation should know when to hand over](https://www.ormitechit.com/blog/ai-with-human-handover)
 - [Designing an omnichannel support workflow](https://www.ormitechit.com/blog/omnichannel-customer-support)
-- [চ্যাটবট কী এবং এটি কীভাবে কাজ করে?](https://www.ormitechit.com/blog/chatbot-ki)
 
 ## More
 - [Pricing](https://www.ormitechit.com/pricing)

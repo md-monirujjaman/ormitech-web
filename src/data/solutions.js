@@ -59,7 +59,7 @@ export const solutionPages = [
       { question: "Can my team see WhatsApp and other channels together?", answer: "Yes. WhatsApp, Facebook, Instagram and website chat appear in one inbox, with a single customer record behind each contact." },
       { question: "Do I need to write the answers myself?", answer: "You provide information about your business. OrmiTech AI uses it to answer common questions, and your team can review and adjust how automation behaves." }
     ],
-    related: ["/solutions/facebook-messenger-automation", "/solutions/instagram-dm-automation", "/product/omnichannel-inbox", "/features/human-handover", "/blog/how-does-a-whatsapp-chatbot-work"]
+    related: ["/solutions/facebook-messenger-automation", "/solutions/instagram-dm-automation", "/product/omnichannel-inbox", "/features/human-handover"]
   },
   {
     slug: "facebook-messenger-automation",
@@ -162,7 +162,7 @@ export const solutionPages = [
       { question: "Will my Instagram customers know they are talking to AI?", answer: "You decide how automation is set up and when a person replies. Sensitive or high-value conversations can always be handled by your team." },
       { question: "Can I manage Instagram and Facebook together?", answer: "Yes. Both, plus WhatsApp and website chat, appear in one inbox." }
     ],
-    related: ["/solutions/facebook-messenger-automation", "/solutions/whatsapp-ai-chatbot", "/product/omnichannel-inbox", "/features/ai-chatbot", "/blog/what-is-an-ai-chatbot-for-business"]
+    related: ["/solutions/facebook-messenger-automation", "/solutions/whatsapp-ai-chatbot", "/product/omnichannel-inbox", "/features/ai-chatbot"]
   },
   {
     slug: "ecommerce-chatbot",
@@ -213,7 +213,7 @@ export const solutionPages = [
       { question: "Can I start an order from a chat?", answer: "Yes. OrmiTech lets you start an order from a conversation and keeps the order history next to the chat." },
       { question: "Does this work for Facebook and Instagram sellers?", answer: "Yes. Facebook, Instagram, WhatsApp and website chat are handled in one inbox." }
     ],
-    related: ["/product/lead-order-management", "/solutions/facebook-messenger-automation", "/solutions/instagram-dm-automation", "/pricing", "/blog/what-is-f-commerce"]
+    related: ["/product/lead-order-management", "/solutions/facebook-messenger-automation", "/solutions/instagram-dm-automation", "/pricing"]
   }
 ];
 
@@ -264,9 +264,9 @@ export const bangladeshPage = {
     { question: "Does OrmiTech work with Facebook and WhatsApp in Bangladesh?", answer: "OrmiTech connects Facebook, Instagram, WhatsApp and website chat into one inbox. Availability of each channel follows the platform's own rules." },
     { question: "Can OrmiTech understand Bangla messages?", answer: "OrmiTech's product walkthrough shows customer messages in Bangla and English, including mixed Bangla-English. Confirm your exact language needs with the team before you rely on it." },
     { question: "Is there a free plan?", answer: "OrmiTech has a Free plan to start with. See the pricing page for the current plans." },
-    { question: "What is F-commerce?", answer: "F-commerce means selling products through Facebook, typically via a Page and Messenger conversations. Read our guide for more detail." }
+    { question: "What is F-commerce?", answer: "F-commerce means selling products through Facebook, typically via a Page and Messenger conversations." }
   ],
-  related: ["/solutions/facebook-messenger-automation", "/solutions/ecommerce-chatbot", "/solutions/whatsapp-ai-chatbot", "/bn/facebook-page-auto-reply", "/blog/what-is-f-commerce"]
+  related: ["/solutions/facebook-messenger-automation", "/solutions/ecommerce-chatbot", "/solutions/whatsapp-ai-chatbot", "/bn/facebook-page-auto-reply"]
 };
 
 // Bangla landing page for the Facebook Page auto-reply cluster ("ফেসবুক পেজ অটো রিপ্লাই").
@@ -319,7 +319,7 @@ export const banglaFacebookPage = {
     { question: "একই পেজ কি একাধিক জন সামলাতে পারবেন?", answer: "পারবেন। কথোপকথন টিমের সদস্যদের দায়িত্ব দেওয়া যায়, নোট রাখা যায়, আর এক জনের কাছ থেকে আরেক জনের কাছে ইতিহাস না হারিয়ে হস্তান্তর করা যায়।" },
     { question: "ইনস্টাগ্রাম ও হোয়াটসঅ্যাপও কি একই জায়গায় দেখা যাবে?", answer: "হ্যাঁ। ফেসবুক, ইনস্টাগ্রাম, হোয়াটসঅ্যাপ ও ওয়েবসাইট চ্যাট একই ইনবক্সে আসে।" }
   ],
-  related: ["/ai-chatbot-bangladesh", "/solutions/whatsapp-ai-chatbot", "/solutions/instagram-dm-automation", "/product/omnichannel-inbox", "/blog/chatbot-ki"]
+  related: ["/ai-chatbot-bangladesh", "/solutions/whatsapp-ai-chatbot", "/solutions/instagram-dm-automation", "/product/omnichannel-inbox"]
 };
 
 export const relatedLabels = {
