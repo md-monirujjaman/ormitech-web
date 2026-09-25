@@ -163,7 +163,7 @@ export default function Navbar() {
       </div>
 
       {open && (
-        <div id={menuId} className="max-h-[calc(100vh-5rem)] overflow-y-auto border-t border-slate-200/70 bg-white shadow-[0_24px_40px_-24px_rgba(13,27,61,.25)] lg:hidden">
+        <div id={menuId} data-lenis-prevent className="max-h-[calc(100vh-5rem)] overflow-y-auto border-t border-slate-200/70 bg-white shadow-[0_24px_40px_-24px_rgba(13,27,61,.25)] lg:hidden">
           <nav aria-label="Mobile" className="container-x flex flex-col py-4">
             {navItems.map(item => {
               const active = isItemActive(item);

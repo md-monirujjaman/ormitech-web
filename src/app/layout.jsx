@@ -1,5 +1,6 @@
 import "@/styles/globals.css";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
+import SmoothScroll from "@/components/common/SmoothScroll";
 import OrganizationJsonLd from "@/components/ui/OrganizationJsonLd";
 
 export const metadata = {
@@ -35,6 +36,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
+        <SmoothScroll />
         {children}
         <OrganizationJsonLd />
         <GoogleAnalytics />

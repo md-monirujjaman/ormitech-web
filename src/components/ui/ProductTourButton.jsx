@@ -4,7 +4,7 @@ import { useId, useRef } from "react";
 import { Play, X } from "lucide-react";
 import { buttonClasses } from "@/components/common/ButtonLink";
 
-// Opens the existing OrmiTech reply demo video in a native modal dialog (focus trap and Escape come with <dialog>).
+// Opens the existing OrmiTech reply demo video in a native modal dialog (focus trap and Escape come with <dialog data-lenis-prevent>).
 export default function ProductTourButton({ label = "Watch it in action", variant = "secondary", className = "" }) {
   const dialogRef = useRef(null);
   const videoRef = useRef(null);
