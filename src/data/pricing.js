@@ -5,14 +5,21 @@ import { authLinks } from "@/data/site";
 //
 // PLACEHOLDERS TO CONFIRM BEFORE LAUNCH: the Starter and Growth prices, every usage limit and the per-plan feature
 // allocation are proposals, not decided business terms. Plan names follow the ones already used on the site.
-// `annualDiscountPercent` stays 0 until a real annual discount is decided, so no savings are advertised.
+// `annualDiscountPercent` is 20 (annual billing shows "Save 20%"); set it to 0 to stop advertising a discount.
 
 export const billing = {
   symbol: "$",
-  annualDiscountPercent: 0,
+  // Annual billing discount shown as "Save X%". Set to 0 to hide the badge and the discount.
+  annualDiscountPercent: 20,
   periods: [
     { id: "monthly", label: "Monthly" },
     { id: "annual", label: "Annual" }
+  ],
+  // Display currencies. Prices are defined in USD; other currencies are USD x `rate`, rounded to `round`.
+  // PLACEHOLDER: the BDT rate is a proposal, not a decided price list. Confirm it before launch.
+  currencies: [
+    { id: "usd", label: "USD", symbol: "$", rate: 1, round: 0.01 },
+    { id: "bdt", label: "BDT", symbol: "৳", rate: 120, round: 10 }
   ]
 };
 
@@ -51,6 +58,17 @@ export const plans = [
     features: ["Conversation summaries and intent detection", "Workflow automation", "Lead management", "Analytics dashboard", "Roles and permissions", "Priority support"]
   },
   {
+    id: "accelerate",
+    name: "Accelerate",
+    tagline: "For high-performing teams with advanced needs.",
+    monthlyPrice: 149,
+    cta: { label: "Get started", href: `${authLinks.signup}?plan=accelerate` },
+    limits: { conversations: 10000, teamMembers: 20, socialChannels: 3 },
+    summary: "10,000 conversations / month · 20 team members",
+    featuresIntro: "Everything in Growth, plus:",
+    features: ["Custom integrations", "Advanced controls", "Custom onboarding", "Dedicated support"]
+  },
+  {
     id: "enterprise",
     name: "Enterprise",
     tagline: "For larger teams and custom requirements.",
@@ -67,8 +85,30 @@ export const plans = [
 
 export const enterprisePlan = plans.find(plan => plan.id === "enterprise");
 
+// Single entry point for everything the pricing UI renders. It is synchronous and static today; when the admin
+// panel / API is connected, replace this function's body (or make it async) and the components keep working
+// unchanged, because they read only from this object.
+export function getPricingConfig() {
+  return {
+    billing,
+    hero: pricingHero,
+    plans,
+    enterprisePlan,
+    includedInAll,
+    enterprise
+  };
+}
+
 export function formatPrice(amount) {
   return `${billing.symbol}${Number.isInteger(amount) ? amount : amount.toFixed(2)}`;
+}
+
+// Formats a USD amount in the chosen display currency, e.g. formatMoney(29, "bdt") -> "৳3,480".
+export function formatMoney(amount, currencyId = "usd") {
+  const currency = billing.currencies.find(item => item.id === currencyId) ?? billing.currencies[0];
+  const converted = Math.round((amount * currency.rate) / currency.round) * currency.round;
+  const text = Number.isInteger(converted) ? converted.toLocaleString("en-US") : converted.toFixed(2);
+  return `${currency.symbol}${text}`;
 }
 
 export function formatNumber(value) {
@@ -101,7 +141,9 @@ export const includedInAll = ["Unified inbox", "Website chat widget", "OrmiTech 
 
 const plan = id => plans.find(item => item.id === id);
 const limitRow = (label, key) => ({ label, values: Object.fromEntries(plans.map(item => [item.id, formatNumber(item.limits[key])])) });
-const row = (label, free, starter, growth, enterprise, hint) => ({ label, hint, values: { free, starter, growth, enterprise } });
+// Accelerate matches Growth in every comparison row except these, where it adds the paid-tier extras.
+const accelerateOverrides = { Support: "Dedicated", "Custom onboarding": true, "Custom integrations": true, "Advanced controls": true };
+const row = (label, free, starter, growth, enterprise, hint) => ({ label, hint, values: { free, starter, growth, accelerate: label in accelerateOverrides ? accelerateOverrides[label] : growth, enterprise } });
 
 export const comparison = [
   {

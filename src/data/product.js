@@ -282,7 +282,7 @@ export const faq = {
     {
       question: "How is OrmiTech priced?",
       answer:
-        "There are four plans: Free, Starter, Growth and Enterprise. Free costs nothing, Starter and Growth have monthly prices on the pricing page, and Enterprise is priced around your requirements."
+        "There are five plans: Free, Starter, Growth, Accelerate and Enterprise. Free costs nothing, Starter, Growth and Accelerate have monthly prices on the pricing page, and Enterprise is priced around your requirements."
     },
     {
       question: "Can I integrate OrmiTech with my existing tools?",
