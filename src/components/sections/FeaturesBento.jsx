@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, MotionConfig, motion, useScroll, useTransform } from "framer-motion";
+import { AnimatePresence, MotionConfig, motion, useMotionValueEvent, useScroll, useTransform } from "framer-motion";
 import { Bot, FileText, MessageCircleMore, Paperclip, Send, Smile, UserRound } from "lucide-react";
 import ChannelLogo from "@/components/common/ChannelLogo";
 import { TypingDots } from "@/components/ui/effects";
@@ -84,7 +84,7 @@ function LiveWindow({ step }) {
           </AnimatePresence>
         </div>
 
-        <div className="mt-3 flex h-[376px] flex-col justify-start gap-2.5 overflow-hidden">
+        <div className="mt-3 flex h-[376px] flex-col justify-start gap-2.5 overflow-hidden lg:h-[clamp(340px,calc(100vh-430px),376px)]">
           <AnimatePresence initial={false}>
             <motion.div key="customer" initial="hidden" animate="show" variants={rise} className="max-w-[86%] self-start rounded-2xl rounded-tl-md bg-slate-100 px-3.5 py-2.5">
               <p className="text-[12px] leading-5 text-slate-600">Hi, I&apos;m interested in your product. Can you tell me more about the pricing?</p>
@@ -149,9 +149,15 @@ function LiveWindow({ step }) {
   );
 }
 
+// Desktop: the two columns are pinned (CSS sticky) while the page scrolls through this track.
+// PIN_TOP matches the fixed navbar height (h-20); SCROLL_PER_STEP is how much page scroll each step gets.
+const PIN_TOP = 80;
+const SCROLL_PER_STEP_VH = 50;
+
 export default function FeaturesBento() {
   const sectionRef = useRef(null);
-  const cardRefs = useRef([]);
+  const trackRef = useRef(null);
+  const isDesktop = useRef(false);
   const [active, setActive] = useState(0);
 
   // Soft parallax on the background shapes as the section scrolls past.
@@ -159,22 +165,45 @@ export default function FeaturesBento() {
   const blobY = useTransform(scrollYProgress, [0, 1], [50, -50]);
   const circleY = useTransform(scrollYProgress, [0, 1], [-30, 60]);
 
+  // 0 when the pinned area locks in place, 1 when it releases and scrolls away with the page.
+  const { scrollYProgress: trackProgress } = useScroll({ target: trackRef, offset: [`start ${PIN_TOP}px`, "end end"] });
+
+  const stepFromProgress = progress => Math.min(steps.length - 1, Math.max(0, Math.floor(progress * steps.length)));
+
+  // One shared state drives the left steps and the device screen. It only re-renders when the step changes.
+  useMotionValueEvent(trackProgress, "change", progress => {
+    if (!isDesktop.current) return;
+    const next = stepFromProgress(progress);
+    setActive(current => (current === next ? current : next));
+  });
+
+  // Below lg there is no pinning: steps are tapped instead of scrolled.
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) setActive(Number(entry.target.dataset.index));
-        });
-      },
-      { rootMargin: "-38% 0px -50% 0px" }
-    );
-    cardRefs.current.forEach(node => node && observer.observe(node));
-    return () => observer.disconnect();
-  }, []);
+    const query = window.matchMedia("(min-width: 1024px)");
+    const sync = () => {
+      isDesktop.current = query.matches;
+      if (query.matches) setActive(stepFromProgress(trackProgress.get()));
+    };
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, [trackProgress]);
+
+  const goToStep = index => {
+    if (!isDesktop.current || !trackRef.current) {
+      setActive(index);
+      return;
+    }
+    // Scroll the page to the middle of that step's range so the scroll position and the active step agree.
+    const track = trackRef.current;
+    const distance = track.offsetHeight - (window.innerHeight - PIN_TOP);
+    const trackTop = track.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({ top: trackTop - PIN_TOP + ((index + 0.5) / steps.length) * distance, behavior: "smooth" });
+  };
 
   return (
     <MotionConfig reducedMotion="user">
-      <section ref={sectionRef} id="features-bento" aria-labelledby="connected-title" className={`${interTight.className} relative overflow-hidden bg-[radial-gradient(ellipse_at_top,#FFF3F6_0%,#FFFFFF_55%)] py-16 sm:py-20 lg:py-28`}>
+      <section ref={sectionRef} id="features-bento" aria-labelledby="connected-title" className={`${interTight.className} relative overflow-clip bg-[radial-gradient(ellipse_at_top,#FFF3F6_0%,#FFFFFF_55%)] py-16 sm:py-20 lg:pb-28 lg:pt-28`}>
         <motion.div aria-hidden style={{ y: blobY }} className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-gradient-to-br from-[#FFC3D0] to-transparent opacity-70 blur-2xl" />
         <motion.div aria-hidden style={{ y: circleY }} className="pointer-events-none absolute -bottom-32 -left-[170px] h-[300px] w-[300px] rounded-full bg-gradient-to-br from-brand to-[#C1093A]" />
         <DotGrid className="left-[8%] top-40 hidden lg:grid" />
@@ -197,99 +226,97 @@ export default function FeaturesBento() {
             </p>
           </motion.div>
 
-          <div className="mt-12 grid items-start gap-10 lg:mt-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-14">
-            <ol className="space-y-4">
-              {steps.map((step, index) => {
-                const isActive = index === active;
-                const Icon = step.icon;
-                return (
-                  <motion.li
-                    key={step.title}
-                    ref={node => {
-                      cardRefs.current[index] = node;
-                    }}
-                    data-index={index}
-                    initial={{ opacity: 0, y: 28 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-40px" }}
-                    transition={{ duration: 0.55, delay: 0.05, ease }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setActive(index)}
-                      aria-pressed={isActive}
-                      className={`group relative flex w-full items-start gap-4 overflow-hidden rounded-2xl border p-5 text-left transition-[transform,box-shadow,background-color,border-color] duration-500 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20 sm:p-6 ${
-                        isActive
-                          ? "border-brand/60 bg-[#FFF0F4] shadow-[0_24px_50px_-26px_rgba(242,13,69,.55)] motion-safe:scale-[1.015]"
-                          : "border-transparent bg-white shadow-[0_1px_2px_rgba(13,27,61,.05),0_20px_40px_-30px_rgba(13,27,61,.3)] hover:border-brand/15 motion-safe:hover:-translate-y-0.5"
-                      }`}
-                    >
-                      <span aria-hidden className={`absolute bottom-0 left-0 top-0 w-1.5 origin-top rounded-l-2xl bg-brand transition-transform duration-500 ${isActive ? "scale-y-100" : "scale-y-0"}`} />
-                      <span aria-hidden className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand to-[#C1093A] text-[13px] font-bold text-white ring-[6px] transition-[box-shadow] duration-500 ${isActive ? "ring-brand/20" : "ring-brand/10"}`}>
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-[10.5px] font-bold uppercase tracking-[.14em] text-brand">{step.label}</span>
-                        <span className="mt-1.5 block text-[17px] font-semibold tracking-[-0.01em] text-[#0B0D12]">{step.title}</span>
-                        <span className="mt-1.5 block max-w-sm text-[13.5px] leading-6 text-slate-500">{step.text}</span>
-                        <span className="mt-4 flex flex-wrap gap-2">
-                          {step.chips.map(chip => (
-                            <span key={chip} className={`rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors duration-300 ${isActive ? "border-brand/20 bg-white text-slate-700" : "border-slate-200 bg-slate-50 text-slate-600"}`}>
-                              {chip}
-                            </span>
-                          ))}
+          {/* Scroll track: on lg its height is the pinned height plus the scroll distance of all steps. */}
+          <div ref={trackRef} className="mt-12 lg:mt-16 lg:h-[calc(100vh-5rem+var(--bento-scroll))]" style={{ "--bento-scroll": `${steps.length * SCROLL_PER_STEP_VH}vh` }}>
+            <div className="grid items-center gap-10 lg:sticky lg:top-20 lg:h-[calc(100vh-5rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-14">
+              <ol className="space-y-3">
+                {steps.map((step, index) => {
+                  const isActive = index === active;
+                  const Icon = step.icon;
+                  return (
+                    <li key={step.title}>
+                      <button
+                        type="button"
+                        onClick={() => goToStep(index)}
+                        aria-current={isActive ? "step" : undefined}
+                        className={`group relative flex w-full items-start gap-4 overflow-hidden rounded-2xl border px-5 py-4 text-left transition-[transform,box-shadow,background-color,border-color,opacity] duration-500 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20 sm:px-6 ${
+                          isActive
+                            ? "border-brand/60 bg-[#FFF0F4] shadow-[0_24px_50px_-26px_rgba(242,13,69,.55)] motion-safe:translate-x-1.5 motion-safe:scale-[1.015]"
+                            : "border-transparent bg-white opacity-60 shadow-[0_1px_2px_rgba(13,27,61,.05),0_20px_40px_-30px_rgba(13,27,61,.3)] hover:opacity-100"
+                        }`}
+                      >
+                        <span aria-hidden className={`absolute bottom-0 left-0 top-0 w-1.5 origin-top rounded-l-2xl bg-brand transition-transform duration-500 ${isActive ? "scale-y-100" : "scale-y-0"}`} />
+                        <span aria-hidden className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand to-[#C1093A] text-[13px] font-bold text-white ring-[6px] transition-[box-shadow] duration-500 ${isActive ? "ring-brand/20" : "ring-brand/10"}`}>
+                          {String(index + 1).padStart(2, "0")}
                         </span>
-                      </span>
-                      <span aria-hidden className={`hidden h-14 w-14 shrink-0 items-center justify-center rounded-full transition-[background-color,color,transform] duration-500 sm:flex ${isActive ? "bg-white text-brand motion-safe:scale-110" : "bg-brand/10 text-brand"}`}>
-                        <Icon className="h-6 w-6" strokeWidth={2} />
-                      </span>
-                    </button>
-                  </motion.li>
-                );
-              })}
-            </ol>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-[10.5px] font-bold uppercase tracking-[.14em] text-brand">{step.label}</span>
+                          <span className="mt-1 block text-[17px] font-semibold tracking-[-0.01em] text-[#0B0D12]">{step.title}</span>
+                          <span className={`grid transition-[grid-template-rows,opacity] duration-500 ease-out ${isActive ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
+                            <span className="overflow-hidden">
+                              <span className="mt-1.5 block max-w-sm text-[13.5px] leading-6 text-slate-500">{step.text}</span>
+                              <span className="mt-3.5 flex flex-wrap gap-2">
+                                {step.chips.map(chip => (
+                                  <span key={chip} className="rounded-full border border-brand/20 bg-white px-3 py-1 text-[11px] font-semibold text-slate-700">
+                                    {chip}
+                                  </span>
+                                ))}
+                              </span>
+                            </span>
+                          </span>
+                        </span>
+                        <span aria-hidden className={`hidden h-12 w-12 shrink-0 items-center justify-center rounded-full transition-[background-color,color,transform] duration-500 sm:flex ${isActive ? "bg-white text-brand motion-safe:scale-110" : "bg-brand/10 text-brand"}`}>
+                          <Icon className="h-5 w-5" strokeWidth={2} />
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ol>
 
-            <motion.div className="relative lg:sticky lg:top-28" initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.7, delay: 0.1, ease }}>
-              <div aria-hidden className="pointer-events-none absolute -top-10 left-[28%] h-48 w-48 rounded-full bg-gradient-to-br from-brand to-[#C1093A] opacity-90" />
-              <div aria-hidden className="pointer-events-none absolute -right-14 top-[32%] h-44 w-44 rounded-full bg-gradient-to-br from-brand to-[#C1093A] opacity-90" />
-              <div aria-hidden className="pointer-events-none absolute -bottom-6 left-1/4 h-56 w-56 rounded-full bg-[#FFC9D5] opacity-50 blur-3xl" />
-              <DotGrid className="-right-4 top-20 hidden xl:grid" cols={4} rows={3} />
+              <motion.div className="relative" initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.7, delay: 0.1, ease }}>
+                <div aria-hidden className="pointer-events-none absolute -top-10 left-[28%] h-48 w-48 rounded-full bg-gradient-to-br from-brand to-[#C1093A] opacity-90" />
+                <div aria-hidden className="pointer-events-none absolute -right-14 top-[32%] h-44 w-44 rounded-full bg-gradient-to-br from-brand to-[#C1093A] opacity-90" />
+                <div aria-hidden className="pointer-events-none absolute -bottom-6 left-1/4 h-56 w-56 rounded-full bg-[#FFC9D5] opacity-50 blur-3xl" />
+                <DotGrid className="-right-4 top-20 hidden xl:grid" cols={4} rows={3} />
 
-              <div className="relative motion-safe:animate-float">
-                <LiveWindow step={active} />
-              </div>
+                {/* Only floats when it is not pinned, so the pinned device never moves. */}
+                <div className="relative motion-safe:max-lg:animate-float">
+                  <LiveWindow step={active} />
+                </div>
 
-              <div className="relative mt-8 flex flex-wrap items-center justify-center gap-3.5">
-                {channels.map((name, index) => (
-                  <motion.span
-                    key={name}
-                    initial={{ opacity: 0, y: 14, scale: 0.9 }}
-                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: 0.3 + index * 0.08, ease }}
-                    whileHover={{ y: -4 }}
-                    className="flex h-[52px] w-[52px] items-center justify-center rounded-xl bg-white shadow-[0_14px_30px_-16px_rgba(13,27,61,.35)] ring-1 ring-slate-100"
-                  >
-                    <ChannelLogo name={name} className="h-7 w-7" />
-                  </motion.span>
-                ))}
-              </div>
+                <div className="relative mt-6 flex flex-wrap items-center justify-center gap-3.5 [@media(max-height:759px)]:lg:hidden">
+                  {channels.map((name, index) => (
+                    <motion.span
+                      key={name}
+                      initial={{ opacity: 0, y: 14, scale: 0.9 }}
+                      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.4, delay: 0.3 + index * 0.08, ease }}
+                      whileHover={{ y: -4 }}
+                      className="flex h-[52px] w-[52px] items-center justify-center rounded-xl bg-white shadow-[0_14px_30px_-16px_rgba(13,27,61,.35)] ring-1 ring-slate-100"
+                    >
+                      <ChannelLogo name={name} className="h-7 w-7" />
+                    </motion.span>
+                  ))}
+                </div>
 
-              <div className="relative mt-4 flex items-start justify-center gap-2">
-                <svg aria-hidden viewBox="0 0 60 50" className="mt-2 h-10 w-12 shrink-0 text-brand" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M52 40 C 34 46, 12 36, 10 10" />
-                  <path d="M3 18 L10 8 L18 16" />
-                </svg>
-                <p className={`${caveat.className} -rotate-3 text-[23px] leading-tight text-brand`}>
-                  All your channels,
-                  <br />
-                  one inbox.
-                </p>
-              </div>
-            </motion.div>
+                <div className="relative mt-4 flex items-start justify-center gap-2 lg:hidden [@media(min-height:900px)]:lg:flex">
+                  <svg aria-hidden viewBox="0 0 60 50" className="mt-2 h-10 w-12 shrink-0 text-brand" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M52 40 C 34 46, 12 36, 10 10" />
+                    <path d="M3 18 L10 8 L18 16" />
+                  </svg>
+                  <p className={`${caveat.className} -rotate-3 text-[23px] leading-tight text-brand`}>
+                    All your channels,
+                    <br />
+                    one inbox.
+                  </p>
+                </div>
+              </motion.div>
+            </div>
           </div>
 
-          <motion.div className="mx-auto mt-14 flex max-w-3xl items-center gap-5 text-center lg:mt-20" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
+          <motion.div className="mx-auto mt-14 flex max-w-3xl items-center gap-5 text-center lg:mt-8" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
             <span aria-hidden className="hidden h-px flex-1 bg-slate-200 sm:block" />
             <p className="text-[14.5px] text-slate-500">All the tools you need. For every step of the customer journey.</p>
             <span aria-hidden className="hidden h-px flex-1 bg-slate-200 sm:block" />
