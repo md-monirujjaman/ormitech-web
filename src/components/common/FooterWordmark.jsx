@@ -3,13 +3,11 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Sora } from "next/font/google";
+import { sora } from "@/styles/fonts";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
-
-const sora = Sora({ subsets: ["latin"], weight: ["600"], display: "swap" });
 
 const TEXT = "OrmiTech";
 const letters = Array.from(TEXT);
