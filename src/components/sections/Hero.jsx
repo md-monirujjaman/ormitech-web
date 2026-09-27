@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { motion, MotionConfig, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Bot, Inbox, MessageSquare, Target, TrendingUp, Users, Zap } from "lucide-react";
 import ChannelLogo from "@/components/common/ChannelLogo";
-import { channels } from "@/data/site";
+import { authLinks, channels } from "@/data/site";
 
 const panel = "rounded-2xl border border-black/[.06] bg-white shadow-[0_30px_60px_-24px_rgba(0,0,0,.28)]";
 
@@ -169,7 +169,7 @@ export default function Hero() {
               <span className="text-sm text-black/60">AI + human teams in one workspace</span>
             </div>
 
-            <a href="/contact" className="mt-[2.6vh] inline-flex items-center gap-2 rounded-xl bg-brand px-7 py-[clamp(.7rem,1.6vh,1rem)] text-[clamp(1rem,2vh,1.125rem)] font-semibold text-white shadow-[0_18px_45px_-12px_rgba(242,13,69,.55)] transition hover:-translate-y-0.5 hover:bg-brand2">
+            <a href={authLinks.register} className="mt-[2.6vh] inline-flex items-center gap-2 rounded-xl bg-brand px-7 py-[clamp(.7rem,1.6vh,1rem)] text-[clamp(1rem,2vh,1.125rem)] font-semibold text-white shadow-[0_18px_45px_-12px_rgba(242,13,69,.55)] transition hover:-translate-y-0.5 hover:bg-brand2">
               Get Started <ArrowRight size={18} />
             </a>
             <p className="mt-[1.4vh] hidden text-sm font-medium text-black/55 sm:block short:hidden">Facebook, Instagram, WhatsApp &amp; website — one inbox.</p>

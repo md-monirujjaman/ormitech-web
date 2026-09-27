@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Bot, Check, Sparkles, UserRound, Workflow } from "lucide-react";
 import ButtonLink from "@/components/common/ButtonLink";
 import { aiShowcase } from "@/data/features";
+import { authLinks } from "@/data/site";
 import { PulseDot, TypingDots, useTimeline } from "@/components/ui/effects";
 import Reveal, { Stagger, StaggerItem, ease, fadeRight } from "@/components/ui/Reveal";
 import SectionHeading from "@/components/ui/SectionHeading";
@@ -139,7 +140,7 @@ export default function AIShowcase() {
                 ))}
               </Stagger>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <ButtonLink href="/contact" arrow>Get started</ButtonLink>
+                <ButtonLink href={authLinks.register} arrow>Get started</ButtonLink>
                 <ButtonLink href="/how-it-works" variant="secondary" icon={Workflow}>See how it works</ButtonLink>
               </div>
             </Reveal>

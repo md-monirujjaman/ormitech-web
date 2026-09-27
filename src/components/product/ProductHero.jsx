@@ -7,6 +7,7 @@ import { Highlight, useTilt } from "@/components/ui/effects";
 import { Stagger, StaggerItem, ease } from "@/components/ui/Reveal";
 import { Eyebrow, IconTile } from "@/components/ui/SectionHeading";
 import { productHero } from "@/data/product";
+import { authLinks } from "@/data/site";
 import DashboardMockup from "./DashboardMockup";
 import ProductTourButton from "@/components/ui/ProductTourButton";
 
@@ -82,7 +83,7 @@ export default function ProductHero() {
             {productHero.description}
           </StaggerItem>
           <StaggerItem className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <ButtonLink href="/contact" arrow>Get started</ButtonLink>
+            <ButtonLink href={authLinks.register} arrow>Get started</ButtonLink>
             <ProductTourButton />
           </StaggerItem>
           <StaggerItem

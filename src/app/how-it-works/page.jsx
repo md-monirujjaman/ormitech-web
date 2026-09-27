@@ -22,6 +22,7 @@ import FaqJsonLd from "@/components/ui/FaqJsonLd";
 import FaqSection from "@/components/ui/FaqSection";
 import { MotionProvider } from "@/components/ui/Reveal";
 import { faq, howMeta } from "@/data/howItWorks";
+import { authLinks } from "@/data/site";
 import { interTight } from "@/styles/fonts";
 import { buildMetadata } from "@/lib/seo";
 
@@ -54,6 +55,7 @@ export default function HowItWorksPage() {
             title="Connect your business. Let OrmiTech do the rest."
             text="Connect your channels, configure your AI and start turning customer conversations into business growth."
             primaryLabel="Get started"
+            primaryHref={authLinks.register}
             secondaryLabel="Explore features"
             secondaryHref="/features/ai-chatbot"
           />

@@ -6,7 +6,7 @@ import { Users, Workflow } from "lucide-react";
 import ButtonLink from "@/components/common/ButtonLink";
 import ChannelLogo from "@/components/common/ChannelLogo";
 import { featuresHero, heroHighlights } from "@/data/features";
-import { channels } from "@/data/site";
+import { authLinks, channels } from "@/data/site";
 import { Highlight, useTilt } from "@/components/ui/effects";
 import { Stagger, StaggerItem, ease } from "@/components/ui/Reveal";
 import { Eyebrow, IconTile } from "@/components/ui/SectionHeading";
@@ -100,7 +100,7 @@ export default function FeaturesHero() {
             {featuresHero.description}
           </StaggerItem>
           <StaggerItem className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <ButtonLink href="/contact" arrow>Get started</ButtonLink>
+            <ButtonLink href={authLinks.register} arrow>Get started</ButtonLink>
             <ButtonLink href="/how-it-works" variant="secondary" icon={Workflow}>See how it works</ButtonLink>
           </StaggerItem>
           <StaggerItem

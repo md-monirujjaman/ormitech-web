@@ -10,7 +10,7 @@ import { Stagger, StaggerItem, ease } from "@/components/ui/Reveal";
 import { Eyebrow } from "@/components/ui/SectionHeading";
 import { hero } from "@/data/howItWorks";
 import { markPath, markViewBox } from "@/data/ormitechMark";
-import { channels } from "@/data/site";
+import { authLinks, channels } from "@/data/site";
 import FlowLine from "./FlowLine";
 
 const engines = [
@@ -154,7 +154,7 @@ export default function HowHero() {
             {hero.description}
           </StaggerItem>
           <StaggerItem className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <ButtonLink href="/contact" arrow>Get started</ButtonLink>
+            <ButtonLink href={authLinks.register} arrow>Get started</ButtonLink>
             <ProductTourButton label="Watch how it works" />
           </StaggerItem>
           <StaggerItem as="dl" className="mt-10 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-slate-200/70 pt-8 sm:grid-cols-4">

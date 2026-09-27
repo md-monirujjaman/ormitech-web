@@ -8,6 +8,7 @@ import { PulseDot } from "@/components/ui/effects";
 import Reveal, { Stagger, StaggerItem, ease, fadeRight } from "@/components/ui/Reveal";
 import SectionHeading, { IconTile } from "@/components/ui/SectionHeading";
 import { automation } from "@/data/product";
+import { authLinks } from "@/data/site";
 
 const AUTO_ADVANCE_MS = 2800;
 const NAV_KEYS = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 };
@@ -187,7 +188,7 @@ export default function AutomationShowcase() {
                 ))}
               </Stagger>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <ButtonLink href="/contact" arrow>Get started</ButtonLink>
+                <ButtonLink href={authLinks.register} arrow>Get started</ButtonLink>
                 <ButtonLink href="/how-it-works" variant="secondary" icon={Workflow}>See how it works</ButtonLink>
               </div>
             </Reveal>

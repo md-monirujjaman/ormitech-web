@@ -12,6 +12,7 @@ import SectionHeading, { IconTile } from "@/components/ui/SectionHeading";
 import { breadcrumbSchema, faqSchema, webPageSchema } from "@/lib/seo";
 import { interTight } from "@/styles/fonts";
 import { Check } from "lucide-react";
+import { authLinks } from "@/data/site";
 
 const ui = {
   en: { answerEyebrow: "The short answer", faqEyebrow: "FAQ", faqTitle: "Frequently asked questions", stepsEyebrow: "How it works", benefitsEyebrow: "Benefits", useCasesEyebrow: "Use cases", relatedTitle: "Keep exploring", ctaTitle: "See OrmiTech with your own channels.", ctaText: "Start with the channels you use today and let your team handle only the conversations that need a person.", cta: "Get started", pricing: "See pricing" },
@@ -100,7 +101,7 @@ export default function SolutionPage({ page, crumbs, language = "en" }) {
 
           <RelatedLinks paths={related} title={t.relatedTitle} eyebrow={language === "bn" ? "সম্পর্কিত" : "Related"} lang={wrap} />
 
-          <SimpleCTA title={t.ctaTitle} text={t.ctaText} primaryLabel={t.cta} secondaryLabel={t.pricing} secondaryHref="/pricing" />
+          <SimpleCTA title={t.ctaTitle} text={t.ctaText} primaryLabel={t.cta} primaryHref={authLinks.register} secondaryLabel={t.pricing} secondaryHref="/pricing" />
         </MotionProvider>
       </main>
       <Footer />

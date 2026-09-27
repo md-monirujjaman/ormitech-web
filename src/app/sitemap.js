@@ -1,8 +1,9 @@
 import { blogPosts, siteUrl } from "@/data/site";
 import { banglaFacebookPage } from "@/data/solutions";
 
-// Public, indexable routes only. Auth pages (/login, /signup, /forgot-password), the API route and the
-// /features redirect are intentionally excluded — see the redirect at src/app/features/page.jsx.
+// Public, indexable routes only. The API route, the /features redirect (src/app/features/page.jsx) and the
+// auth paths that now redirect to the client app (/login, /signup, /register, /forgot-password — see
+// next.config.js) are intentionally excluded.
 const staticRoutes = [
   "/",
   "/product",

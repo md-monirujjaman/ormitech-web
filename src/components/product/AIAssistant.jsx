@@ -9,6 +9,7 @@ import { PulseDot, TypingDots, useTimeline } from "@/components/ui/effects";
 import Reveal, { Stagger, StaggerItem, ease, fadeRight } from "@/components/ui/Reveal";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { aiAssistant } from "@/data/product";
+import { authLinks } from "@/data/site";
 import ProductTourButton from "@/components/ui/ProductTourButton";
 
 const PHASE = { message: 1, thinking: 2, reply: 3, insights: 4, action: 5 };
@@ -170,7 +171,7 @@ export default function AIAssistant() {
             ))}
           </Stagger>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <ButtonLink href="/contact" arrow>Get started</ButtonLink>
+            <ButtonLink href={authLinks.register} arrow>Get started</ButtonLink>
             <ProductTourButton />
           </div>
         </Reveal>

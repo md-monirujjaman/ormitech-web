@@ -4,9 +4,10 @@ import ButtonLink from "@/components/common/ButtonLink";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { Stagger, StaggerItem, ease } from "@/components/ui/Reveal";
 import { Eyebrow } from "@/components/ui/SectionHeading";
+import { authLinks } from "@/data/site";
 
 // Shared hero shell for the five dedicated feature pages. `visual` is the feature-specific mockup.
-export default function FeaturePageHero({ eyebrow, title, description, visual, ctaHref = "/contact", ctaLabel = "Get started", secondaryHref, secondaryLabel, secondaryIcon, breadcrumbs }) {
+export default function FeaturePageHero({ eyebrow, title, description, visual, ctaHref = authLinks.register, ctaLabel = "Get started", secondaryHref, secondaryLabel, secondaryIcon, breadcrumbs }) {
   return (
     <section aria-labelledby="feature-hero-title" className="relative overflow-hidden border-b border-slate-100 bg-gradient-to-b from-[#F7F9FC] to-white pb-16 pt-32 lg:pb-20 lg:pt-40">
       <div aria-hidden className="grid-bg absolute inset-0 opacity-40 [mask-image:linear-gradient(to_bottom,black,transparent_70%)]" />

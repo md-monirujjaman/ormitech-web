@@ -7,6 +7,7 @@ import { Highlight, Spotlight } from "@/components/ui/effects";
 import Reveal, { Stagger, StaggerItem } from "@/components/ui/Reveal";
 import SectionHeading, { IconTile } from "@/components/ui/SectionHeading";
 import { overview } from "@/data/product";
+import { authLinks } from "@/data/site";
 
 export default function ProductOverview() {
   return (
@@ -27,7 +28,7 @@ export default function ProductOverview() {
                 }
                 description={overview.description}
               />
-              <ButtonLink href="/contact" arrow className="mt-7">
+              <ButtonLink href={authLinks.register} arrow className="mt-7">
                 Get started
               </ButtonLink>
             </Reveal>

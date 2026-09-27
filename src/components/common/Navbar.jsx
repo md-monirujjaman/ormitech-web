@@ -142,10 +142,10 @@ export default function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-1 lg:flex">
-          <Link href={authLinks.login} className="rounded-md px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:text-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30">
+          <a href={authLinks.login} className="rounded-md px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:text-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30">
             Log in
-          </Link>
-          <ButtonLink href="/contact" size="sm" arrow>
+          </a>
+          <ButtonLink href={authLinks.register} size="sm" arrow>
             Get started
           </ButtonLink>
         </div>
@@ -227,10 +227,10 @@ export default function Navbar() {
               );
             })}
             <div className="mt-3 grid gap-2 border-t border-slate-200/70 pt-4 sm:grid-cols-2">
-              <Link href={authLinks.login} className="flex h-12 items-center justify-center rounded-lg border border-slate-200 font-semibold text-navy transition-colors hover:bg-slate-50">
+              <a href={authLinks.login} className="flex h-12 items-center justify-center rounded-lg border border-slate-200 font-semibold text-navy transition-colors hover:bg-slate-50">
                 Log in
-              </Link>
-              <ButtonLink href="/contact" arrow>
+              </a>
+              <ButtonLink href={authLinks.register} arrow>
                 Get started
               </ButtonLink>
             </div>

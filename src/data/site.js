@@ -8,6 +8,7 @@ export const siteUrl = trimSlash(process.env.NEXT_PUBLIC_SITE_URL || "https://ww
 export const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-HFH88XV2FG";
 
 export const appLinks = {
+  app: trimSlash(process.env.NEXT_PUBLIC_APP_URL || "https://app.ormitechit.com"),
   docs: trimSlash(process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.ormitechit.com")
 };
 
@@ -20,11 +21,12 @@ export const socialProfiles = [
   "https://x.com/ormitechit"
 ];
 
-// Account pages on this site. They are a frontend preview until authentication is connected.
+// Accounts live in the client app, not on this site. Every "Log in" and "Get started" link points there;
+// the old /login, /signup and /forgot-password paths redirect to the same places (see next.config.js).
 export const authLinks = {
-  login: "/login",
-  signup: "/signup",
-  forgotPassword: "/forgot-password"
+  login: `${appLinks.app}/login`,
+  register: `${appLinks.app}/register`,
+  forgotPassword: `${appLinks.app}/forgot-password`
 };
 
 export const channels = [
@@ -312,7 +314,7 @@ export const blogPosts = [
     "cta": {
       "text": "OrmiTech brings WhatsApp, Messenger, Instagram, and website chat into exactly this kind of single dashboard, with an AI chatbot layered in to handle repetitive questions automatically. See how it looks with a free OrmiTech trial to get a feel for it with your own channels connected.",
       "label": "Get started with OrmiTech",
-      "href": "/contact",
+      "href": authLinks.register,
       "secondaryLabel": "Compare plans",
       "secondaryHref": "/pricing"
     },

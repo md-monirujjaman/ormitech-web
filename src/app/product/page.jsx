@@ -20,6 +20,7 @@ import { buildMetadata } from "@/lib/seo";
 import AnswerBlock from "@/components/seo/AnswerBlock";
 import RelatedLinks from "@/components/seo/RelatedLinks";
 import { answerBlocks } from "@/data/solutions";
+import { authLinks } from "@/data/site";
 
 export const metadata = buildMetadata({ title: "Product: AI Customer Communication Platform", description: "OrmiTech is an AI customer communication platform. Manage Facebook, Instagram, WhatsApp and website chat in one inbox and automate routine replies.", path: "/product", ogTitle: "OrmiTech Product: AI customer communication platform" });
 
@@ -46,6 +47,7 @@ export default function ProductPage() {
             title="Turn your conversations into real business growth."
             text="Start with the channels you use today and give every customer a faster, more personal experience with OrmiTech."
             primaryLabel="Get started"
+            primaryHref={authLinks.register}
             secondaryLabel="See pricing"
             secondaryHref="/pricing"
           />
