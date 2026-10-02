@@ -43,7 +43,7 @@ export default function Hero() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <section ref={ref} className="relative mt-20 h-[85vh] overflow-hidden bg-[#F6F7F9]">
+      <section ref={ref} className="relative mt-20 h-[clamp(620px,85svh,900px)] overflow-hidden bg-[#F6F7F9]">
         <div aria-hidden className="dot-bg absolute inset-0" />
         <div aria-hidden className="absolute left-1/2 top-[40%] h-[85%] w-[1100px] max-w-[130%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/90 blur-3xl" />
         <div aria-hidden className="red-glow absolute left-1/2 top-[60%] h-[420px] w-[420px] -translate-x-1/2 opacity-40" />
@@ -152,8 +152,8 @@ export default function Hero() {
             </Float>
           </div>
 
-          <div className="container-x absolute inset-x-0 bottom-[4%] top-[21%] flex flex-col items-center text-center">
-            <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .6 }} className="text-[clamp(1.9rem,min(8.4vw,7.6vh),4.5rem)] font-bold leading-[1.05] tracking-[-.045em]">
+          <div className="container-x absolute inset-x-0 bottom-[4%] top-[21%] flex min-w-0 flex-col items-center text-center">
+            <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .6 }} className="max-w-full text-[clamp(1.9rem,min(8.4vw,7.6vh),4.5rem)] font-bold leading-[1.05] tracking-[-.045em]">
               Every conversation.
               <span className="block bg-gradient-to-r from-brand to-brand2 bg-clip-text pb-[.08em] text-transparent">One powerful workspace.</span>
             </motion.h1>
