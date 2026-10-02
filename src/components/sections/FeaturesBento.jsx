@@ -229,7 +229,7 @@ export default function FeaturesBento() {
           {/* Scroll track: on lg its height is the pinned height plus the scroll distance of all steps. */}
           <div ref={trackRef} className="mt-12 lg:mt-16 lg:h-[calc(100vh-5rem+var(--bento-scroll))]" style={{ "--bento-scroll": `${steps.length * SCROLL_PER_STEP_VH}vh` }}>
             <div className="grid items-center gap-10 lg:sticky lg:top-20 lg:h-[calc(100vh-5rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-14">
-              <ol className="space-y-3">
+              <ol className="min-w-0 space-y-3">
                 {steps.map((step, index) => {
                   const isActive = index === active;
                   const Icon = step.icon;
@@ -274,7 +274,7 @@ export default function FeaturesBento() {
                 })}
               </ol>
 
-              <motion.div className="relative" initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.7, delay: 0.1, ease }}>
+              <motion.div className="relative min-w-0" initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.7, delay: 0.1, ease }}>
                 <div aria-hidden className="pointer-events-none absolute -top-10 left-[28%] h-48 w-48 rounded-full bg-gradient-to-br from-brand to-[#C1093A] opacity-90" />
                 <div aria-hidden className="pointer-events-none absolute -right-14 top-[32%] h-44 w-44 rounded-full bg-gradient-to-br from-brand to-[#C1093A] opacity-90" />
                 <div aria-hidden className="pointer-events-none absolute -bottom-6 left-1/4 h-56 w-56 rounded-full bg-[#FFC9D5] opacity-50 blur-3xl" />
