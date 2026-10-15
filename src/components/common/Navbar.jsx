@@ -39,15 +39,16 @@ const navItems = [
       ["Documentation", appLinks.docs],
       ["FAQ", "/faq"]
     ]
-  }
+  },
+  { label: "Contact", href: "/contact" }
 ];
 
 const isExternal = href => href.startsWith("http");
 
 const triggerClass = active =>
-  `relative inline-flex items-center gap-1 rounded-md px-3.5 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 ${active ? "text-brandInk" : "text-slate-600 hover:text-navy"}`;
+  `relative inline-flex items-center gap-1 rounded-lg px-3.5 py-2.5 text-[13px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 ${active ? "text-brandInk" : "text-slate-700 hover:text-brandInk"}`;
 
-const dropdownLinkClass = "block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30";
+const dropdownLinkClass = "group/link relative block rounded-xl px-4 py-3 text-[13px] font-semibold text-slate-700 transition-colors hover:text-brandInk focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -98,7 +99,7 @@ export default function Navbar() {
                   <li key={item.label}>
                     <Link href={item.href} aria-current={active ? "page" : undefined} className={triggerClass(active)}>
                       {item.label}
-                      {active && <span aria-hidden className="absolute inset-x-3.5 -bottom-0.5 h-0.5 rounded-full bg-brand" />}
+                      {active && <span aria-hidden className="absolute inset-x-3.5 -bottom-1 h-0.5 rounded-full bg-brand" />}
                     </Link>
                   </li>
                 );
@@ -110,7 +111,7 @@ export default function Navbar() {
                     <Link href={item.href} aria-current={active ? "page" : undefined} className={triggerClass(active)}>
                       {item.label}
                       <ChevronDown aria-hidden className="h-3.5 w-3.5 transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180" />
-                      {active && <span aria-hidden className="absolute inset-x-3.5 -bottom-0.5 h-0.5 rounded-full bg-brand" />}
+                      {active && <span aria-hidden className="absolute inset-x-3.5 -bottom-1 h-0.5 rounded-full bg-brand" />}
                     </Link>
                   ) : (
                     <button type="button" aria-haspopup="true" className={triggerClass(active)}>
@@ -120,20 +121,23 @@ export default function Navbar() {
                     </button>
                   )}
 
-                  <div className="invisible absolute left-0 top-full pt-2 opacity-0 transition-all duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
-                    <div className="w-64 rounded-xl border border-slate-200/70 bg-white p-2 shadow-[0_24px_40px_-24px_rgba(13,27,61,.25)]">
+                  <div className="invisible fixed left-0 right-0 top-20 z-50 border-y border-slate-200/80 bg-white/95 pt-2 opacity-0 shadow-[0_24px_55px_-24px_rgba(13,27,61,.3)] backdrop-blur-xl transition-all duration-200 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                    <div className="container-x relative grid grid-cols-3 gap-2 pb-3 pt-2">
                       {item.children.map(([label, href]) =>
                         isExternal(href) ? (
                           <a key={label} href={href} className={dropdownLinkClass}>
                             {label}
+                            <span aria-hidden className="absolute bottom-1.5 left-4 right-4 h-px origin-left scale-x-0 bg-brand/40 transition-transform duration-200 group-hover/link:scale-x-100" />
                           </a>
                         ) : (
                           <Link key={label} href={href} className={dropdownLinkClass}>
                             {label}
+                            <span aria-hidden className="absolute bottom-1.5 left-4 right-4 h-px origin-left scale-x-0 bg-brand/40 transition-transform duration-200 group-hover/link:scale-x-100" />
                           </Link>
                         )
                       )}
                     </div>
+                    <div aria-hidden className="h-1 bg-brand" />
                   </div>
                 </li>
               );

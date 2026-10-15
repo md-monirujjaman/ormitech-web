@@ -39,7 +39,7 @@ npm run dev
 npm run build
 ```
 
-The contact API currently validates and logs requests. Connect it to your production email/CRM provider using environment variables before launch.
+The contact API validates requests and can forward them to an email/CRM automation endpoint. Set `CONTACT_WEBHOOK_URL` in the deployment environment before launch; the endpoint receives the submitted fields as JSON. Without it, the route still validates and acknowledges submissions for local development.
 
 
 ## Multi-page expansion

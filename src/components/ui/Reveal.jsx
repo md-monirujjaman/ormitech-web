@@ -8,17 +8,17 @@ const viewport = { once: true, margin: "-60px" };
 
 export const fadeUp = {
   hidden: { opacity: 0, y: 16 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease } }
+  show: { opacity: 1, y: 0, transition: { duration: 0.62, ease } }
 };
 
 export const fadeRight = {
   hidden: { opacity: 0, x: -12 },
-  show: { opacity: 1, x: 0, transition: { duration: 0.45, ease } }
+  show: { opacity: 1, x: 0, transition: { duration: 0.56, ease } }
 };
 
 export const popIn = {
   hidden: { opacity: 0, scale: 0.9 },
-  show: { opacity: 1, scale: 1, transition: { duration: 0.4, ease } }
+  show: { opacity: 1, scale: 1, transition: { duration: 0.5, ease } }
 };
 
 // Respects the visitor's reduced-motion setting for every animation inside.
@@ -34,7 +34,7 @@ export default function Reveal({ as = "div", delay = 0, className, children, ...
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={viewport}
-      transition={{ duration: 0.4, delay, ease }}
+      transition={{ duration: 0.62, delay, ease }}
       className={className}
       {...props}
     >
