@@ -10,7 +10,7 @@ const columns = [
   ["Solutions", [["WhatsApp AI chatbot", "/solutions/whatsapp-ai-chatbot"], ["Facebook automation", "/solutions/facebook-messenger-automation"], ["Instagram DM automation", "/solutions/instagram-dm-automation"], ["Ecommerce chatbot", "/solutions/ecommerce-chatbot"]]],
   ["Company", [["Blog", "/blog"], ["FAQ", "/faq"], ["Contact", "/contact"]]],
   ["Resources", [["Documentation", appLinks.docs], ["Log in", authLinks.login], ["Sign up", authLinks.register]]],
-  ["Legal", [["Privacy Policy", "/privacy"], ["Terms of Service", "/terms"], ["Data Deletion", "/data-deletion"]]]
+  ["Legal", [["Privacy Policy", "/privacy"], ["Terms & Conditions", "/terms"], ["Data Deletion", "/data-deletion"]]]
 ];
 
 // Full-colour official brand marks (thesvg.org "default" variant), each already a self-contained badge.
