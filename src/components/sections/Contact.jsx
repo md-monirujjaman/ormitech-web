@@ -10,11 +10,23 @@ const TOPICS = {
 };
 
 const contactDetails = [
-  { icon: MapPin, label: "Our office", value: "123 Innovation Drive, Dhaka 1200, Bangladesh" },
-  { icon: Mail, label: "Email us", value: "hello@ormitech.com", secondary: "support@ormitech.com", href: "mailto:hello@ormitech.com" },
-  { icon: Phone, label: "Call us", value: "+880 1712 345678", secondary: "+880 1812 345678", href: "tel:+8801712345678" },
-  { icon: Clock3, label: "Working hours", value: "Mon – Fri: 9:00 AM – 6:00 PM", secondary: "Sat – Sun: Closed" }
+  { icon: MapPin, label: "Our office", lines: [{ text: "Khulna Sadar, Khulna 9100, Bangladesh" }] },
+  { icon: Mail, label: "Email us", lines: [{ text: "hello@ormitech.com", href: "mailto:hello@ormitech.com" }, { text: "support@ormitech.com", href: "mailto:support@ormitech.com" }] },
+  {
+    icon: Phone,
+    label: "Call us",
+    lines: [
+      { text: "+880 1407752887", href: "tel:+8801407752887" },
+      { text: "+880 1814634028", href: "tel:+8801814634028" },
+      { text: "+880 1568842688", href: "tel:+8801568842688" }
+    ]
+  },
+  { icon: Clock3, label: "Working hours", lines: [{ text: "Open 24/7" }, { text: "Open 24 hours, 7 days a week" }] }
 ];
+
+const officeMapQuery = "Khulna Sadar, Khulna 9100, Bangladesh";
+const officeMapEmbedSrc = `https://www.google.com/maps?q=${encodeURIComponent(officeMapQuery)}&output=embed`;
+const officeMapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(officeMapQuery)}`;
 
 export default function Contact({ headingLevel: Heading = "h2" }) {
   const [status, setStatus] = useState("");
@@ -72,19 +84,20 @@ export default function Contact({ headingLevel: Heading = "h2" }) {
             </Reveal>
 
             <Stagger as="div" className="mt-8 grid gap-3 sm:grid-cols-2" stagger={0.06}>
-              {contactDetails.map(({ icon: Icon, label, value, secondary, href }) => (
+              {contactDetails.map(({ icon: Icon, label, lines }) => (
                 <StaggerItem key={label}>
                 <div key={label} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_10px_30px_-28px_rgba(13,27,61,.5)]">
                   <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand/10 text-brand" aria-hidden>
                     <Icon size={17} strokeWidth={2} />
                   </span>
                   <p className="mt-3 text-xs font-bold capitalize text-navy">{label}</p>
-                  {href ? (
-                    <a href={href} className="mt-1 block text-xs leading-5 text-slate-600 transition-colors hover:text-brandInk">{value}</a>
-                  ) : (
-                    <p className="mt-1 text-xs leading-5 text-slate-600">{value}</p>
+                  {lines.map(({ text, href: lineHref }, index) =>
+                    lineHref ? (
+                      <a key={text} href={lineHref} className={`block text-xs leading-5 text-slate-600 transition-colors hover:text-brandInk ${index === 0 ? "mt-1" : ""}`}>{text}</a>
+                    ) : (
+                      <p key={text} className={`text-xs leading-5 text-slate-600 ${index === 0 ? "mt-1" : ""}`}>{text}</p>
+                    )
                   )}
-                  {secondary && <p className="text-xs leading-5 text-slate-600">{secondary}</p>}
                 </div>
                 </StaggerItem>
               ))}
@@ -92,13 +105,21 @@ export default function Contact({ headingLevel: Heading = "h2" }) {
 
             <Reveal delay={0.16} transition={{ duration: 0.75, ease }} className="relative mt-5 h-[360px] w-full overflow-hidden rounded-2xl border border-slate-200 bg-[#edf1f5] shadow-[0_12px_35px_-28px_rgba(13,27,61,.6)] sm:h-[420px] lg:h-[480px]">
               <iframe
-                title="OrmiTechIT office location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d58759.74267533393!2d91.15546470610349!3d23.005997738706323!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6a4087c8b02d1037%3A0x95f3486a0dd4fc3!2sOrmiTechIT!5e0!3m2!1sen!2sbd!4v1792069097667!5m2!1sen!2sbd"
+                title="OrmiTech office location"
+                src={officeMapEmbedSrc}
                 className="block h-full w-full border-0"
                 loading="lazy"
                 allowFullScreen
                 referrerPolicy="strict-origin-when-cross-origin"
               />
+              <a
+                href={officeMapLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-2 text-xs font-semibold text-navy shadow-[0_10px_25px_-16px_rgba(13,27,61,.6)] transition-colors hover:text-brandInk"
+              >
+                <MapPin size={14} aria-hidden /> Open in Google Maps
+              </a>
             </Reveal>
           </div>
 
