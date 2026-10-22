@@ -17,7 +17,7 @@ const miniCards = [
 
 const conversations = [["Facebook", "Nusrat", "Order follow-up", "2m"], ["WhatsApp", "Tanvir", "Pricing request", "5m"], ["Instagram", "Sadia", "Product question", "9m"]];
 const trustIcons = [[Bot, "bg-brand"], [Users, "bg-emerald-600"], [Inbox, "bg-blue-600"], [Zap, "bg-amber-500"], [TrendingUp, "bg-violet-600"]];
-const tileOffsets = [3, -.6, 3.8, .4];
+const tileOffsets = [.8, -.15, 1, .1];
 const tileRotate = ["-rotate-[10deg]", "rotate-[8deg]", "-rotate-[5deg]", "rotate-[10deg]"];
 const dotLines = ["M10 8 L50 12", "M90 9 L50 12", "M8 35 L50 12", "M92 33 L50 12", "M24 12 L76 12"];
 
@@ -43,7 +43,7 @@ export default function Hero() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <section ref={ref} className="relative mt-20 h-[clamp(620px,85svh,900px)] overflow-hidden bg-[#F6F7F9]">
+      <section ref={ref} className="relative mt-20 flex min-h-[clamp(600px,calc(100svh-5rem),900px)] items-center justify-center overflow-hidden bg-[#F6F7F9] py-14 sm:py-16">
         <div aria-hidden className="dot-bg absolute inset-0" />
         <div aria-hidden className="absolute left-1/2 top-[40%] h-[85%] w-[1100px] max-w-[130%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/90 blur-3xl" />
         <div aria-hidden className="red-glow absolute left-1/2 top-[60%] h-[420px] w-[420px] -translate-x-1/2 opacity-40" />
@@ -67,8 +67,8 @@ export default function Hero() {
           </motion.div>
         ))}
 
-        <motion.div aria-hidden style={{ y: leftY, rotate: tilt }} className="absolute -left-10 bottom-16 hidden xl:block">
-          <div className="relative origin-bottom-left scale-[.85] tall:scale-100">
+        <motion.div aria-hidden style={{ y: leftY, rotate: tilt }} className="absolute -left-6 bottom-12 hidden xl:block">
+          <div className="relative origin-bottom-left scale-[.56] min-[1280px]:scale-[.66] min-[1440px]:scale-[.8] min-[1700px]:scale-100">
             <Float amp={8} duration={7}>
               <div className={`${panel} w-[400px] rotate-[7deg] p-4`}>
                 <div className="flex items-center gap-3 border-b border-black/5 pb-3">
@@ -103,8 +103,8 @@ export default function Hero() {
           </div>
         </motion.div>
 
-        <motion.div aria-hidden style={{ y: rightY }} className="absolute -right-10 bottom-2 hidden xl:block">
-          <div className="relative origin-bottom-right scale-[.85] tall:scale-100">
+        <motion.div aria-hidden style={{ y: rightY }} className="absolute -right-6 bottom-6 hidden xl:block">
+          <div className="relative origin-bottom-right scale-[.56] min-[1280px]:scale-[.66] min-[1440px]:scale-[.8] min-[1700px]:scale-100">
             <Float amp={9} duration={7.5} delay={.4}>
               <div className={`${panel} w-[410px] -rotate-[8deg] p-4`}>
                 <div className="flex items-center justify-between">
@@ -143,41 +143,41 @@ export default function Hero() {
           </div>
         </motion.div>
 
-        <motion.div style={{ y: contentY }} className="absolute inset-0 z-10">
-          <div className="absolute left-1/2 top-[12%] -translate-x-1/2 -translate-y-1/2">
+        <motion.div style={{ y: contentY }} className="relative z-10 w-full">
+          <div className="mb-5 flex justify-center sm:mb-6">
             <Float amp={6} duration={5}>
-              <div className="flex h-[clamp(48px,8vh,80px)] w-[clamp(48px,8vh,80px)] items-center justify-center rounded-2xl border border-black/[.06] bg-white shadow-[0_18px_40px_-14px_rgba(0,0,0,.25)]">
+              <div className="flex h-14 w-14 items-center justify-center sm:h-16 sm:w-16 rounded-2xl border border-black/[.06] bg-white shadow-[0_18px_40px_-14px_rgba(0,0,0,.25)]">
                 <MessageSquare strokeWidth={2.6} className="h-[45%] w-[45%] text-brand" />
               </div>
             </Float>
           </div>
 
-          <div className="container-x absolute inset-x-0 bottom-[4%] top-[21%] flex min-w-0 flex-col items-center text-center">
+          <div className="container-x flex min-w-0 flex-col items-center text-center">
             <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .6 }} className="max-w-full text-[clamp(1.9rem,min(8.4vw,7.6vh),4.5rem)] font-bold leading-[1.05] tracking-[-.045em]">
               Every conversation.
               <span className="block bg-gradient-to-r from-brand to-brand2 bg-clip-text pb-[.08em] text-transparent">One powerful workspace.</span>
             </motion.h1>
 
-            <p className="mt-[2vh] max-w-xl text-[clamp(.9rem,min(4vw,2.2vh),1.125rem)] leading-relaxed text-black/60">
+            <p className="mt-4 max-w-xl text-[clamp(.9rem,min(4vw,2.2vh),1.125rem)] leading-relaxed text-black/60 sm:mt-5">
               Connect your customer channels, automate routine conversations with AI, and let your team take over whenever a human touch matters.
             </p>
 
-            <div className="mt-[2.4vh] hidden items-center justify-center gap-3 sm:flex short:hidden">
+            <div className="mt-5 hidden items-center justify-center gap-3 sm:flex short:hidden">
               <div className="flex -space-x-2">
                 {trustIcons.map(([Icon, bg], i) => <span key={i} className={`flex h-7 w-7 items-center justify-center rounded-full border-2 border-white text-white ${bg}`}><Icon size={13} /></span>)}
               </div>
               <span className="text-sm text-black/60">AI + human teams in one workspace</span>
             </div>
 
-            <a href={authLinks.register} className="mt-[2.6vh] inline-flex items-center gap-2 rounded-xl bg-brand px-7 py-[clamp(.7rem,1.6vh,1rem)] text-[clamp(1rem,2vh,1.125rem)] font-semibold text-white shadow-[0_18px_45px_-12px_rgba(242,13,69,.55)] transition hover:-translate-y-0.5 hover:bg-brand2">
+            <a href={authLinks.register} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-brand px-7 py-[clamp(.7rem,1.6vh,1rem)] text-[clamp(1rem,2vh,1.125rem)] font-semibold text-white shadow-[0_18px_45px_-12px_rgba(242,13,69,.55)] transition hover:-translate-y-0.5 hover:bg-brand2">
               Get Started <ArrowRight size={18} />
             </a>
-            <p className="mt-[1.4vh] hidden text-sm font-medium text-black/55 sm:block short:hidden">Facebook, Instagram, WhatsApp &amp; website — one inbox.</p>
+            <p className="mt-3 hidden text-sm font-medium text-black/55 sm:block short:hidden">Facebook, Instagram, WhatsApp &amp; website — one inbox.</p>
 
-            <div className="mt-[3.5vh] flex items-start justify-center gap-5 sm:gap-8 short:hidden">
+            <div className="mt-8 flex items-start justify-center gap-5 sm:gap-8 short:hidden">
               {channels.map((c, i) => (
                 <Float key={c.name} amp={7} duration={4.5 + i * .7} delay={i * .4} className="shrink-0">
-                  <div title={c.name} style={{ marginTop: `${tileOffsets[i]}vh` }} className={`flex h-[clamp(44px,6.5vh,60px)] w-[clamp(44px,6.5vh,60px)] items-center justify-center rounded-2xl border border-black/[.05] bg-white shadow-[0_14px_30px_-12px_rgba(0,0,0,.25)] ${tileRotate[i]}`}>
+                  <div title={c.name} style={{ marginTop: `${tileOffsets[i]}rem` }} className={`flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl border border-black/[.05] bg-white shadow-[0_14px_30px_-12px_rgba(0,0,0,.25)] ${tileRotate[i]}`}>
                     <ChannelLogo name={c.name} className="h-[58%] w-[58%]" />
                   </div>
                 </Float>
