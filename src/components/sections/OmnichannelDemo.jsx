@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, MotionConfig, motion, useInView, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, Send } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import ChannelLogo from "@/components/common/ChannelLogo";
-import { TypingDots, useTimeline } from "@/components/ui/effects";
 import { interTight } from "@/styles/fonts";
+import { AiReply, Avatar, CourierCard, Incoming, PhoneShell, PhotoMessage, ProductCard, Typing, photos } from "./ChatParts";
 import { DotGrid, Pill, fadeUp, headingClass, stagger, viewOnce } from "./kit";
 
 const channelCards = [
@@ -16,74 +16,96 @@ const channelCards = [
   { name: "Website", label: "Website", sub: "Live Chat", href: "/product/omnichannel-inbox" }
 ];
 
-const bubble = { hidden: { opacity: 0, y: 12, scale: 0.97 }, show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } } };
+// Illustrative conversations, one per channel. The phone plays them in turn while it is on screen.
+const scenarios = [
+  { channel: "Facebook", sub: "Messenger", who: "Rafi Hasan", tone: "from-sky-400 to-blue-600", accent: "#1877F2", photo: photos.brown, ask: "Do you have this in size 40?", answer: "Yes, size 40 is in stock. Shall I hold one for you?", card: "product" },
+  { channel: "Instagram", sub: "Direct", who: "Nusrat Jahan", tone: "from-pink-400 to-rose-600", accent: "#E1306C", photo: photos.blue, ask: "Saw this on your reel. How much?", answer: "Delivery takes 2–3 days. Want me to place the order?", card: "product" },
+  { channel: "WhatsApp", sub: "Business", who: "Tanvir Ahmed", tone: "from-emerald-400 to-teal-600", accent: "#25D366", text: "Where is my order #4821?", answer: "It is with the courier and will reach you today.", card: "courier" },
+  { channel: "Website", sub: "Live Chat", who: "New visitor", tone: "from-slate-500 to-slate-700", accent: "#334155", text: "Which plan fits a small shop?", answer: "Starter is a good fit for a small shop. Want a quick comparison?", card: "none" }
+];
 
-// Conversation replays every few seconds while the window is on screen.
-function LiveConversation() {
+const CYCLE_MS = 4600;
+
+// A phone whose chat changes with the active channel: customer message or photo, typing dots, instant AI reply.
+function ChannelPhone({ active, onPick, auto }) {
   const ref = useRef(null);
   const inView = useInView(ref, { margin: "-80px" });
-  const [round, setRound] = useState(0);
-  const phase = useTimeline(ref, [400, 1500, 2300, 3600], round);
+  const [phase, setPhase] = useState(0);
+  const scenario = scenarios[active];
 
   useEffect(() => {
-    if (!inView) return undefined;
-    const timer = setInterval(() => setRound(value => value + 1), 9000);
+    setPhase(0);
+    const timers = [150, 650, 1250].map((delay, index) => setTimeout(() => setPhase(index + 1), delay));
+    return () => timers.forEach(clearTimeout);
+  }, [active]);
+
+  useEffect(() => {
+    if (!inView || !auto) return undefined;
+    const timer = setInterval(() => onPick((active + 1) % scenarios.length, true), CYCLE_MS);
     return () => clearInterval(timer);
-  }, [inView]);
+  }, [inView, auto, active, onPick]);
+
+  const card = scenario.card === "product" ? <ProductCard photo={scenario.photo} /> : scenario.card === "courier" ? <CourierCard /> : null;
 
   return (
-    <div ref={ref} role="img" aria-label="Example live conversation: a customer asks about pricing and OrmiTech replies instantly" className="rounded-3xl border border-slate-100 bg-white p-6 shadow-[0_40px_80px_-36px_rgba(242,13,69,.3),0_18px_40px_-28px_rgba(13,27,61,.25)] sm:p-7">
-      <div className="flex items-center justify-between">
-        <p className="text-[14.5px] font-semibold text-[#0B0D12]">Live Conversation</p>
-        <span className="flex items-center gap-1.5 text-[11.5px] font-medium text-emerald-600">
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="absolute inset-0 rounded-full bg-emerald-500 opacity-60 motion-safe:animate-ping" />
-            <span className="relative h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          </span>
-          Online
-        </span>
-      </div>
-
-      <div className="mt-5 flex items-center gap-3">
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-slate-700 to-slate-900 text-[11px] font-semibold text-white">C</span>
-        <div>
-          <p className="text-[12.5px] font-semibold text-[#0B0D12]">Customer</p>
-          <p className="text-[11px] text-slate-400">Active 2m ago</p>
-        </div>
-      </div>
-
-      <div className="mt-4 flex h-[190px] flex-col gap-3">
-        <AnimatePresence mode="popLayout">
-          {phase >= 1 && (
-            <motion.p key={`q${round}`} variants={bubble} initial="hidden" animate="show" exit={{ opacity: 0 }} className="max-w-[82%] self-start rounded-2xl rounded-tl-md bg-slate-100 px-4 py-3 text-[12.5px] leading-5 text-slate-600">
-              Hi, I&apos;m interested in your product. Can you tell me more about the pricing?
-            </motion.p>
-          )}
-          {phase === 3 && (
-            <motion.span key={`t${round}`} variants={bubble} initial="hidden" animate="show" exit={{ opacity: 0 }} className="self-end rounded-2xl bg-[#FFE3EA] px-4 py-3.5">
-              <TypingDots dotClassName="bg-brand" />
-            </motion.span>
-          )}
-          {phase >= 4 && (
-            <motion.p key={`a${round}`} variants={bubble} initial="hidden" animate="show" exit={{ opacity: 0 }} className="max-w-[86%] self-end rounded-2xl rounded-tr-md bg-[#FFE3EA] px-4 py-3 text-[12.5px] leading-5 text-[#8A1230]">
-              Yes, of course! Here&apos;s an overview of our plans. Would you like to see the full details?
-            </motion.p>
+    <div ref={ref} role="img" aria-label={`Example ${scenario.channel} conversation: a customer asks a question and OrmiTech replies instantly`}>
+      <PhoneShell
+        height={560}
+        headerClass="text-white"
+        header={
+          <div className="-mx-4 -mb-3 -mt-9 px-4 pb-3 pt-9" style={{ backgroundColor: scenario.accent, transition: "background-color .4s" }}>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div key={scenario.channel} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.18 }} className="flex items-center gap-2.5">
+                <span className="relative">
+                  <Avatar name={scenario.who} tone={scenario.tone} size={38} />
+                  <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-white ring-2" style={{ "--tw-ring-color": scenario.accent }}>
+                    <ChannelLogo name={scenario.channel} className="h-2.5 w-2.5" />
+                  </span>
+                </span>
+                <span className="leading-tight">
+                  <span className="block text-[13.5px] font-semibold">{scenario.who}</span>
+                  <span className="flex items-center gap-1 text-[10.5px] text-white/85">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+                    {scenario.channel} · {scenario.sub}
+                  </span>
+                </span>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        }
+        footer={
+          <div className="flex items-center justify-between gap-1 border-t border-slate-200/70 bg-white px-3 py-2.5">
+            {scenarios.map((item, index) => (
+              <button key={item.channel} type="button" onClick={() => onPick(index, false)} aria-label={`Show ${item.channel} example`} aria-pressed={index === active} className={`relative flex h-9 flex-1 items-center justify-center rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 ${index === active ? "bg-slate-100" : "hover:bg-slate-50"}`}>
+                <ChannelLogo name={item.channel} className={`h-[18px] w-[18px] transition-opacity duration-200 ${index === active ? "opacity-100" : "opacity-50"}`} />
+                {index === active && auto && <motion.span key={`${active}-${inView}`} aria-hidden className="absolute inset-x-2 bottom-0 h-[2px] origin-left rounded-full bg-brand" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: CYCLE_MS / 1000, ease: "linear" }} />}
+              </button>
+            ))}
+          </div>
+        }
+      >
+        <AnimatePresence>
+          {phase >= 1 && (scenario.photo ? <PhotoMessage key={`q${active}`} photo={scenario.photo} caption={scenario.ask} /> : <Incoming key={`q${active}`}>{scenario.text}</Incoming>)}
+          {phase === 2 && <Typing key={`t${active}`} />}
+          {phase >= 3 && (
+            <AiReply key={`a${active}`} card={card}>
+              {scenario.answer}
+            </AiReply>
           )}
         </AnimatePresence>
-      </div>
-
-      <div className="mt-2 flex items-center gap-2 rounded-full border border-slate-200 py-1.5 pl-4 pr-1.5">
-        <span className="flex-1 text-[12px] text-slate-400">Type your message...</span>
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-white shadow-[0_10px_20px_-10px_rgba(242,13,69,.9)]">
-          <Send aria-hidden className="h-4 w-4" />
-        </span>
-      </div>
+      </PhoneShell>
     </div>
   );
 }
 
 export default function OmnichannelDemo() {
   const ref = useRef(null);
+  const [active, setActive] = useState(0);
+  const [auto, setAuto] = useState(true);
+  const pick = (index, fromTimer) => {
+    if (!fromTimer) setAuto(false);
+    setActive(index);
+  };
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const circleY = useTransform(scrollYProgress, [0, 1], [50, -50]);
 
@@ -99,13 +121,13 @@ export default function OmnichannelDemo() {
               One inbox, Every <span className="text-brand">channel</span>.
             </motion.h2>
             <motion.p variants={fadeUp} className="mt-4 max-w-md text-[15px] leading-7 text-slate-500">
-              Your customers chat across multiple channels. OrmiTech brings them all together in one smart inbox — so you never miss a message.
+              Your customers chat across multiple channels. OrmiTech IT brings them all together in one smart inbox — so you never miss a message.
             </motion.p>
 
             <motion.ul variants={stagger(0.09, 0.15)} className="mt-9 grid max-w-lg gap-3 sm:grid-cols-2">
-              {channelCards.map(card => (
+              {channelCards.map((card, index) => (
                 <motion.li key={card.name} variants={fadeUp}>
-                  <Link href={card.href} className="group flex items-center gap-3.5 rounded-2xl border border-white bg-white px-4 py-4 shadow-[0_1px_2px_rgba(13,27,61,.05),0_16px_34px_-26px_rgba(242,13,69,.35)] transition-[transform,box-shadow,border-color] duration-300 hover:border-brand/20 hover:shadow-[0_24px_44px_-24px_rgba(242,13,69,.45)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20 motion-safe:hover:-translate-y-1">
+                  <Link href={card.href} className={`group flex items-center gap-3.5 rounded-2xl border bg-white ${index === active ? "border-brand/40 ring-4 ring-brand/10" : "border-white"} px-4 py-4 shadow-[0_1px_2px_rgba(13,27,61,.05),0_16px_34px_-26px_rgba(242,13,69,.35)] transition-[transform,box-shadow,border-color] duration-300 hover:border-brand/20 hover:shadow-[0_24px_44px_-24px_rgba(242,13,69,.45)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20 motion-safe:hover:-translate-y-1`}>
                     <ChannelLogo name={card.name} className="h-9 w-9 transition-transform duration-300 motion-safe:group-hover:scale-110" />
                     <span className="min-w-0 flex-1">
                       <span className="block text-[14px] font-semibold text-[#0B0D12]">{card.label}</span>
@@ -125,7 +147,7 @@ export default function OmnichannelDemo() {
             <motion.div aria-hidden style={{ y: circleY }} className="pointer-events-none absolute -right-14 top-[30%] h-56 w-56 rounded-full bg-gradient-to-br from-[#FF4F7B] to-brand sm:-right-20 sm:h-72 sm:w-72" />
             <DotGrid className="-right-2 top-2 hidden sm:grid" />
             <div className="relative motion-safe:animate-float">
-              <LiveConversation />
+              <ChannelPhone active={active} onPick={pick} auto={auto} />
             </div>
           </motion.div>
         </div>

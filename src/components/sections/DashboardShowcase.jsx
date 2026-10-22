@@ -1,9 +1,10 @@
 "use client";
 
 import { useRef } from "react";
+import dynamic from "next/dynamic";
 import DashboardMock from "@/components/sections/DashboardMock";
 import ChannelLogo from "@/components/common/ChannelLogo";
-import LaserFlow from "@/components/ui/LaserFlow";
+const LaserFlow = dynamic(() => import("@/components/ui/LaserFlow"), { ssr: false });
 import { interTight } from "@/styles/fonts";
 
 // Soft side edges so the canvas never shows a hard box where the light stops.
@@ -54,7 +55,7 @@ export default function DashboardShowcase() {
               <span className="absolute inset-0 rounded-full bg-brand opacity-60 motion-safe:animate-ping" />
               <span className="relative h-1.5 w-1.5 rounded-full bg-brand" />
             </span>
-            OrmiTech workspace
+            OrmiTech IT workspace
           </span>
           <h2 id="dashboard-showcase-title" className="mt-5 text-[34px] font-bold leading-[1.06] tracking-[-0.03em] text-[#0B0D12] [text-wrap:balance] sm:text-[46px] lg:text-[54px]">
             Every customer chat, <span className="bg-gradient-to-r from-brand to-[#C1093A] bg-clip-text text-transparent">one clean dashboard</span>

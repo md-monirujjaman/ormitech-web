@@ -138,7 +138,7 @@ export default function Solutions() {
               AI Chat
             </span>
             <h2 id="solutions-title" className="mt-5 text-[34px] font-bold leading-[1.08] tracking-[-0.025em] text-[#0B0D12] [text-wrap:balance] sm:text-[44px]">
-              OrmiTech replies to all of your customers so <span className="text-brand">you can focus on growth</span>
+              OrmiTech IT replies to all of your customers so <span className="text-brand">you can focus on growth</span>
             </h2>
             <p className="mt-4 text-base text-slate-500 sm:text-lg">Just like your superhuman sales agent.</p>
           </motion.div>

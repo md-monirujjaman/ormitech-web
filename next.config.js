@@ -6,7 +6,12 @@ const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://app.ormitechit.com")
 
 const nextConfig = {
   images: {
-    remotePatterns: []
+    remotePatterns: [],
+    formats: ["image/avif", "image/webp"]
+  },
+  // Pull only the icons and components that are used out of these barrel packages, so less JavaScript ships to phones.
+  experimental: {
+    optimizePackageImports: ["lucide-react", "framer-motion", "@thesvg/react"]
   },
   // Accounts live in the client app. This site used to carry its own login, signup and forgot-password
   // pages; those are gone, and the paths stay only as redirects so old links and bookmarks still work.

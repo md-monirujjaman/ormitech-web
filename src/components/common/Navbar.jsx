@@ -5,29 +5,31 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, Menu, X } from "lucide-react";
+import NavIcon from "@/components/common/NavIcon";
 import ButtonLink from "@/components/common/ButtonLink";
 import { appLinks, authLinks } from "@/data/site";
 import { interTight } from "@/styles/fonts";
 
+// Each dropdown entry is [label, href, icon, one-line description].
 const navItems = [
   { label: "Home", href: "/" },
   {
     label: "Product",
     children: [
-      ["Product Overview", "/product"],
-      ["AI Customer Support", "/product/ai-customer-support"],
-      ["Omnichannel Inbox", "/product/omnichannel-inbox"],
-      ["Lead & Order Management", "/product/lead-order-management"]
+      ["Product Overview", "/product", "overview", "Everything OrmiTech IT offers"],
+      ["AI Customer Support", "/product/ai-customer-support", "ai", "AI replies around the clock"],
+      ["Omnichannel Inbox", "/product/omnichannel-inbox", "inbox", "Every channel in one inbox"],
+      ["Lead & Order Management", "/product/lead-order-management", "orders", "Track leads and orders"]
     ]
   },
   {
     label: "Features",
     children: [
-      ["AI Chatbot", "/features/ai-chatbot"],
-      ["Human Handover", "/features/human-handover"],
-      ["Automation", "/features/automation"],
-      ["Team Collaboration", "/features/team-collaboration"],
-      ["Analytics", "/features/analytics"]
+      ["AI Chatbot", "/features/ai-chatbot", "chatbot", "Answers the routine questions"],
+      ["Human Handover", "/features/human-handover", "handover", "Pass chats to your team"],
+      ["Automation", "/features/automation", "automation", "Routing, tags and follow-ups"],
+      ["Team Collaboration", "/features/team-collaboration", "team", "Assign chats and share notes"],
+      ["Analytics", "/features/analytics", "analytics", "Response time and lead flow"]
     ]
   },
   { label: "How it works", href: "/how-it-works" },
@@ -35,20 +37,45 @@ const navItems = [
   {
     label: "Resources",
     children: [
-      ["Blog", "/blog"],
-      ["Documentation", appLinks.docs],
-      ["FAQ", "/faq"]
+      ["Blog", "/blog", "blog", "Guides and updates"],
+      ["Documentation", appLinks.docs, "docs", "Set up and learn"],
+      ["FAQ", "/faq", "faq", "Quick answers"]
     ]
   },
   { label: "Contact", href: "/contact" }
 ];
+
+// "Get started" with a bright light that travels around its border.
+function GlowBorder({ className = "", children }) {
+  return (
+    <span className={`relative inline-flex overflow-hidden rounded-[10px] bg-brand/30 p-[2px] ${className}`}>
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -inset-[100%] [background:conic-gradient(from_0deg,transparent_0_60%,rgba(255,200,214,.9)_82%,#fff_100%)] motion-safe:animate-[spin_2.6s_linear_infinite]"
+      />
+      <span className="relative flex w-full">{children}</span>
+    </span>
+  );
+}
 
 const isExternal = href => href.startsWith("http");
 
 const triggerClass = active =>
   `relative inline-flex items-center gap-1 rounded-lg px-3.5 py-2.5 text-[13px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 ${active ? "text-brandInk" : "text-slate-700 hover:text-brandInk"}`;
 
-const dropdownLinkClass = "group/link relative block rounded-xl px-4 py-3 text-[13px] font-semibold text-slate-700 transition-colors hover:text-brandInk focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30";
+// One row in the desktop dropdown: icon tile, title and a short line. Internal links use next/link, external ones a plain anchor.
+function DropdownLink({ label, href, icon, text }) {
+  const Tag = isExternal(href) ? "a" : Link;
+  return (
+    <Tag href={href} className="group/link flex items-center gap-3.5 rounded-xl p-3 transition-colors hover:bg-[#FFF3F6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30">
+      <NavIcon name={icon} className="transition-transform duration-300 group-hover/link:-translate-y-0.5 group-hover/link:ring-brand/40 motion-safe:group-hover/link:scale-105" />
+      <span className="min-w-0 leading-tight">
+        <span className="block text-[13.5px] font-semibold text-[#0B0D12] transition-colors group-hover/link:text-brandInk">{label}</span>
+        <span className="mt-0.5 block truncate text-[12px] font-normal text-slate-500">{text}</span>
+      </span>
+    </Tag>
+  );
+}
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -121,23 +148,15 @@ export default function Navbar() {
                     </button>
                   )}
 
-                  <div className="invisible fixed left-0 right-0 top-20 z-50 border-y border-slate-200/80 bg-white/95 pt-2 opacity-0 shadow-[0_24px_55px_-24px_rgba(13,27,61,.3)] backdrop-blur-xl transition-all duration-200 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
-                    <div className="container-x relative grid grid-cols-3 gap-2 pb-3 pt-2">
-                      {item.children.map(([label, href]) =>
-                        isExternal(href) ? (
-                          <a key={label} href={href} className={dropdownLinkClass}>
-                            {label}
-                            <span aria-hidden className="absolute bottom-1.5 left-4 right-4 h-px origin-left scale-x-0 bg-brand/40 transition-transform duration-200 group-hover/link:scale-x-100" />
-                          </a>
-                        ) : (
-                          <Link key={label} href={href} className={dropdownLinkClass}>
-                            {label}
-                            <span aria-hidden className="absolute bottom-1.5 left-4 right-4 h-px origin-left scale-x-0 bg-brand/40 transition-transform duration-200 group-hover/link:scale-x-100" />
-                          </Link>
-                        )
-                      )}
+                  <div className="invisible fixed left-0 right-0 top-20 z-50 grid grid-rows-[0fr] opacity-0 shadow-[0_24px_55px_-24px_rgba(13,27,61,.3)] transition-[grid-template-rows,opacity,visibility] duration-200 ease-out group-hover:visible group-hover:grid-rows-[1fr] group-hover:opacity-100 group-hover:duration-1000 group-hover:ease-[cubic-bezier(.22,1,.36,1)] group-focus-within:visible group-focus-within:grid-rows-[1fr] group-focus-within:opacity-100 group-focus-within:duration-1000 group-focus-within:ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none">
+                    <div className="min-h-0 overflow-hidden"><div className="border-y border-slate-200/80 bg-white/95 pt-2 backdrop-blur-xl">
+                    <div className="container-x relative grid grid-cols-2 gap-2 pb-3 pt-2 xl:grid-cols-3">
+                      {item.children.map(([label, href, icon, text]) => (
+                        <DropdownLink key={label} label={label} href={href} icon={icon} text={text} />
+                      ))}
                     </div>
                     <div aria-hidden className="h-1 bg-brand" />
+                    </div></div>
                   </div>
                 </li>
               );
@@ -149,9 +168,11 @@ export default function Navbar() {
           <a href={authLinks.login} className="rounded-md px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:text-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30">
             Log in
           </a>
-          <ButtonLink href={authLinks.register} size="sm" arrow>
-            Get started
-          </ButtonLink>
+          <GlowBorder>
+            <ButtonLink href={authLinks.register} size="sm" arrow className="w-full">
+              Get started
+            </ButtonLink>
+          </GlowBorder>
         </div>
 
         <button
@@ -214,17 +235,15 @@ export default function Navbar() {
 
                   {groupOpen && (
                     <div className="ml-3 flex flex-col border-l border-slate-200/70 pl-3">
-                      {item.children.map(([label, href]) =>
-                        isExternal(href) ? (
-                          <a key={label} href={href} className="rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-navy">
+                      {item.children.map(([label, href, icon]) => {
+                        const Tag = isExternal(href) ? "a" : Link;
+                        return (
+                          <Tag key={label} href={href} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-navy">
+                            <NavIcon name={icon} size={34} />
                             {label}
-                          </a>
-                        ) : (
-                          <Link key={label} href={href} className="rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-navy">
-                            {label}
-                          </Link>
-                        )
-                      )}
+                          </Tag>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -234,9 +253,11 @@ export default function Navbar() {
               <a href={authLinks.login} className="flex h-12 items-center justify-center rounded-lg border border-slate-200 font-semibold text-navy transition-colors hover:bg-slate-50">
                 Log in
               </a>
-              <ButtonLink href={authLinks.register} arrow>
-                Get started
-              </ButtonLink>
+              <GlowBorder className="w-full">
+                <ButtonLink href={authLinks.register} arrow className="w-full">
+                  Get started
+                </ButtonLink>
+              </GlowBorder>
             </div>
           </nav>
         </div>

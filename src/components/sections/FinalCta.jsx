@@ -1,7 +1,8 @@
 "use client";
 
+import { useRef } from "react";
 import Link from "next/link";
-import { MotionConfig, motion } from "framer-motion";
+import { MotionConfig, motion, useInView } from "framer-motion";
 import { ArrowRight, Check, MessageCircleMore, Sparkles } from "lucide-react";
 import ChannelLogo from "@/components/common/ChannelLogo";
 import { ease } from "@/components/ui/Reveal";
@@ -26,11 +27,16 @@ function Mark({ className = "" }) {
 }
 
 export default function FinalCta() {
+  // The looping ring and floating logos only run while the panel is on screen.
+  const panelRef = useRef(null);
+  const live = useInView(panelRef, { margin: "120px" });
+
   return (
     <MotionConfig reducedMotion="user">
       <section aria-labelledby="final-cta-title" className={`${interTight.className} relative overflow-hidden bg-gradient-to-b from-white to-[#FFF5F7] py-16 sm:py-20 lg:py-24`}>
         <div className="container-x">
           <motion.div
+            ref={panelRef}
             initial={{ opacity: 0, y: 28, scale: 0.98 }}
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
             viewport={{ once: true, margin: "-80px" }}
@@ -40,7 +46,7 @@ export default function FinalCta() {
             {/* Soft light, rings and a dot grid, all in the brand red so the panel reads as one piece. */}
             <div aria-hidden className="pointer-events-none absolute -left-24 -top-32 h-80 w-80 rounded-full bg-white/15 blur-3xl" />
             <div aria-hidden className="pointer-events-none absolute -bottom-40 -right-20 h-96 w-96 rounded-full bg-[#FF6A8C]/40 blur-3xl" />
-            <motion.div aria-hidden animate={{ rotate: 360 }} transition={{ duration: 80, repeat: Infinity, ease: "linear" }} className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[620px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 sm:h-[820px] sm:w-[820px]">
+            <motion.div aria-hidden animate={live ? { rotate: 360 } : undefined} transition={{ duration: 80, repeat: Infinity, ease: "linear" }} className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[620px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 sm:h-[820px] sm:w-[820px]">
               <span className="absolute -top-1.5 left-1/2 h-3 w-3 rounded-full bg-white/70 shadow-[0_0_18px_6px_rgba(255,255,255,.35)]" />
             </motion.div>
             <div aria-hidden className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 sm:h-[560px] sm:w-[560px]" />
@@ -50,7 +56,7 @@ export default function FinalCta() {
               <motion.span
                 key={item.name}
                 aria-hidden
-                animate={{ y: [0, item.drift, 0] }}
+                animate={live ? { y: [0, item.drift, 0] } : undefined}
                 transition={{ duration: 6 + item.delay, repeat: Infinity, ease: "easeInOut", delay: item.delay }}
                 className={`absolute hidden h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-[0_22px_40px_-18px_rgba(80,0,20,.55)] md:flex ${item.className}`}
               >
@@ -97,7 +103,7 @@ export default function FinalCta() {
                 transition={{ duration: 0.6, delay: 0.38, ease }}
                 className="mx-auto mt-4 max-w-xl text-[15px] leading-7 text-white/85 sm:text-lg sm:leading-8"
               >
-                Let OrmiTech answer the routine questions while your team focuses on growth. Pick a plan, or talk to us first.
+                Let OrmiTech IT answer the routine questions while your team focuses on growth. Pick a plan, or talk to us first.
               </motion.p>
 
               <motion.ul
