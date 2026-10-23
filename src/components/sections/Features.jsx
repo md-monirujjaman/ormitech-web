@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, MotionConfig, motion, useInView, useScroll, useTransform } from "framer-motion";
 import { Bot, ChartNoAxesColumnIncreasing, Inbox, Settings, TrendingUp, UserRound } from "lucide-react";
 import ChannelLogo from "@/components/common/ChannelLogo";
-import { Spotlight } from "@/components/ui/effects";
 import { ease } from "@/components/ui/Reveal";
+import { markPath, markViewBox } from "@/data/ormitechMark";
 import { interTight } from "@/styles/fonts";
 
 const loop = (duration, delay = 0) => ({ duration, delay, repeat: Infinity, ease: "easeInOut" });
@@ -159,73 +159,190 @@ function AnalyticsVisual({ live }) {
 }
 
 // Same six capabilities listed in data/site.js `features`, in the order shown on the site.
-const cards = [
-  { title: "Unified Inbox", text: "Bring Facebook, Instagram, WhatsApp and website conversations into one workspace.", icon: Inbox, Visual: InboxVisual, span: "lg:col-span-2" },
-  { title: "AI Automation", text: "Automate repetitive questions, qualify leads and respond around the clock.", icon: Bot, Visual: AutomationVisual, span: "" },
-  { title: "Human Handover", text: "Move a conversation from AI to a human agent without losing context.", icon: UserRound, Visual: HandoverVisual, span: "" },
-  { title: "Lead Management", text: "Capture customer intent, tag leads and keep follow-ups organized.", icon: Settings, Visual: LeadsVisual, span: "" },
-  { title: "Real-Time Conversations", text: "Built around live events and instant team visibility.", icon: TrendingUp, Visual: RealtimeVisual, span: "" },
-  { title: "Analytics", text: "Understand response time, lead flow, automation and team performance.", icon: ChartNoAxesColumnIncreasing, Visual: AnalyticsVisual, span: "lg:col-span-3" }
+const features = [
+  { title: "Unified Inbox", text: "Bring Facebook, Instagram, WhatsApp and website conversations into one workspace.", icon: Inbox, Visual: InboxVisual },
+  { title: "AI Automation", text: "Automate repetitive questions, qualify leads and respond around the clock.", icon: Bot, Visual: AutomationVisual },
+  { title: "Human Handover", text: "Move a conversation from AI to a human agent without losing context.", icon: UserRound, Visual: HandoverVisual },
+  { title: "Lead Management", text: "Capture customer intent, tag leads and keep follow-ups organized.", icon: Settings, Visual: LeadsVisual },
+  { title: "Real-Time Conversations", text: "Built around live events and instant team visibility.", icon: TrendingUp, Visual: RealtimeVisual },
+  { title: "Analytics", text: "Understand response time, lead flow, automation and team performance.", icon: ChartNoAxesColumnIncreasing, Visual: AnalyticsVisual }
 ];
 
-function Card({ card, index }) {
-  const ref = useRef(null);
-  const live = useInView(ref, { margin: "-40px" });
-  const { title, text, icon: Icon, Visual, span } = card;
-  const wide = span.includes("col-span");
+const SLIDE_MS = 5200;
+
+// Hub and spokes: the OrmiTech mark in the middle, three capabilities on each side joined to it by curved lines, and one
+// stage below that plays the capability you pick. It moves on by itself while on screen and stops once a visitor picks one.
+const ROW = 104;
+const GAP = 36;
+const HEIGHT = ROW * 3 + GAP * 2;
+const GUTTER = 72;
+const rowY = index => ROW / 2 + index * (ROW + GAP);
+
+function Spokes({ side, active, live }) {
+  const items = side === "left" ? [0, 1, 2] : [3, 4, 5];
+  const from = side === "left" ? 0 : GUTTER;
+  const to = side === "left" ? GUTTER : 0;
+  return (
+    <svg aria-hidden viewBox={`0 0 ${GUTTER} ${HEIGHT}`} preserveAspectRatio="none" className="hidden h-full w-full overflow-visible lg:block">
+      {items.map((feature, row) => {
+        const y = rowY(row);
+        const d = `M${from} ${y} C ${GUTTER / 2} ${y}, ${GUTTER / 2} ${HEIGHT / 2}, ${to} ${HEIGHT / 2}`;
+        const isActive = feature === active;
+        return (
+          <g key={feature} fill="none" strokeLinecap="round">
+            <path d={d} stroke="#F20D45" strokeOpacity={isActive ? 0.8 : 0.25} strokeWidth="1.6" vectorEffect="non-scaling-stroke" style={{ transition: "stroke-opacity .4s" }} />
+            {isActive && live && (
+              <motion.path key={`${feature}-pulse`} d={d} pathLength={1} stroke="#F20D45" strokeWidth="3" strokeDasharray="0.2 1.01" vectorEffect="non-scaling-stroke" initial={{ strokeDashoffset: 0.2 }} animate={{ strokeDashoffset: -1 }} transition={{ duration: 1.4, repeat: Infinity, repeatDelay: 0.4, ease: "easeInOut" }} />
+            )}
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+function Chip({ feature, isActive, auto, onPick, index }) {
+  const Icon = feature.icon;
+  return (
+    <motion.button
+      type="button"
+      role="tab"
+      aria-selected={isActive}
+      onClick={onPick}
+      initial={{ opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.5, delay: (index % 3) * 0.09, ease }}
+      style={{ minHeight: ROW }}
+      className={`group relative flex w-full items-center gap-4 overflow-hidden rounded-[22px] border px-5 text-left backdrop-blur-md transition-[background-color,box-shadow,border-color,transform] duration-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/30 lg:h-[104px] ${isActive ? "border-brand/50 bg-white/[.12] shadow-[0_30px_60px_-30px_rgba(242,13,69,.8),inset_0_1px_0_rgba(255,255,255,.18)]" : "border-white/10 bg-white/[.05] shadow-[inset_0_1px_0_rgba(255,255,255,.06)] hover:border-white/25 hover:bg-white/[.09]"}`}
+    >
+      <span aria-hidden className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl transition-[background-color,color,box-shadow] duration-300 ${isActive ? "bg-gradient-to-br from-brand to-[#B3082F] text-white shadow-[0_14px_26px_-10px_rgba(242,13,69,.75)]" : "bg-white/10 text-[#FF8AA3] group-hover:bg-white/15"}`}>
+        <Icon className="h-[22px] w-[22px]" strokeWidth={2} />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-[16px] font-semibold tracking-[-0.01em] text-white">{feature.title}</span>
+        <span className="mt-0.5 line-clamp-2 block text-[13px] leading-[19px] text-white/55">{feature.text}</span>
+      </span>
+      {isActive && auto && <motion.span key={`${feature.title}-bar`} aria-hidden className="absolute inset-x-0 bottom-0 h-[3px] origin-left bg-gradient-to-r from-brand to-[#FF5C85]" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: SLIDE_MS / 1000, ease: "linear" }} />}
+    </motion.button>
+  );
+}
+
+function Hub({ live }) {
+  return (
+    <div className="relative mx-auto flex h-[170px] w-[170px] items-center justify-center lg:h-full lg:w-full">
+      <div className="relative flex h-[150px] w-[150px] items-center justify-center">
+        {live && <motion.span aria-hidden className="absolute inset-0 rounded-full bg-brand/25" animate={{ scale: [1, 1.5], opacity: [0.5, 0] }} transition={{ duration: 2.6, repeat: Infinity, ease: "easeOut" }} />}
+        <motion.span aria-hidden className="absolute -inset-4 rounded-full border border-dashed border-white/25" animate={live ? { rotate: 360 } : undefined} transition={{ duration: 40, repeat: Infinity, ease: "linear" }} />
+        <span aria-hidden className="absolute -inset-9 rounded-full border border-white/10" />
+        <span className="relative flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-brand2 via-brand to-[#7A0722] text-white shadow-[0_0_80px_-10px_rgba(242,13,69,.75)] ring-[6px] ring-white/15">
+          <svg aria-hidden viewBox={markViewBox} className="h-[54%] w-[54%]">
+            <path d={markPath} fill="currentColor" />
+          </svg>
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function Showcase({ live }) {
+  const [active, setActive] = useState(0);
+  const [auto, setAuto] = useState(true);
+
+  useEffect(() => {
+    if (!live || !auto) return undefined;
+    const timer = setInterval(() => setActive(current => (current + 1) % features.length), SLIDE_MS);
+    return () => clearInterval(timer);
+  }, [live, auto]);
+
+  const pick = index => {
+    setAuto(false);
+    setActive(index);
+  };
+
+  const { title, text, icon: Icon, Visual } = features[active];
+  const chip = index => <Chip key={features[index].title} feature={features[index]} index={index} isActive={index === active} auto={auto} onPick={() => pick(index)} />;
 
   return (
-    <motion.li ref={ref} initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.6, delay: (index % 3) * 0.1, ease }} className={span}>
-      <Spotlight as="article" className={`group flex h-full flex-col rounded-[24px] border border-white bg-white p-4 shadow-[0_1px_2px_rgba(13,27,61,.05),0_24px_48px_-34px_rgba(242,13,69,.4)] transition-[transform,box-shadow,border-color] duration-300 hover:border-brand/20 hover:shadow-[0_34px_60px_-30px_rgba(242,13,69,.5)] motion-safe:hover:-translate-y-1.5 ${wide ? "lg:flex-row lg:items-center lg:gap-6" : ""}`}>
-        <div aria-hidden className={`relative overflow-hidden rounded-[18px] bg-gradient-to-br from-[#FFF5F7] to-[#FFEAF0] p-3.5 ${wide ? "lg:w-[52%] lg:shrink-0" : ""}`}>
-          <div className="relative h-[150px]">
-            <Visual live={live} />
+    <div>
+      <div role="tablist" aria-label="Platform capabilities" className="grid items-stretch gap-5 lg:grid-cols-[minmax(0,1fr)_72px_minmax(200px,260px)_72px_minmax(0,1fr)] lg:gap-0" style={{ "--rows": HEIGHT }}>
+        <div className="order-2 grid gap-3 sm:grid-cols-2 lg:order-none lg:flex lg:flex-col lg:justify-between lg:gap-9">{[0, 1, 2].map(chip)}</div>
+        <Spokes side="left" active={active} live={live} />
+        <div className="order-1 lg:order-none">
+          <Hub live={live} />
+        </div>
+        <Spokes side="right" active={active} live={live} />
+        <div className="order-3 grid gap-3 sm:grid-cols-2 lg:order-none lg:flex lg:flex-col lg:justify-between lg:gap-9">{[3, 4, 5].map(chip)}</div>
+      </div>
+
+      <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.7, ease }} className="relative mx-auto mt-10 max-w-3xl lg:mt-12">
+        <div aria-hidden className="absolute -inset-6 rounded-[44px] bg-brand/25 blur-3xl" />
+        <div className="relative overflow-hidden rounded-[30px] border border-white/15 bg-white/[.07] p-3 shadow-[0_50px_100px_-40px_rgba(0,0,0,.8),inset_0_1px_0_rgba(255,255,255,.15)] backdrop-blur-xl">
+          <div className="flex items-center gap-1.5 px-3 pb-2 pt-1">
+            <span className="h-2.5 w-2.5 rounded-full bg-[#FF5F57]" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#FEBC2E]" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#28C840]" />
+            <span className="ml-3 rounded-md bg-white/10 px-3 py-0.5 text-[10.5px] text-white/50">app.ormitechit.com</span>
           </div>
+          <div className="relative flex h-[300px] items-center justify-center overflow-hidden rounded-[20px] bg-gradient-to-br from-white/[.09] to-white/[.02] ring-1 ring-white/10 sm:h-[340px]">
+            <div aria-hidden className="absolute inset-0 opacity-60 [background-image:radial-gradient(rgba(255,255,255,.14)_1px,transparent_1px)] [background-size:16px_16px]" />
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div key={active} initial={{ opacity: 0, y: 24, scale: 0.94 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -16, scale: 0.97 }} transition={{ duration: 0.45, ease }} className="relative w-[62%] max-w-[400px]">
+                <div className="origin-center scale-[1.3] sm:scale-[1.45]" style={{ height: 156 }}>
+                  <Visual live={live} />
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div key={active} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="flex items-center gap-3 px-3 pb-2 pt-4">
+              <span aria-hidden className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 text-[#FF8AA3]">
+                <Icon className="h-[18px] w-[18px]" strokeWidth={2.1} />
+              </span>
+              <span className="leading-tight">
+                <span className="block text-[14.5px] font-semibold text-white">{title}</span>
+                <span className="mt-0.5 block text-[12.5px] text-white/55">{text}</span>
+              </span>
+            </motion.div>
+          </AnimatePresence>
         </div>
-        <div className={`px-2 pb-2 pt-5 ${wide ? "lg:pt-2" : ""}`}>
-          <span aria-hidden className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand/10 text-brand transition-[background-color,color,transform] duration-300 group-hover:bg-brand group-hover:text-white motion-safe:group-hover:-rotate-6 motion-safe:group-hover:scale-110">
-            <Icon className="h-5 w-5" strokeWidth={2.1} />
-          </span>
-          <h3 className="mt-4 text-[19px] font-semibold tracking-[-0.015em] text-[#0B0D12]">{title}</h3>
-          <p className="mt-1.5 max-w-md text-[14px] leading-6 text-slate-500">{text}</p>
-        </div>
-      </Spotlight>
-    </motion.li>
+      </motion.div>
+    </div>
   );
 }
 
 export default function Features() {
   const ref = useRef(null);
+  const live = useInView(ref, { margin: "-80px" });
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const blobY = useTransform(scrollYProgress, [0, 1], [60, -60]);
 
   return (
     <MotionConfig reducedMotion="user">
-      <section ref={ref} id="features" aria-labelledby="platform-title" className={`${interTight.className} relative overflow-hidden border-t border-slate-200/60 bg-gradient-to-b from-[#FFF7F9] to-[#FFF1F4] py-16 sm:py-20 lg:py-28`}>
-        <motion.div aria-hidden style={{ y: blobY }} className="pointer-events-none absolute -bottom-20 -left-[230px] h-[300px] w-[300px] rounded-full bg-gradient-to-br from-brand to-[#C1093A]" />
-        <div aria-hidden className="pointer-events-none absolute -right-[190px] top-[30%] h-[240px] w-[240px] rounded-full bg-gradient-to-br from-brand to-[#C1093A]" />
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[420px] opacity-60 [background-image:radial-gradient(rgba(242,13,69,.14)_1px,transparent_1px)] [background-size:26px_26px] [mask-image:linear-gradient(to_bottom,#000,transparent)]" />
+      <section ref={ref} id="features" aria-labelledby="platform-title" className={`${interTight.className} relative overflow-hidden bg-[#0B0D12] py-16 text-white sm:py-20 lg:py-28`}>
+        <motion.div aria-hidden style={{ y: blobY }} className="pointer-events-none absolute -top-40 left-1/2 h-[480px] w-[900px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(242,13,69,.32),transparent)]" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-40 -right-32 h-96 w-96 rounded-full bg-brand/20 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -left-40 top-1/2 h-96 w-96 rounded-full bg-[#7A0722]/30 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[.35] [background-image:radial-gradient(rgba(255,255,255,.16)_1px,transparent_1px)] [background-size:28px_28px] [mask-image:radial-gradient(ellipse_at_top,#000_20%,transparent_70%)]" />
 
         <div className="container-x relative">
           <motion.div className="mx-auto max-w-3xl text-center" initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.5, ease }}>
-            <span className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-white px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[.16em] text-brand shadow-[0_8px_20px_-14px_rgba(242,13,69,.5)]">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[.16em] text-white backdrop-blur">
               <span aria-hidden className="relative flex h-1.5 w-1.5">
                 <span className="absolute inset-0 rounded-full bg-brand opacity-60 motion-safe:animate-ping" />
                 <span className="relative h-1.5 w-1.5 rounded-full bg-brand" />
               </span>
               Platform
             </span>
-            <h2 id="platform-title" className="mt-5 text-[34px] font-bold leading-[1.06] tracking-[-0.03em] text-[#0B0D12] [text-wrap:balance] sm:text-[48px]">
-              Everything your customer <span className="bg-gradient-to-r from-brand to-[#C1093A] bg-clip-text text-transparent">conversations need</span>.
+            <h2 id="platform-title" className="mt-5 text-[34px] font-bold leading-[1.06] tracking-[-0.03em] [text-wrap:balance] sm:text-[48px]">
+              Everything your customer <span className="bg-gradient-to-r from-[#FF5C85] to-brand bg-clip-text text-transparent">conversations need</span>.
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-[15.5px] leading-7 text-slate-500">A single, centralized hub designed to handle channels, AI automation and multi-team collaboration — all in one place.</p>
+            <p className="mx-auto mt-4 max-w-xl text-[15.5px] leading-7 text-white/65">A single, centralized hub designed to handle channels, AI automation and multi-team collaboration — all in one place.</p>
           </motion.div>
 
-          <ul className="mt-14 grid gap-5 sm:grid-cols-2 lg:mt-16 lg:grid-cols-3">
-            {cards.map((card, index) => (
-              <Card key={card.title} card={card} index={index} />
-            ))}
-          </ul>
+          <div className="mt-14 lg:mt-16">
+            <Showcase live={live} />
+          </div>
         </div>
       </section>
     </MotionConfig>

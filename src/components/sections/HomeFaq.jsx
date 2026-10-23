@@ -61,21 +61,16 @@ function Item({ item, index, open, onToggle, id }) {
   );
 }
 
-// Home page FAQ. Same questions as the product page; several answers can be open at once and the first starts open.
+// Home page FAQ. Same questions as the product page; one answer is open at a time and the first starts open.
 export default function HomeFaq() {
   const baseId = useId();
   const ref = useRef(null);
-  const [openItems, setOpenItems] = useState(() => new Set([0]));
+  const [openIndex, setOpenIndex] = useState(0);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const blobY = useTransform(scrollYProgress, [0, 1], [60, -60]);
 
-  const toggle = index =>
-    setOpenItems(current => {
-      const next = new Set(current);
-      if (next.has(index)) next.delete(index);
-      else next.add(index);
-      return next;
-    });
+  // One answer is open at a time: opening another closes the one that was open.
+  const toggle = index => setOpenIndex(current => (current === index ? -1 : index));
 
   return (
     <MotionConfig reducedMotion="user">
@@ -107,7 +102,7 @@ export default function HomeFaq() {
 
           <ul className="space-y-3">
             {faq.items.map((item, index) => (
-              <Item key={item.question} id={`${baseId}-${index}`} item={item} index={index} open={openItems.has(index)} onToggle={() => toggle(index)} />
+              <Item key={item.question} id={`${baseId}-${index}`} item={item} index={index} open={openIndex === index} onToggle={() => toggle(index)} />
             ))}
           </ul>
         </div>

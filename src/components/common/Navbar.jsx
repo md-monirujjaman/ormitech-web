@@ -4,7 +4,8 @@ import { useEffect, useId, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { motion } from "framer-motion";
+import { ChevronDown, LogIn, Menu, X } from "lucide-react";
 import NavIcon from "@/components/common/NavIcon";
 import ButtonLink from "@/components/common/ButtonLink";
 import { appLinks, authLinks } from "@/data/site";
@@ -61,7 +62,17 @@ function GlowBorder({ className = "", children }) {
 const isExternal = href => href.startsWith("http");
 
 const triggerClass = active =>
-  `relative inline-flex items-center gap-1 rounded-lg px-3.5 py-2.5 text-[13px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 ${active ? "text-brandInk" : "text-slate-700 hover:text-brandInk"}`;
+  `relative isolate inline-flex items-center gap-1 rounded-full px-4 py-2.5 text-[13px] font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 ${active ? "text-brandInk" : "text-slate-700 hover:text-[#0B0D12]"}`;
+
+// Pills behind the nav items: a soft grey one follows the pointer, a pink one marks the page you are on.
+function NavPills({ active, hovered }) {
+  return (
+    <>
+      {hovered && !active && <motion.span layoutId="nav-hover-pill" aria-hidden className="absolute inset-0 -z-10 rounded-full bg-slate-100" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
+      {active && <span aria-hidden className="absolute inset-0 -z-10 rounded-full bg-brand/10 shadow-[inset_0_0_0_1px_rgba(242,13,69,.16)]" />}
+    </>
+  );
+}
 
 // One row in the desktop dropdown: icon tile, title and a short line. Internal links use next/link, external ones a plain anchor.
 function DropdownLink({ label, href, icon, text }) {
@@ -80,6 +91,7 @@ function DropdownLink({ label, href, icon, text }) {
 export default function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [hovered, setHovered] = useState(null);
   const [openGroups, setOpenGroups] = useState({});
   const menuId = useId();
 
@@ -117,34 +129,34 @@ export default function Navbar() {
         </Link>
 
         <nav aria-label="Main" className="hidden lg:block">
-          <ul className="flex items-center gap-1">
+          <ul className="flex items-center gap-0.5" onMouseLeave={() => setHovered(null)}>
             {navItems.map(item => {
               const active = isItemActive(item);
 
               if (!item.children) {
                 return (
-                  <li key={item.label}>
+                  <li key={item.label} onMouseEnter={() => setHovered(item.label)} onFocus={() => setHovered(item.label)}>
                     <Link href={item.href} aria-current={active ? "page" : undefined} className={triggerClass(active)}>
+                      <NavPills active={active} hovered={hovered === item.label} />
                       {item.label}
-                      {active && <span aria-hidden className="absolute inset-x-3.5 -bottom-1 h-0.5 rounded-full bg-brand" />}
                     </Link>
                   </li>
                 );
               }
 
               return (
-                <li key={item.label} className="group relative">
+                <li key={item.label} className="group relative" onMouseEnter={() => setHovered(item.label)} onFocus={() => setHovered(item.label)}>
                   {item.href ? (
                     <Link href={item.href} aria-current={active ? "page" : undefined} className={triggerClass(active)}>
+                      <NavPills active={active} hovered={hovered === item.label} />
                       {item.label}
                       <ChevronDown aria-hidden className="h-3.5 w-3.5 transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180" />
-                      {active && <span aria-hidden className="absolute inset-x-3.5 -bottom-1 h-0.5 rounded-full bg-brand" />}
                     </Link>
                   ) : (
                     <button type="button" aria-haspopup="true" className={triggerClass(active)}>
+                      <NavPills active={active} hovered={hovered === item.label} />
                       {item.label}
                       <ChevronDown aria-hidden className="h-3.5 w-3.5 transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180" />
-                      {active && <span aria-hidden className="absolute inset-x-3.5 -bottom-0.5 h-0.5 rounded-full bg-brand" />}
                     </button>
                   )}
 
@@ -164,8 +176,9 @@ export default function Navbar() {
           </ul>
         </nav>
 
-        <div className="hidden items-center gap-1 lg:flex">
-          <a href={authLinks.login} className="rounded-md px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:text-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30">
+        <div className="hidden items-center gap-3 lg:flex">
+          <a href={authLinks.login} className="group/login relative inline-flex h-11 items-center gap-2 rounded-[10px] border border-slate-200 bg-white px-5 text-[14px] font-semibold text-slate-700 shadow-[0_8px_18px_-14px_rgba(13,27,61,.4)] transition-[transform,border-color,color,background-color,box-shadow] duration-300 hover:-translate-y-0.5 hover:border-brand/40 hover:bg-[#FFF5F7] hover:text-brandInk hover:shadow-[0_14px_26px_-14px_rgba(242,13,69,.35)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20 active:translate-y-0">
+            <LogIn aria-hidden className="h-4 w-4 transition-transform duration-300 group-hover/login:translate-x-0.5" />
             Log in
           </a>
           <GlowBorder>
@@ -250,7 +263,8 @@ export default function Navbar() {
               );
             })}
             <div className="mt-3 grid gap-2 border-t border-slate-200/70 pt-4 sm:grid-cols-2">
-              <a href={authLinks.login} className="flex h-12 items-center justify-center rounded-lg border border-slate-200 font-semibold text-navy transition-colors hover:bg-slate-50">
+              <a href={authLinks.login} className="group/login flex h-[52px] items-center justify-center gap-2 rounded-[10px] border border-slate-200 bg-white font-semibold text-slate-700 shadow-[0_8px_18px_-14px_rgba(13,27,61,.4)] transition-[border-color,color,background-color] duration-300 hover:border-brand/40 hover:bg-[#FFF5F7] hover:text-brandInk">
+                <LogIn aria-hidden className="h-4 w-4 transition-transform duration-300 group-hover/login:translate-x-0.5" />
                 Log in
               </a>
               <GlowBorder className="w-full">

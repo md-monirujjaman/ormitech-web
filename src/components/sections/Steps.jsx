@@ -2,98 +2,17 @@
 
 import { createContext, useContext, useRef } from "react";
 import Link from "next/link";
-import { MotionConfig, motion, useInView, useScroll, useTransform } from "framer-motion";
+import { MotionConfig, motion, useInView, useScroll, useSpring, useTransform } from "framer-motion";
 import { ArrowRight, ChevronDown, Database, Sparkles, Zap } from "lucide-react";
 import ChannelLogo from "@/components/common/ChannelLogo";
 import { channels } from "@/data/site";
-import { markPath, markViewBox } from "@/data/ormitechMark";
+import { interTight } from "@/styles/fonts";
 
 const ease = [0.22, 1, 0.36, 1];
-const inView = { once: true, margin: "-60px" };
+const inView = { once: true, margin: "-80px" };
 
 // True while the section is on screen. Every looping animation below only runs then, which keeps phones light.
 const Live = createContext(false);
-
-function Mark({ className }) {
-  return (
-    <svg viewBox={markViewBox} className={className} aria-hidden>
-      <path d={markPath} fill="currentColor" />
-    </svg>
-  );
-}
-
-function CenterMark({ size }) {
-  const live = useContext(Live);
-  return (
-    <div className={`relative ${size}`}>
-      <motion.div
-        aria-hidden
-        className="absolute -inset-5 rounded-full opacity-35 blur-2xl"
-        style={{ background: "conic-gradient(from 180deg, #FF8AA3, #F20D45, #9E0A2E, #FF4D6D, #FFE3EA, #F20D45)" }}
-        animate={live ? { rotate: 360 } : undefined}
-        transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-      />
-      <motion.span
-        aria-hidden
-        className="absolute -inset-2.5 rounded-full border border-brand/20 bg-brand/[.05]"
-        animate={live ? { scale: [1, 1.08, 1], opacity: [0.9, 0.45, 0.9] } : undefined}
-        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <div className="relative flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-brand2 via-brand to-[#7A0722] shadow-[0_18px_40px_-10px_rgba(242,13,69,.6)] ring-4 ring-white">
-        <Mark className="h-[56%] w-[56%] text-white" />
-      </div>
-    </div>
-  );
-}
-
-function Connectors() {
-  const live = useContext(Live);
-  const paths = ["M550 48 H262 Q192 48 192 104 V128", "M650 48 H938 Q1008 48 1008 104 V128", "M600 96 V128"];
-  return (
-    <svg aria-hidden className="absolute inset-0 h-full w-full" viewBox="0 0 1200 128" preserveAspectRatio="none" fill="none">
-      {paths.map((d, i) => (
-        <g key={d}>
-          <motion.path
-            d={d}
-            stroke="rgba(242,13,69,.38)"
-            strokeWidth="2"
-            vectorEffect="non-scaling-stroke"
-            initial={{ pathLength: 0 }}
-            whileInView={{ pathLength: 1 }}
-            viewport={inView}
-            transition={{ duration: 1.1, delay: 0.2 + i * 0.1, ease }}
-          />
-          {live && (
-            <motion.path
-              d={d}
-              pathLength={1}
-              stroke="#F20D45"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeDasharray="0.12 1.01"
-              vectorEffect="non-scaling-stroke"
-              initial={{ strokeDashoffset: 0.12 }}
-              animate={{ strokeDashoffset: -1 }}
-              transition={{ duration: 2.2, delay: 1.4 + i * 0.5, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }}
-            />
-          )}
-        </g>
-      ))}
-    </svg>
-  );
-}
-
-function FloatSquare({ className, delay = 0 }) {
-  const live = useContext(Live);
-  return (
-    <motion.span
-      aria-hidden
-      className={`absolute rounded-md ${className}`}
-      animate={live ? { y: [0, -10, 0], rotate: [0, 6, 0] } : undefined}
-      transition={{ duration: 5, delay, repeat: Infinity, ease: "easeInOut" }}
-    />
-  );
-}
 
 function ConnectVisual() {
   const live = useContext(Live);
@@ -204,69 +123,79 @@ function LaunchVisual() {
 
 const steps = [
   { n: 1, tag: "Connect", title: "Connect Your Platforms", text: "Link Facebook, Instagram, WhatsApp and your website in one place. No code, no hassle.", cta: "Integrate Now", href: "/contact", Visual: ConnectVisual },
-  { n: 2, tag: "Build", title: "Create Your AI Workflow", text: "Tell the AI about your business so it can answer questions, qualify leads and get things done.", cta: "Build Your Flow", href: "/how-it-works", Visual: BuildVisual, highlight: true },
+  { n: 2, tag: "Build", title: "Create Your AI Workflow", text: "Tell the AI about your business so it can answer questions, qualify leads and get things done.", cta: "Build Your Flow", href: "/how-it-works", Visual: BuildVisual },
   { n: 3, tag: "Launch", title: "Go Live & Grow", text: "Go live on every channel, track performance and scale as you grow.", cta: "Launch Now", href: "/contact", Visual: LaunchVisual }
 ];
 
-function StepCard({ step, index }) {
+// One step of the timeline. Text and picture swap sides on wide screens; on phones everything sits beside the line.
+function Step({ step, index }) {
   const { Visual } = step;
+  const flip = index % 2 === 1;
+
   return (
-    <motion.article
-      initial={{ opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={inView}
-      transition={{ duration: 0.6, delay: 0.1 + index * 0.12, ease }}
-      className={`group/card relative flex w-[85%] shrink-0 snap-center flex-col rounded-3xl border bg-white p-5 shadow-[0_24px_60px_-34px_rgba(15,23,42,.35)] transition-[transform,box-shadow,border-color] duration-300 hover:shadow-[0_38px_70px_-32px_rgba(242,13,69,.45)] sm:w-[60%] md:w-auto md:p-6 motion-safe:hover:-translate-y-1.5 ${step.highlight ? "border-brand/70 ring-4 ring-brand/[.06]" : "border-black/[.07] hover:border-brand/30"}`}
-    >
-      <div className="flex items-center gap-3">
-        <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-brand2 to-[#9E0A2E] text-sm font-bold text-white shadow-[0_8px_20px_-6px_rgba(242,13,69,.6)]">
-          <span aria-hidden className="absolute inset-0 rounded-full bg-brand/40 opacity-0 group-hover/card:opacity-100 motion-safe:group-hover/card:animate-ping" />
-          <span className="relative">{step.n}</span>
-        </span>
-        <span className="rounded-full bg-brand/[.08] px-3 py-1 text-sm font-semibold text-brand">{step.tag}</span>
-      </div>
-      <h3 className="mt-3 text-lg font-bold tracking-tight text-[#0B0D12] lg:text-xl">{step.title}</h3>
-      <p className="mt-1.5 text-sm leading-6 text-black/55">{step.text}</p>
-      <div className="mt-4 flex flex-1 items-center">
-        <Visual />
-      </div>
-      <Link
-        href={step.href}
-        className="group relative mt-4 flex items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-brand via-[#B8082F] to-[#1A0A0F] px-6 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_-12px_rgba(242,13,69,.55)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_36px_-10px_rgba(242,13,69,.7)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/30"
+    <li className="relative grid items-center gap-6 pl-14 md:grid-cols-2 md:gap-16 md:pl-0">
+      <motion.span
+        initial={{ scale: 0.5, opacity: 0 }}
+        whileInView={{ scale: 1, opacity: 1 }}
+        viewport={inView}
+        transition={{ type: "spring", stiffness: 300, damping: 18 }}
+        className="absolute left-0 top-1 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-brand2 to-[#9E0A2E] text-[15px] font-bold text-white shadow-[0_0_0_6px_rgba(242,13,69,.12),0_16px_30px_-10px_rgba(242,13,69,.7)] md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2"
       >
-        <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-1/3 -translate-x-[120%] bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100 motion-safe:group-hover:animate-shine" />
-        {step.cta}
-        <ArrowRight size={16} className="transition group-hover:translate-x-1" />
-      </Link>
-    </motion.article>
+        {step.n}
+      </motion.span>
+
+      <motion.div initial={{ opacity: 0, x: flip ? 40 : -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={inView} transition={{ duration: 0.7, ease }} className={flip ? "md:order-2 md:pl-10" : "md:pr-10 md:text-right"}>
+        <span className="inline-flex items-center gap-2 rounded-full bg-brand/[.08] px-3 py-1 text-[12px] font-bold uppercase tracking-[.14em] text-brand">
+          Step {step.n} · {step.tag}
+        </span>
+        <h3 className="mt-4 text-[26px] font-bold leading-[1.1] tracking-[-0.025em] text-[#0B0D12] sm:text-[32px]">{step.title}</h3>
+        <p className={`mt-3 max-w-md text-[15.5px] leading-7 text-slate-500 ${flip ? "" : "md:ml-auto"}`}>{step.text}</p>
+        <Link
+          href={step.href}
+          className="group relative mt-6 inline-flex items-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-brand via-[#B8082F] to-[#1A0A0F] px-7 py-3.5 text-[14.5px] font-semibold text-white shadow-[0_16px_32px_-14px_rgba(242,13,69,.6)] transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_40px_-14px_rgba(242,13,69,.75)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/30"
+        >
+          <span aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-1/3 -translate-x-[120%] bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100 motion-safe:group-hover:animate-shine" />
+          {step.cta}
+          <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
+        </Link>
+      </motion.div>
+
+      <motion.div initial={{ opacity: 0, x: flip ? -40 : 40, scale: 0.97 }} whileInView={{ opacity: 1, x: 0, scale: 1 }} viewport={inView} transition={{ duration: 0.7, delay: 0.1, ease }} className={flip ? "md:order-1 md:pr-10" : "md:pl-10"}>
+        <div className="group/frame relative">
+          <div aria-hidden className="absolute -inset-3 rounded-[34px] bg-gradient-to-br from-[#FFC3D0]/60 to-transparent opacity-0 blur-xl transition-opacity duration-500 group-hover/frame:opacity-100" />
+          <div className="relative rounded-[28px] border border-white bg-white/90 p-5 shadow-[0_1px_2px_rgba(13,27,61,.05),0_34px_64px_-36px_rgba(242,13,69,.4)] backdrop-blur transition-[transform,box-shadow] duration-500 sm:p-6 motion-safe:group-hover/frame:-translate-y-1.5">
+            <div className="flex min-h-[210px] items-center sm:min-h-[230px]">
+              <Visual />
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </li>
   );
 }
 
 export default function Steps() {
   const ref = useRef(null);
+  const trackRef = useRef(null);
   const live = useInView(ref, { margin: "120px" });
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const topY = useTransform(scrollYProgress, [0, 1], [50, -50]);
   const bottomY = useTransform(scrollYProgress, [0, 1], [-40, 60]);
 
+  // The red line fills down the middle as the visitor scrolls through the three steps.
+  const { scrollYProgress: trackProgress } = useScroll({ target: trackRef, offset: ["start 75%", "end 55%"] });
+  const fill = useSpring(trackProgress, { stiffness: 120, damping: 30, mass: 0.4 });
+
   return (
     <Live.Provider value={live}>
       <MotionConfig reducedMotion="user">
-        <section ref={ref} id="steps" aria-labelledby="steps-title" className="relative overflow-hidden bg-gradient-to-b from-white via-[#FFF8FA] to-white py-14 md:py-20">
+        <section ref={ref} id="steps" aria-labelledby="steps-title" className={`${interTight.className} relative overflow-hidden bg-gradient-to-b from-white via-[#FFF8FA] to-white py-16 sm:py-20 lg:py-28`}>
           <motion.div aria-hidden style={{ y: topY, background: "radial-gradient(circle at 65% 65%, #F20D45, #FF8AA3 40%, transparent 70%)" }} className="pointer-events-none absolute -left-28 -top-28 h-72 w-72 rounded-full opacity-30 sm:h-96 sm:w-96" />
           <motion.div aria-hidden style={{ y: bottomY, background: "radial-gradient(circle at 35% 35%, #F20D45, #FF8AA3 40%, transparent 70%)" }} className="pointer-events-none absolute -bottom-32 -right-32 h-72 w-72 rounded-full opacity-30 sm:h-96 sm:w-96" />
           <div aria-hidden className="pointer-events-none absolute inset-0 opacity-50 [background-image:radial-gradient(rgba(242,13,69,.12)_1px,transparent_1px)] [background-size:26px_26px] [mask-image:radial-gradient(ellipse_at_center,#000_25%,transparent_75%)]" />
-          <div aria-hidden className="pointer-events-none absolute inset-0 hidden lg:block">
-            <FloatSquare className="left-[3%] top-[12%] h-7 w-7 bg-brand/25" />
-            <FloatSquare className="left-[5.5%] top-[19%] h-8 w-8 bg-brand" delay={0.8} />
-            <FloatSquare className="left-[3.5%] top-[24%] h-5 w-5 bg-[#140A0E]" delay={1.4} />
-            <FloatSquare className="right-[5%] top-[66%] h-4 w-4 bg-[#140A0E]" delay={0.4} />
-            <FloatSquare className="right-[6.5%] top-[71%] h-8 w-8 bg-brand" delay={1.1} />
-            <FloatSquare className="right-[3.5%] top-[77%] h-7 w-7 bg-brand/40" delay={1.8} />
-          </div>
 
           <div className="container-x relative">
-            <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={inView} transition={{ duration: 0.55, ease }} className="mx-auto mb-10 max-w-2xl text-center md:mb-12">
+            <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={inView} transition={{ duration: 0.55, ease }} className="mx-auto max-w-2xl text-center">
               <span className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-white px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[.16em] text-brand shadow-[0_8px_20px_-14px_rgba(242,13,69,.5)]">
                 <span aria-hidden className="relative flex h-1.5 w-1.5">
                   <span className="absolute inset-0 rounded-full bg-brand opacity-60 motion-safe:animate-ping" />
@@ -274,36 +203,20 @@ export default function Steps() {
                 </span>
                 Get started
               </span>
-              <h2 id="steps-title" className="mt-4 text-[30px] font-bold leading-[1.08] tracking-[-0.03em] text-[#0B0D12] [text-wrap:balance] sm:text-[42px]">
+              <h2 id="steps-title" className="mt-4 text-[32px] font-bold leading-[1.08] tracking-[-0.03em] text-[#0B0D12] [text-wrap:balance] sm:text-[46px]">
                 Start in <span className="bg-gradient-to-r from-brand to-[#C1093A] bg-clip-text text-transparent">3 simple steps</span>
               </h2>
+              <p className="mx-auto mt-4 max-w-md text-[15.5px] leading-7 text-slate-500">From your first connected channel to a workspace that answers for you.</p>
             </motion.div>
 
-            <div className="flex justify-center md:hidden">
-              <CenterMark size="h-16 w-16" />
-            </div>
-
-            <div className="relative mx-auto hidden h-32 md:block">
-              <Connectors />
-              {["left-[16%]", "left-1/2", "left-[84%]"].map((position, i) => (
-                <motion.span
-                  key={position}
-                  aria-hidden
-                  className={`absolute bottom-0 h-2.5 w-2.5 rounded-full bg-brand ring-4 ring-brand/15 ${position}`}
-                  style={{ x: "-50%", y: "50%" }}
-                  initial={{ scale: 0 }}
-                  whileInView={{ scale: 1 }}
-                  viewport={inView}
-                  transition={{ delay: 1 + i * 0.1, type: "spring", stiffness: 300, damping: 18 }}
-                />
-              ))}
-              <div className="absolute left-1/2 top-0 -translate-x-1/2">
-                <CenterMark size="h-24 w-24" />
-              </div>
-            </div>
-
-            <div className="-mx-5 mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-3 [scrollbar-width:none] md:mx-0 md:mt-0 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:px-0 md:pb-0 [&::-webkit-scrollbar]:hidden">
-              {steps.map((step, i) => <StepCard key={step.n} step={step} index={i} />)}
+            <div ref={trackRef} className="relative mx-auto mt-14 max-w-5xl md:mt-20">
+              <span aria-hidden className="absolute bottom-4 left-[21px] top-4 w-[2px] rounded-full bg-slate-200/80 md:left-1/2 md:-translate-x-1/2" />
+              <motion.span aria-hidden style={{ scaleY: fill }} className="absolute bottom-4 left-[21px] top-4 w-[2px] origin-top rounded-full bg-gradient-to-b from-brand to-[#C1093A] shadow-[0_0_14px_rgba(242,13,69,.6)] md:left-1/2 md:-translate-x-1/2" />
+              <ol className="relative space-y-16 md:space-y-24">
+                {steps.map((step, index) => (
+                  <Step key={step.n} step={step} index={index} />
+                ))}
+              </ol>
             </div>
           </div>
         </section>
