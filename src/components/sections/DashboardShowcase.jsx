@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import DashboardMock from "@/components/sections/DashboardMock";
 import ChannelLogo from "@/components/common/ChannelLogo";
@@ -17,16 +17,37 @@ const channels = ["Facebook", "Instagram", "WhatsApp"];
 
 export default function DashboardShowcase() {
   const cardRef = useRef(null);
+  const beamBoxRef = useRef(null);
+  const [beam, setBeam] = useState(0.82);
+
+  // Keep the beam on the card's right side at every screen size: it is placed at 88% of the card width,
+  // measured against the full-width canvas, so on wide screens it no longer drifts past the card.
+  useEffect(() => {
+    const box = beamBoxRef.current;
+    const card = cardRef.current;
+    if (!box || !card) return undefined;
+    const place = () => {
+      const boxRect = box.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+      if (!boxRect.width) return;
+      setBeam(Math.min(0.95, Math.max(0.05, (cardRect.left - boxRect.left + cardRect.width * 0.88) / boxRect.width)));
+    };
+    place();
+    const observer = new ResizeObserver(place);
+    observer.observe(box);
+    observer.observe(card);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <section aria-labelledby="dashboard-showcase-title" className={`${interTight.className} relative overflow-hidden`}>
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-1/2 mx-auto h-2/3 max-w-5xl -translate-y-1/2 rounded-full bg-brand/[.06] blur-3xl" />
 
       {/* One beam for the whole section: it starts at the top edge, drops down beside the title and pours over the dashboard card. */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 z-0" style={fadeMask}>
+      <div ref={beamBoxRef} aria-hidden className="pointer-events-none absolute inset-0 z-0" style={fadeMask}>
         <LaserFlow
           surfaceRef={cardRef}
-          beamPosition={0.82}
+          beamPosition={beam}
           theme="light"
           color="#F20D45"
           hueSpread={0.12}

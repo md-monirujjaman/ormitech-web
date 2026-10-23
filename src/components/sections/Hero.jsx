@@ -43,7 +43,7 @@ export default function Hero() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <section ref={ref} className="relative mt-20 flex min-h-[clamp(600px,calc(100svh-5rem),900px)] items-center justify-center overflow-hidden bg-[#F6F7F9] py-14 sm:py-16">
+      <section ref={ref} className="relative mt-20 flex items-center justify-center overflow-hidden bg-[#F6F7F9] pb-14 pt-10 sm:min-h-[clamp(600px,calc(100svh-5rem),900px)] sm:py-16">
         <div aria-hidden className="dot-bg absolute inset-0" />
         <div aria-hidden className="absolute left-1/2 top-[40%] h-[85%] w-[1100px] max-w-[130%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/90 blur-3xl" />
         <div aria-hidden className="red-glow absolute left-1/2 top-[60%] h-[420px] w-[420px] -translate-x-1/2 opacity-40" />
@@ -162,11 +162,11 @@ export default function Hero() {
               Connect your customer channels, automate routine conversations with AI, and let your team take over whenever a human touch matters.
             </p>
 
-            <div className="mt-5 hidden items-center justify-center gap-3 sm:flex short:hidden">
+            <div className="mt-5 flex items-center justify-center gap-2.5 sm:gap-3 short:hidden">
               <div className="flex -space-x-2">
                 {trustIcons.map(([Icon, bg], i) => <span key={i} className={`flex h-7 w-7 items-center justify-center rounded-full border-2 border-white text-white ${bg}`}><Icon size={13} /></span>)}
               </div>
-              <span className="text-sm text-black/60">AI + human teams in one workspace</span>
+              <span className="text-[13px] text-black/60 sm:text-sm">AI + human teams in one workspace</span>
             </div>
 
             <a href={authLinks.register} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-brand px-7 py-[clamp(.7rem,1.6vh,1rem)] text-[clamp(1rem,2vh,1.125rem)] font-semibold text-white shadow-[0_18px_45px_-12px_rgba(242,13,69,.55)] transition hover:-translate-y-0.5 hover:bg-brand2">
@@ -182,6 +182,51 @@ export default function Hero() {
                   </div>
                 </Float>
               ))}
+            </div>
+
+            {/* Phones and tablets: a small stack of the same product cards the wide layout shows at the sides. */}
+            <div aria-hidden className="relative mx-auto mt-10 h-[340px] w-full max-w-[360px] xl:hidden">
+              <Float amp={5} duration={6} className="absolute left-0 top-0 w-[90%] -rotate-[3deg]">
+                <div className={`${panel} p-3.5 text-left`}>
+                  <div className="flex items-center gap-2.5 border-b border-black/5 pb-2.5">
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-red-400 to-red-700" />
+                    <div><p className="text-[13px] font-semibold">Rahim · New lead</p><p className="text-[10px] text-emerald-600">● Active now</p></div>
+                    <div className="ml-auto flex -space-x-1.5">
+                      {channels.map(c => <span key={c.name} className="rounded-full bg-white p-0.5"><ChannelLogo name={c.name} className="h-4 w-4" /></span>)}
+                    </div>
+                  </div>
+                  <div className="space-y-2 pt-3">
+                    <div className="max-w-[82%] rounded-2xl rounded-tl-md bg-black/[.05] p-2.5 text-[11.5px] leading-4 text-black/65">Hi! Which plan is best for my business?</div>
+                    <div className="ml-auto max-w-[84%] rounded-2xl rounded-tr-md bg-brand/15 p-2.5 text-[11.5px] leading-4 text-red-900">I can help you compare options based on your team size.</div>
+                    <div className="flex items-center gap-2 rounded-xl border border-brand/20 bg-brand/[.06] p-2 text-[10px] text-black/55">
+                      <Bot size={13} className="text-brand" /> AI is handling this chat
+                      <span className="ml-auto rounded-full bg-emerald-500/10 px-2 py-0.5 text-emerald-600">AI active</span>
+                    </div>
+                  </div>
+                </div>
+              </Float>
+              <Float amp={7} duration={5.5} delay={.6} className="absolute bottom-0 right-0 w-[62%] rotate-[4deg]">
+                <div className={`${panel} p-3 text-left`}>
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-brand/10 text-brand"><Zap size={13} /></span>
+                    <p className="text-[11px] font-semibold">AI suggested reply</p>
+                  </div>
+                  <p className="mt-2 rounded-xl bg-black/[.04] p-2 text-[10px] leading-4 text-black/60">Yes, we deliver in Khulna. Want me to place the order?</p>
+                  <div className="mt-2 flex gap-1.5">
+                    <span className="flex-1 rounded-lg bg-brand py-1.5 text-center text-[10px] font-semibold text-white">Send</span>
+                    <span className="flex-1 rounded-lg border border-black/10 py-1.5 text-center text-[10px] font-semibold text-black/60">Edit</span>
+                  </div>
+                </div>
+              </Float>
+              <Float amp={6} duration={6.5} delay={1.1} className="absolute bottom-3 left-1 w-[40%] -rotate-[5deg]">
+                <div className={`${panel} p-2.5 text-left`}>
+                  <p className="flex items-center gap-1.5 text-[10px] font-semibold text-black/60"><span className="h-1.5 w-1.5 rounded-full bg-amber-500" />Qualified</p>
+                  <div className="mt-1.5 rounded-lg border border-black/[.06] bg-white p-1.5">
+                    <p className="text-[10px] font-semibold">Tanvir</p>
+                    <div className="mt-1 h-1 w-4/5 rounded-full bg-black/[.08]" />
+                  </div>
+                </div>
+              </Float>
             </div>
           </div>
         </motion.div>

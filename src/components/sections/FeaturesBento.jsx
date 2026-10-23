@@ -2,12 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, MotionConfig, motion, useInView, useScroll, useTransform } from "framer-motion";
-import { Camera, Check, MessagesSquare, Moon, PackageCheck, Star, Truck } from "lucide-react";
+import { Camera, MessagesSquare, Moon, PackageCheck, Star, Truck } from "lucide-react";
 import { ease } from "@/components/ui/Reveal";
 import { interTight } from "@/styles/fonts";
-import { AiReply, Avatar, glide, CourierCard, Incoming, OrderCard, PhoneShell, PhotoMessage, ProductCard, Stars, Typing, photos } from "./ChatParts";
+import { TypingDots } from "@/components/ui/effects";
+import { AiReply, Avatar, glide, pop, CourierCard, Incoming, OrderCard, PhoneShell, PhotoMessage, ProductCard, Stars, Typing, photos } from "./ChatParts";
 
-// The five jobs the AI does. The left list and the phone are driven by the same stage number.
+// The five jobs the AI does. This list is information only; the chat on the phone plays on its own.
 const jobs = [
   { title: "Answers day and night", text: "Customers get a reply in seconds, at 3 a.m. too.", icon: Moon },
   { title: "Recognises products from photos", text: "A customer sends a picture and the AI finds the item.", icon: Camera },
@@ -16,62 +17,104 @@ const jobs = [
   { title: "Asks for a review", text: "After delivery the AI asks how it went and records the rating.", icon: Star }
 ];
 
-const happenings = [
-  ["Customer is waiting", "AI replies in seconds"],
-  ["Photo received", "Navy blue suit matched"],
-  ["Order created", "#4821 added to Orders"],
-  ["Courier updated", "Out for delivery today"],
-  ["Review collected", "5 stars from the customer"]
+// The chat is a script. For each message, `side` says who is typing first and `typing` how long (ms) before it arrives.
+const script = [
+  { kind: "in", side: "in", typing: 1200, text: "Hi, are you open? I need help with an order.", time: "10:24" },
+  { kind: "ai", side: "ai", typing: 1000, text: "Hello! Yes, we are always here. How can I help?", time: "10:24" },
+  { kind: "photo", side: "in", typing: 1500, text: "Do you have this one?", time: "10:26" },
+  { kind: "match", side: "ai", typing: 1300, text: "Found it! Size 40 is in stock.", time: "10:26" },
+  { kind: "in", side: "in", typing: 1100, text: "I'll take it. Size 40.", time: "10:27" },
+  { kind: "order", side: "ai", typing: 1400, text: "Done! Your order is confirmed.", time: "10:27" },
+  { kind: "courier", side: null, typing: 0, hold: 2200 },
+  { kind: "ask", side: "ai", typing: 1000, text: "How was your order? Please rate us.", time: "10:31" },
+  { kind: "review", side: "in", typing: 1300, text: "Loved it, thank you!", time: "10:32", hold: 2200 }
 ];
 
-const STAGE_MS = 6800;
+// What the floating note beside the phone says for the latest message.
+const notes = {
+  in: [Moon, "Customer is waiting", "AI replies in seconds"],
+  ai: [Moon, "AI answered", "No agent needed"],
+  photo: [Camera, "Photo received", "Matching the product"],
+  match: [Camera, "Product matched", "Navy blue suit found"],
+  order: [PackageCheck, "Order created", "#4821 added to Orders"],
+  courier: [Truck, "Courier updated", "Out for delivery today"],
+  ask: [Star, "Review requested", "Sent after delivery"],
+  review: [Star, "Review collected", "5 stars from the customer"]
+};
 
-// Which messages are visible at a given stage. Each group appears as a customer message, typing dots and an AI reply.
-function Conversation({ stage, sub }) {
+function CustomerTyping() {
   return (
-    <AnimatePresence initial={false}>
-      {stage >= 0 && <Incoming key="s0q">Hi, are you open? I need help with an order.</Incoming>}
-      {stage >= 0 && sub >= 2 && <AiReply key="s0a">Hello! Yes, we are always here. How can I help?</AiReply>}
-      {stage >= 1 && <PhotoMessage key="s1q" photo={photos.blue} caption="Do you have this one?" time="10:26" />}
-      {stage === 1 && sub === 1 && <Typing key="s1t" />}
-      {stage >= 1 && sub >= 2 && (
-        <AiReply key="s1a" time="10:26" card={<ProductCard photo={photos.blue} />}>
-          Found it! Size 40 is in stock.
-        </AiReply>
-      )}
-      {stage >= 2 && <Incoming key="s2q" time="10:27">I&apos;ll take it. Size 40.</Incoming>}
-      {stage === 2 && sub === 1 && <Typing key="s2t" />}
-      {stage >= 2 && sub >= 2 && (
-        <AiReply key="s2a" time="10:27" card={<OrderCard />}>
-          Done! Your order is confirmed.
-        </AiReply>
-      )}
-      {stage >= 3 && sub >= 1 && <CourierCard key="s3c" />}
-      {stage >= 4 && sub >= 1 && (
-        <AiReply key="s4q" time="10:31">
-          How was your order? Please rate us.
-        </AiReply>
-      )}
-      {stage >= 4 && sub >= 2 && (
-        <motion.div key="s4a" layout="position" initial={{ opacity: 0, y: 12, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.5, ease, ...glide }} className="max-w-[84%] self-start rounded-2xl rounded-tl-md bg-white px-3.5 py-2.5 shadow-[0_6px_14px_-10px_rgba(13,27,61,.4)]">
-          <Stars />
-          <p className="mt-1 text-[12.5px] text-slate-700">Loved it, thank you!</p>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <motion.span layout="position" transition={glide} variants={pop} initial="hidden" animate="show" exit="exit" className="self-start rounded-2xl rounded-tl-md bg-white px-3.5 py-3 shadow-[0_6px_14px_-10px_rgba(13,27,61,.4)]">
+      <TypingDots dotClassName="bg-slate-400" />
+    </motion.span>
   );
 }
 
-function AssistantPhone({ stage }) {
-  const [sub, setSub] = useState(0);
+function Message({ event }) {
+  switch (event.kind) {
+    case "in":
+      return <Incoming time={event.time}>{event.text}</Incoming>;
+    case "photo":
+      return <PhotoMessage photo={photos.blue} caption={event.text} time={event.time} />;
+    case "match":
+      return <AiReply time={event.time} card={<ProductCard photo={photos.blue} />}>{event.text}</AiReply>;
+    case "order":
+      return <AiReply time={event.time} card={<OrderCard />}>{event.text}</AiReply>;
+    case "courier":
+      return <CourierCard />;
+    case "review":
+      return (
+        <Incoming time={event.time}>
+          <Stars />
+          <span className="mt-1 block">{event.text}</span>
+        </Incoming>
+      );
+    default:
+      return <AiReply time={event.time}>{event.text}</AiReply>;
+  }
+}
 
-  // Within a stage the message, typing dots and reply arrive one after the other.
+// Plays the script on a loop while the phone is on screen: typing dots, then the message, with a pause between messages.
+function usePlayback(active) {
+  const [shown, setShown] = useState(0);
+  const [typing, setTyping] = useState(null);
+
   useEffect(() => {
-    setSub(0);
-    const timers = [500, 1700, 3000].map((delay, index) => setTimeout(() => setSub(index + 1), delay));
-    return () => timers.forEach(clearTimeout);
-  }, [stage]);
+    if (!active) return undefined;
+    let cancelled = false;
+    const timers = [];
+    const wait = ms => new Promise(resolve => timers.push(setTimeout(resolve, ms)));
 
+    (async () => {
+      while (!cancelled) {
+        setShown(0);
+        setTyping(null);
+        await wait(800);
+        for (let index = 0; index < script.length && !cancelled; index += 1) {
+          const event = script[index];
+          if (event.typing) {
+            setTyping(event.side);
+            await wait(event.typing);
+          }
+          if (cancelled) return;
+          setTyping(null);
+          setShown(index + 1);
+          await wait(event.hold ?? 1400);
+        }
+        await wait(3500);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      timers.forEach(clearTimeout);
+    };
+  }, [active]);
+
+  return { shown, typing };
+}
+
+function AssistantPhone({ shown, typing }) {
   return (
     <PhoneShell
       height={540}
@@ -81,8 +124,8 @@ function AssistantPhone({ stage }) {
           <Avatar name="Sarah Johnson" tone="from-rose-400 to-rose-600" size={38} />
           <span className="leading-tight">
             <span className="block text-[13.5px] font-semibold text-[#0B0D12]">Sarah Johnson</span>
-            <span className="flex items-center gap-1 text-[10.5px] text-emerald-600">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Active now
+            <span className={`flex items-center gap-1 text-[10.5px] ${typing === "in" ? "text-brand" : "text-emerald-600"}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${typing === "in" ? "bg-brand motion-safe:animate-pulse" : "bg-emerald-500"}`} /> {typing === "in" ? "typing…" : "Active now"}
             </span>
           </span>
           <span className="ml-auto rounded-full bg-brand/10 px-2 py-1 text-[9.5px] font-bold uppercase tracking-wide text-brand">AI on</span>
@@ -90,24 +133,29 @@ function AssistantPhone({ stage }) {
       }
       footer={
         <div className="flex items-center gap-2 border-t border-slate-200/70 bg-white px-3 py-2.5">
-          <span className="flex h-9 flex-1 items-center rounded-full bg-slate-100 px-3.5 text-[11.5px] text-slate-400">Message...</span>
+          <span className="flex h-9 flex-1 items-center rounded-full bg-slate-100 px-3.5 text-[11.5px] text-slate-400">{typing === "ai" ? "OrmiTech AI is typing…" : "Message..."}</span>
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-white shadow-[0_10px_20px_-10px_rgba(242,13,69,.9)]">
             <MessagesSquare className="h-4 w-4" />
           </span>
         </div>
       }
     >
-      <Conversation stage={stage} sub={sub} />
+      <AnimatePresence initial={false}>
+        {script.slice(0, shown).map((event, index) => (
+          <Message key={index} event={event} />
+        ))}
+        {typing === "in" && <CustomerTyping key="typing-in" />}
+        {typing === "ai" && <Typing key="typing-ai" />}
+      </AnimatePresence>
     </PhoneShell>
   );
 }
 
-function Happening({ stage }) {
-  const [title, text] = happenings[stage];
-  const Icon = jobs[stage].icon;
+function Happening({ latest }) {
+  const [Icon, title, text] = notes[latest];
   return (
     <AnimatePresence mode="wait" initial={false}>
-      <motion.div key={stage} initial={{ opacity: 0, x: -14, scale: 0.96 }} animate={{ opacity: 1, x: 0, scale: 1 }} exit={{ opacity: 0, x: -8 }} transition={{ duration: 0.3, ease }} className="flex items-center gap-3 rounded-2xl border border-white bg-white/95 p-3 shadow-[0_22px_44px_-22px_rgba(13,27,61,.45)] backdrop-blur">
+      <motion.div key={latest} initial={{ opacity: 0, x: -14, scale: 0.96 }} animate={{ opacity: 1, x: 0, scale: 1 }} exit={{ opacity: 0, x: -8 }} transition={{ duration: 0.3, ease }} className="flex items-center gap-3 rounded-2xl border border-white bg-white/95 p-3 shadow-[0_22px_44px_-22px_rgba(13,27,61,.45)] backdrop-blur">
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
           <Icon className="h-[18px] w-[18px]" strokeWidth={2.1} />
         </span>
@@ -122,25 +170,13 @@ function Happening({ stage }) {
 
 export default function FeaturesBento() {
   const sectionRef = useRef(null);
-  const [stage, setStage] = useState(0);
-  const [paused, setPaused] = useState(false);
   const inView = useInView(sectionRef, { margin: "-120px" });
+  const { shown, typing } = usePlayback(inView);
+  const latest = shown > 0 ? script[shown - 1].kind : "in";
 
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
   const blobY = useTransform(scrollYProgress, [0, 1], [50, -50]);
   const circleY = useTransform(scrollYProgress, [0, 1], [-30, 60]);
-
-  // The chat plays through the five jobs and starts over, while the section is on screen.
-  useEffect(() => {
-    if (!inView || paused) return undefined;
-    const timer = setInterval(() => setStage(current => (current + 1) % jobs.length), STAGE_MS);
-    return () => clearInterval(timer);
-  }, [inView, paused]);
-
-  const pick = index => {
-    setPaused(true);
-    setStage(index);
-  };
 
   return (
     <MotionConfig reducedMotion="user">
@@ -173,32 +209,22 @@ export default function FeaturesBento() {
                 Answering messages day and night, recognising products from photos, taking orders, courier updates, asking for reviews — the jobs that eat hours of your day, OrmiTech IT does on its own. You focus on growing the business.
               </p>
 
-              <ol className="mt-8 space-y-2.5">
+              <ul className="mt-8 space-y-2.5">
                 {jobs.map((job, index) => {
                   const Icon = job.icon;
-                  const isActive = index === stage;
-                  const done = index < stage;
                   return (
-                    <li key={job.title}>
-                      <button
-                        type="button"
-                        onClick={() => pick(index)}
-                        aria-current={isActive ? "step" : undefined}
-                        className={`group relative flex w-full items-center gap-4 overflow-hidden rounded-2xl border px-4 py-3.5 text-left transition-[transform,box-shadow,background-color,border-color] duration-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20 ${isActive ? "border-brand/40 bg-[#FFF0F4] shadow-[0_22px_44px_-26px_rgba(242,13,69,.55)] motion-safe:translate-x-1.5" : "border-transparent bg-white/80 shadow-[0_1px_2px_rgba(13,27,61,.05)] hover:bg-white"}`}
-                      >
-                        <span aria-hidden className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-[background-color,color] duration-300 ${isActive ? "bg-brand text-white shadow-[0_12px_24px_-10px_rgba(242,13,69,.7)]" : done ? "bg-emerald-500/10 text-emerald-600" : "bg-brand/10 text-brand"}`}>
-                          {done ? <Check className="h-5 w-5" strokeWidth={2.6} /> : <Icon className="h-5 w-5" strokeWidth={2.1} />}
-                        </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block text-[15px] font-semibold text-[#0B0D12]">{job.title}</span>
-                          <span className="mt-0.5 block text-[12.5px] leading-5 text-slate-500">{job.text}</span>
-                        </span>
-                        {isActive && !paused && <motion.span key={`${stage}-bar`} aria-hidden className="absolute inset-x-0 bottom-0 h-[3px] origin-left bg-brand" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: STAGE_MS / 1000, ease: "linear" }} />}
-                      </button>
-                    </li>
+                    <motion.li key={job.title} initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "-40px" }} transition={{ duration: 0.5, delay: index * 0.08, ease }} className="group flex items-center gap-4 rounded-2xl border border-transparent bg-white/80 px-4 py-3.5 shadow-[0_1px_2px_rgba(13,27,61,.05)] transition-[transform,background-color,border-color,box-shadow] duration-300 hover:border-brand/25 hover:bg-white hover:shadow-[0_22px_44px_-28px_rgba(242,13,69,.45)] motion-safe:hover:translate-x-1.5">
+                      <span aria-hidden className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand transition-[background-color,color] duration-300 group-hover:bg-brand group-hover:text-white">
+                        <Icon className="h-5 w-5" strokeWidth={2.1} />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-[15px] font-semibold text-[#0B0D12]">{job.title}</span>
+                        <span className="mt-0.5 block text-[12.5px] leading-5 text-slate-500">{job.text}</span>
+                      </span>
+                    </motion.li>
                   );
                 })}
-              </ol>
+              </ul>
             </motion.div>
 
             <motion.div className="relative min-w-0" initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.7, delay: 0.1, ease }}>
@@ -207,9 +233,9 @@ export default function FeaturesBento() {
               <div aria-hidden className="pointer-events-none absolute -bottom-6 left-1/4 h-56 w-56 rounded-full bg-[#FFC9D5] opacity-50 blur-3xl" />
 
               <div className="relative motion-safe:animate-float">
-                <AssistantPhone stage={stage} />
+                <AssistantPhone shown={shown} typing={typing} />
                 <motion.div aria-hidden animate={{ y: [0, -8, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} className="absolute -left-2 top-[14%] hidden w-[200px] lg:block xl:-left-14">
-                  <Happening stage={stage} />
+                  <Happening latest={latest} />
                 </motion.div>
               </div>
             </motion.div>
