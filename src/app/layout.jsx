@@ -1,5 +1,6 @@
 import "@/styles/globals.css";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
+import AnnouncementPopup from "@/components/common/AnnouncementPopup";
 import SmoothScroll from "@/components/common/SmoothScroll";
 import OrganizationJsonLd from "@/components/ui/OrganizationJsonLd";
 
@@ -40,6 +41,7 @@ export default function RootLayout({ children }) {
         {children}
         <OrganizationJsonLd />
         <GoogleAnalytics />
+        <AnnouncementPopup />
       </body>
     </html>
   );
