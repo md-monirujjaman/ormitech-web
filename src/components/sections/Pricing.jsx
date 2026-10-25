@@ -1,9 +1,11 @@
 import { Check } from "lucide-react";
 import Link from "next/link";
-import { getPriceLabel, plans } from "@/data/pricing";
+import { getPriceLabel } from "@/data/pricing";
+import { getLivePricing } from "@/lib/livePricing";
 
 // Homepage pricing summary. Plans, prices and features come from the shared pricing config.
-export default function Pricing() {
+export default async function Pricing() {
+  const { billing, plans } = await getLivePricing();
   return (
     <section id="pricing" className="py-24">
       <div className="container-x">
@@ -20,7 +22,7 @@ export default function Pricing() {
                 {plan.popular && <span className="rounded-full bg-brand/10 px-3 py-1 text-[10px] font-semibold text-red-700">POPULAR</span>}
               </div>
               <p className="mt-3 min-h-12 text-sm text-black/55">{plan.tagline}</p>
-              <p className="mt-4 text-2xl font-bold">{getPriceLabel(plan)}</p>
+              <p className="mt-4 text-2xl font-bold">{getPriceLabel(plan, "monthly", billing)}</p>
               <div className="my-6 border-t border-black/10" />
               <div className="flex-1 space-y-3 text-sm text-black/65">
                 {plan.features.slice(0, 4).map(feature => (

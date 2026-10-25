@@ -12,6 +12,9 @@ export const appLinks = {
   docs: trimSlash(process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.ormitechit.com")
 };
 
+// The OrmiTech API. Public by design (the pricing page reads the plans from it), so a default here is safe.
+export const apiUrl = trimSlash(process.env.NEXT_PUBLIC_API_URL || "https://api.ormitechit.com");
+
 // Official OrmiTech social profiles, used in the Organization JSON-LD `sameAs`.
 export const socialProfiles = [
   "https://www.facebook.com/ormitechit",

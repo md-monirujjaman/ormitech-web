@@ -99,13 +99,13 @@ export function getPricingConfig() {
   };
 }
 
-export function formatPrice(amount) {
-  return `${billing.symbol}${Number.isInteger(amount) ? amount : amount.toFixed(2)}`;
+export function formatPrice(amount, config = billing) {
+  return `${config.symbol}${Number.isInteger(amount) ? amount : amount.toFixed(2)}`;
 }
 
 // Formats a USD amount in the chosen display currency, e.g. formatMoney(29, "bdt") -> "৳3,480".
-export function formatMoney(amount, currencyId = "usd") {
-  const currency = billing.currencies.find(item => item.id === currencyId) ?? billing.currencies[0];
+export function formatMoney(amount, currencyId = "usd", config = billing) {
+  const currency = config.currencies.find(item => item.id === currencyId) ?? config.currencies[0];
   const converted = Math.round((amount * currency.rate) / currency.round) * currency.round;
   const text = Number.isInteger(converted) ? converted.toLocaleString("en-US") : converted.toFixed(2);
   return `${currency.symbol}${text}`;
@@ -115,19 +115,30 @@ export function formatNumber(value) {
   return value === null ? "Custom" : value.toLocaleString("en-US");
 }
 
-// Returns { perMonth, yearly } for the billing period, or null for custom-priced plans.
-export function getPlanPrice(plan, period) {
+// True while a plan's own discount (set in the admin panel) is in force. The API only sends one that is, but the
+// end date is checked here as well in case the page was built a while ago.
+export function activeDiscount(plan, now = Date.now()) {
+  const discount = plan.discount;
+  if (!discount || !(discount.percent > 0) || plan.monthlyPrice === null || plan.monthlyPrice === 0) return null;
+  return discount.endsAt && new Date(discount.endsAt).getTime() <= now ? null : discount;
+}
+
+// Returns { perMonth, yearly, original } for the billing period, or null for custom-priced plans. `original` is the
+// price without the plan's own discount (null when there is none), so a card can show it struck through.
+export function getPlanPrice(plan, period, config = billing) {
   if (plan.monthlyPrice === null) return null;
-  const discount = period === "annual" ? billing.annualDiscountPercent / 100 : 0;
-  const perMonth = plan.monthlyPrice * (1 - discount);
-  return { perMonth, yearly: perMonth * 12 };
+  const annual = period === "annual" ? config.annualDiscountPercent / 100 : 0;
+  const discount = activeDiscount(plan);
+  const base = plan.monthlyPrice * (1 - annual);
+  const perMonth = discount ? base * (1 - discount.percent / 100) : base;
+  return { perMonth, yearly: perMonth * 12, original: discount ? base : null };
 }
 
 // Short price label for tables and summaries, e.g. "$0 forever", "$29 / month" or "Custom".
-export function getPriceLabel(plan, period = "monthly") {
-  const price = getPlanPrice(plan, period);
+export function getPriceLabel(plan, period = "monthly", config = billing) {
+  const price = getPlanPrice(plan, period, config);
   if (!price) return plan.priceLabel;
-  return plan.monthlyPrice === 0 ? `${formatPrice(0)} forever` : `${formatPrice(price.perMonth)} / month`;
+  return plan.monthlyPrice === 0 ? `${formatPrice(0, config)} forever` : `${formatPrice(price.perMonth, config)} / month`;
 }
 
 export const pricingHero = {
@@ -140,7 +151,7 @@ export const pricingHero = {
 export const includedInAll = ["Unified inbox", "Website chat widget", "OrmiTech AI assistant", "Human takeover", "English and Bangla replies", "Customer profiles"];
 
 const plan = id => plans.find(item => item.id === id);
-const limitRow = (label, key) => ({ label, values: Object.fromEntries(plans.map(item => [item.id, formatNumber(item.limits[key])])) });
+const limitRow = (label, key) => ({ label, limitKey: key, values: Object.fromEntries(plans.map(item => [item.id, formatNumber(item.limits[key])])) });
 // Accelerate matches Growth in every comparison row except these, where it adds the paid-tier extras.
 const accelerateOverrides = { Support: "Dedicated", "Custom onboarding": true, "Custom integrations": true, "Advanced controls": true };
 const row = (label, free, starter, growth, enterprise, hint) => ({ label, hint, values: { free, starter, growth, accelerate: label in accelerateOverrides ? accelerateOverrides[label] : growth, enterprise } });
@@ -246,15 +257,26 @@ export const planFinder = {
   ]
 };
 
-export function recommendPlan(answers) {
-  const minimum = plans.findIndex(item => item.id === answers.minPlan);
+export function recommendPlan(answers, planList = plans) {
+  const minimum = planList.findIndex(item => item.id === answers.minPlan);
   return (
-    plans.find((item, index) => {
+    planList.find((item, index) => {
       if (index < minimum) return false;
       const { teamMembers, conversations, socialChannels } = item.limits;
-      return (teamMembers === null || teamMembers >= answers.team) && (conversations === null || conversations >= answers.conversations) && socialChannels >= answers.socialChannels;
-    }) ?? enterprisePlan
+      return (teamMembers == null || teamMembers >= answers.team) && (conversations == null || conversations >= answers.conversations) && (socialChannels ?? 0) >= answers.socialChannels;
+    }) ?? planList.find(item => item.id === "enterprise") ?? enterprisePlan
   );
+}
+
+// The comparison table for a set of plans: the limit rows (conversations, team members) are worked out from the plans'
+// own limits, so numbers edited in the admin panel show here too. Every other row is fixed content.
+export function getComparison(planList = plans) {
+  return comparison.map(category => ({
+    ...category,
+    rows: category.rows.map(item =>
+      item.limitKey ? { ...item, values: Object.fromEntries(planList.map(entry => [entry.id, formatNumber(entry.limits[item.limitKey] ?? null)])) } : item
+    )
+  }));
 }
 
 export const value = {
@@ -290,14 +312,15 @@ export const enterprise = {
 
 const free = plan("free");
 
-export const faq = {
+// The FAQ quotes the Free plan's price and allowance, so it is built from whichever Free plan is current.
+export const buildFaq = freePlan => ({
   eyebrow: "FAQ",
   title: "Pricing questions, answered",
   description: "Plans, billing, channels and Enterprise — what to know before you choose.",
   items: [
     {
       question: "Is there a free plan?",
-      answer: `Yes. The Free plan costs ${formatPrice(free.monthlyPrice)} and includes the unified inbox, website chat, one social or messaging channel and AI replies from your business knowledge, with ${formatNumber(free.limits.conversations)} conversations a month.`
+      answer: `Yes. The Free plan costs ${formatPrice(freePlan.monthlyPrice ?? 0)} and includes the unified inbox, website chat, one social or messaging channel and AI replies from your business knowledge, with ${formatNumber(freePlan.limits.conversations ?? null)} conversations a month.`
     },
     { question: "Can I upgrade later?", answer: "Yes. Start on any plan and move to a higher one when you need more channels, team members or conversations." },
     { question: "Do you offer monthly and annual billing?", answer: "Yes. Use the Monthly / Annual switch above the plans to see the price for each billing period." },
@@ -331,4 +354,6 @@ export const faq = {
     },
     { question: "Can I contact OrmiTech for a custom plan?", answer: "Yes. Use Talk to sales or the contact page, tell us about your business and our team will get back to you." }
   ]
-};
+});
+
+export const faq = buildFaq(free);

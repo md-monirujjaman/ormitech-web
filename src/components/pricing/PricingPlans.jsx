@@ -9,6 +9,7 @@ import { DotGrid, Pill } from "@/components/sections/kit";
 import { Spotlight } from "@/components/ui/effects";
 import { Stagger, StaggerItem, ease } from "@/components/ui/Reveal";
 import { formatMoney, getPlanPrice, getPricingConfig } from "@/data/pricing";
+import { usePricing } from "./PricingProvider";
 import EnterpriseBanner from "./EnterpriseBanner";
 
 const PLAN_ICONS = { free: Send, starter: Rocket, growth: Sprout, accelerate: ChartNoAxesColumnIncreasing, enterprise: Building2 };
@@ -104,10 +105,17 @@ function CardArt({ id }) {
   return null;
 }
 
-function priceNote(plan, period, price, currency) {
+function endsOn(discount) {
+  if (!discount?.endsAt) return null;
+  return new Date(discount.endsAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+function priceNote(plan, period, price, currency, billing) {
   if (!price) return plan.priceNote;
   if (plan.monthlyPrice === 0) return "Free forever";
-  return period === "annual" ? `Billed yearly · ${formatMoney(price.yearly, currency)} per year` : "Billed monthly";
+  const ends = price.original !== null ? endsOn(plan.discount) : null;
+  const billed = period === "annual" ? `Billed yearly · ${formatMoney(price.yearly, currency, billing)} per year` : "Billed monthly";
+  return ends ? `${billed} · offer ends ${ends}` : billed;
 }
 
 function ctaClass(plan) {
@@ -116,8 +124,9 @@ function ctaClass(plan) {
   return buttonClasses({ variant: "secondary", size: "sm", className: "w-full !border-slate-300 !text-[#0B0D12] hover:!border-[#0B0D12]" });
 }
 
-function PlanCard({ plan, period, currency }) {
-  const price = getPlanPrice(plan, period);
+function PlanCard({ plan, period, currency, billing, reserveOfferRow }) {
+  const price = getPlanPrice(plan, period, billing);
+  const hasOffer = price?.original !== null && price?.original !== undefined;
   const Icon = PLAN_ICONS[plan.id] ?? Sparkles;
   const titleId = `plan-${plan.id}-title`;
 
@@ -150,7 +159,15 @@ function PlanCard({ plan, period, currency }) {
         </h3>
         <p className="relative mt-1 min-h-[40px] text-[13px] leading-5 text-slate-500">{plan.tagline}</p>
 
-        <div className="relative mt-4 flex min-h-[42px] items-end gap-1.5">
+        {/* When any card has an offer, the others keep an empty row there so the prices line up. */}
+        {!hasOffer && reserveOfferRow && <div aria-hidden className="mt-3.5 h-5" />}
+        {hasOffer && (
+          <p className="relative mt-3.5 flex h-5 items-center gap-2 text-[12px]">
+            <span className="rounded-full bg-brand/10 px-2 py-0.5 font-bold uppercase tracking-[.06em] text-brand">{plan.discount.label || `Save ${plan.discount.percent}%`}</span>
+            <span className="text-slate-400 line-through tabular-nums">{formatMoney(price.original, currency, billing)}</span>
+          </p>
+        )}
+        <div className={`relative flex min-h-[42px] items-end gap-1.5 ${hasOffer || reserveOfferRow ? "mt-1.5" : "mt-4"}`}>
           <AnimatePresence mode="wait" initial={false}>
             <motion.span
               key={`${period}-${currency}-${price ? price.perMonth : plan.priceLabel}`}
@@ -160,12 +177,12 @@ function PlanCard({ plan, period, currency }) {
               transition={{ duration: 0.2, ease }}
               className="text-[38px] font-bold leading-none tracking-[-0.04em] text-[#0B0D12] tabular-nums"
             >
-              {price ? formatMoney(price.perMonth, currency) : plan.priceLabel}
+              {price ? formatMoney(price.perMonth, currency, billing) : plan.priceLabel}
             </motion.span>
           </AnimatePresence>
           {price && <span className="pb-0.5 text-[13px] text-slate-400">/month</span>}
         </div>
-        <p className="relative mt-1.5 min-h-[18px] text-[12px] text-slate-500">{priceNote(plan, period, price, currency)}</p>
+        <p className="relative mt-1.5 min-h-[18px] text-[12px] text-slate-500">{priceNote(plan, period, price, currency, billing)}</p>
 
         <Link href={plan.cta.href} className={`relative mt-4 ${ctaClass(plan)}`}>
           {plan.popular && <ButtonShine />}
@@ -194,12 +211,14 @@ function PlanCard({ plan, period, currency }) {
 }
 
 export default function PricingPlans() {
-  const { billing, hero, plans, enterprisePlan, includedInAll } = getPricingConfig();
+  const { hero, includedInAll } = getPricingConfig();
+  const { billing, plans, enterprisePlan } = usePricing();
   const [period, setPeriod] = useState(billing.periods[0].id);
   const [currency, setCurrency] = useState(billing.currencies[0].id);
   // The Free plan has no annual billing, so it is not offered while Annual is selected.
   const cardPlans = plans.filter(plan => plan.id !== enterprisePlan.id);
   const visiblePlans = period === "annual" ? cardPlans.filter(plan => plan.monthlyPrice !== 0) : cardPlans;
+  const reserveOfferRow = visiblePlans.some(plan => getPlanPrice(plan, period, billing)?.original != null);
 
   return (
     <MotionConfig reducedMotion="user">
@@ -255,7 +274,7 @@ export default function PricingPlans() {
                   exit={{ opacity: 0, scale: 0.94 }}
                   transition={{ duration: 0.5, ease, delay: index * 0.08 }}
                 >
-                  <PlanCard plan={plan} period={period} currency={currency} />
+                  <PlanCard plan={plan} period={period} currency={currency} billing={billing} reserveOfferRow={reserveOfferRow} />
                 </motion.li>
               ))}
             </AnimatePresence>
