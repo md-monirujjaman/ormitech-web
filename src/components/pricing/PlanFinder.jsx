@@ -7,11 +7,13 @@ import ButtonLink from "@/components/common/ButtonLink";
 import Reveal, { ease } from "@/components/ui/Reveal";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { getPriceLabel, planFinder, recommendPlan } from "@/data/pricing";
+import { usePricing } from "./PricingProvider";
 
 const initialAnswers = Object.fromEntries(planFinder.questions.map(question => [question.id, question.options[0].id]));
 
 // Lightweight client-side helper: the recommendation updates as soon as an answer changes.
 export default function PlanFinder() {
+  const { billing, plans } = usePricing();
   const baseId = useId();
   const [answers, setAnswers] = useState(initialAnswers);
 
@@ -20,7 +22,7 @@ export default function PlanFinder() {
     option: question.options.find(option => option.id === answers[question.id])
   }));
   const values = Object.fromEntries(selectedOptions.map(({ question, option }) => [question.id, option.value]));
-  const plan = recommendPlan(values);
+  const plan = recommendPlan(values, plans);
 
   return (
     <section id="plan-finder" aria-labelledby="plan-finder-title" className="scroll-mt-24 border-y border-slate-100 bg-[#F7F9FC] py-20 lg:py-28">
@@ -68,7 +70,7 @@ export default function PlanFinder() {
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div key={plan.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25, ease }} className="p-5 sm:p-6">
                   <p className="text-3xl font-bold tracking-[-0.03em] text-navy">{plan.name}</p>
-                  <p className="mt-1 text-sm font-semibold text-slate-500">{getPriceLabel(plan)}</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-500">{getPriceLabel(plan, "monthly", billing)}</p>
                   <p className="mt-3 text-sm leading-6 text-slate-600">{plan.tagline}</p>
                   <p className="mt-5 text-[12px] font-bold uppercase tracking-[.12em] text-slate-500">Matches your answers</p>
                   <ul className="mt-2 space-y-2">

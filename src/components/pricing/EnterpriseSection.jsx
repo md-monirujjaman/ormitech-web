@@ -1,9 +1,13 @@
+"use client";
+
 import { Check } from "lucide-react";
 import ButtonLink from "@/components/common/ButtonLink";
 import Reveal, { Stagger, StaggerItem } from "@/components/ui/Reveal";
-import { enterprise, enterprisePlan } from "@/data/pricing";
+import { enterprise } from "@/data/pricing";
+import { usePricing } from "./PricingProvider";
 
 export default function EnterpriseSection() {
+  const { enterprisePlan } = usePricing();
   return (
     <section id="enterprise" aria-labelledby="enterprise-title" className="scroll-mt-24 py-20 lg:py-28">
       <div className="container-x">

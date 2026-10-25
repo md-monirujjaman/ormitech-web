@@ -6,12 +6,14 @@ import EnterpriseSection from "@/components/pricing/EnterpriseSection";
 import PlanComparison from "@/components/pricing/PlanComparison";
 import PlanFinder from "@/components/pricing/PlanFinder";
 import PricingPlans from "@/components/pricing/PricingPlans";
+import { PricingProvider } from "@/components/pricing/PricingProvider";
 import PricingValue from "@/components/pricing/PricingValue";
 import { ScrollProgress } from "@/components/ui/effects";
 import FaqJsonLd from "@/components/ui/FaqJsonLd";
 import FaqSection from "@/components/ui/FaqSection";
 import { MotionProvider } from "@/components/ui/Reveal";
-import { enterprisePlan, faq, plans } from "@/data/pricing";
+import { buildFaq } from "@/data/pricing";
+import { getLivePricing } from "@/lib/livePricing";
 import { interTight } from "@/styles/fonts";
 import { buildMetadata } from "@/lib/seo";
 
@@ -21,14 +23,22 @@ const description =
 
 export const metadata = buildMetadata({ title, description, path: "/pricing", absoluteTitle: true });
 
-const freePlan = plans.find(plan => plan.id === "free");
+// The plans and prices are managed in the admin panel and read from the API. The page is refreshed from it at most
+// once a minute (see `lib/livePricing.js`).
+export const revalidate = 60;
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const pricing = await getLivePricing();
+  const { plans, enterprisePlan } = pricing;
+  const freePlan = plans.find(plan => plan.id === "free") ?? plans[0];
+  const faq = buildFaq(freePlan);
+
   return (
     <>
       <Navbar />
       <main className={`${interTight.className} overflow-x-clip bg-white text-navy antialiased`}>
         <MotionProvider>
+          <PricingProvider value={pricing}>
           <ScrollProgress />
           <PricingPlans />
           <PlanComparison />
@@ -45,6 +55,7 @@ export default function PricingPage() {
             secondaryLabel={enterprisePlan.cta.label}
             secondaryHref={enterprisePlan.cta.href}
           />
+          </PricingProvider>
         </MotionProvider>
       </main>
       <Footer />

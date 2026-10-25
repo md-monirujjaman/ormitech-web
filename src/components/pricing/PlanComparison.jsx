@@ -1,13 +1,14 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, ChevronDown, Minus } from "lucide-react";
 import ButtonLink from "@/components/common/ButtonLink";
 import Reveal, { ease } from "@/components/ui/Reveal";
 import SectionHeading from "@/components/ui/SectionHeading";
-import { comparison, getPriceLabel, plans } from "@/data/pricing";
+import { getComparison, getPriceLabel } from "@/data/pricing";
+import { usePricing } from "./PricingProvider";
 
 function CellValue({ value, align = "center" }) {
   const position = align === "center" ? "mx-auto" : "";
@@ -31,6 +32,8 @@ function CellValue({ value, align = "center" }) {
 }
 
 function DesktopTable({ openCategories, onToggle }) {
+  const { billing, plans } = usePricing();
+  const comparison = useMemo(() => getComparison(plans), [plans]);
   return (
     <div className="mt-12 hidden overflow-x-auto rounded-2xl border border-slate-200/80 bg-white shadow-[0_24px_48px_-36px_rgba(13,27,61,.35)] md:block">
       <table className="w-full min-w-[760px] border-collapse text-left">
@@ -50,7 +53,7 @@ function DesktopTable({ openCategories, onToggle }) {
               <th key={plan.id} scope="col" className="px-3 py-5 text-center align-bottom">
                 {plan.popular && <span className="mb-2 inline-block rounded-full bg-brand px-2 py-0.5 text-[10px] font-bold uppercase tracking-[.12em] text-white">Most popular</span>}
                 <span className="block text-base font-semibold text-navy">{plan.name}</span>
-                <span className="block text-[13px] font-normal text-slate-500">{getPriceLabel(plan)}</span>
+                <span className="block text-[13px] font-normal text-slate-500">{getPriceLabel(plan, "monthly", billing)}</span>
                 <Link
                   href={plan.cta.href}
                   className="mt-2.5 inline-block rounded text-[13px] font-semibold text-brandInk underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30"
@@ -109,6 +112,8 @@ function DesktopTable({ openCategories, onToggle }) {
 
 // On phones: pick one plan, then browse its features by category.
 function MobileComparison() {
+  const { billing, plans } = usePricing();
+  const comparison = useMemo(() => getComparison(plans), [plans]);
   const baseId = useId();
   const [selectedId, setSelectedId] = useState(plans.find(plan => plan.popular)?.id ?? plans[0].id);
   const [openCategory, setOpenCategory] = useState(comparison[0].id);
@@ -124,7 +129,7 @@ function MobileComparison() {
               <input type="radio" name={`${baseId}-plan`} value={plan.id} checked={plan.id === selectedId} onChange={() => setSelectedId(plan.id)} className="peer sr-only" />
               <span className="flex h-full flex-col rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left transition-colors duration-200 peer-checked:border-navy peer-checked:bg-navy peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-brand/40">
                 <span className="text-sm font-semibold">{plan.name}</span>
-                <span className="text-[12px] opacity-75">{getPriceLabel(plan)}</span>
+                <span className="text-[12px] opacity-75">{getPriceLabel(plan, "monthly", billing)}</span>
               </span>
             </label>
           ))}
@@ -181,7 +186,8 @@ function MobileComparison() {
 }
 
 export default function PlanComparison() {
-  const [openCategories, setOpenCategories] = useState(() => new Set(comparison.map(category => category.id)));
+  const { plans } = usePricing();
+  const [openCategories, setOpenCategories] = useState(() => new Set(getComparison(plans).map(category => category.id)));
 
   function toggle(id) {
     setOpenCategories(current => {
