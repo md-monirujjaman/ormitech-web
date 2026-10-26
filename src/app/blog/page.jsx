@@ -1,3 +1,44 @@
-import Link from "next/link";import Navbar from "@/components/common/Navbar";import Footer from "@/components/common/Footer";import PageHero from "@/components/common/PageHero";import { blogPosts } from "@/data/site";import { buildMetadata } from "@/lib/seo";
+import Navbar from "@/components/common/Navbar";
+import Footer from "@/components/common/Footer";
+import BlogIndex from "@/components/blog/BlogIndex";
+import { blogPosts } from "@/data/site";
+import { buildMetadata } from "@/lib/seo";
+
 export const metadata=buildMetadata({title:"OrmiTech Blog: AI Customer Support and Inbox Guides",description:"Practical guides on AI chatbots, omnichannel inboxes, WhatsApp automation and human handover for teams that talk to customers every day.",path:"/blog",absoluteTitle:true,ogTitle:"OrmiTech Blog"});
-export default function Blog(){return <><Navbar/><main><PageHero eyebrow="Insights" title="Ideas for better customer conversations." description="Practical thinking around AI automation, omnichannel communication, human handover and modern customer operations."/><section className="container-x py-20"><div className="grid gap-5 md:grid-cols-3">{blogPosts.map(p=><Link key={p.slug} href={`/blog/${p.slug}`} className="glass flex h-full flex-col rounded-2xl p-6 transition hover:-translate-y-1 hover:border-brand/30">{p.image&&(/* eslint-disable-next-line @next/next/no-img-element */<img src={p.image.src} alt={p.image.alt} width={p.image.width} height={p.image.height} loading="lazy" decoding="async" className="mb-5 aspect-[3/2] w-full rounded-xl bg-slate-50 object-contain"/>)}<p className="text-xs font-bold text-brand">{p.category}</p><h2 className="mt-4 line-clamp-3 text-xl font-semibold">{p.title}</h2><p className="mt-3 line-clamp-4 text-sm leading-6 text-black/45">{p.excerpt}</p><p className="mt-auto pt-6 text-xs text-black/25">{p.date}</p></Link>)}</div></section></main><Footer/></>}
+
+const WORDS_PER_MINUTE = 200;
+
+/** Every piece of readable text in a post, skipping picture addresses. */
+function textOf(value) {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.map(textOf).join(" ");
+  if (value && typeof value === "object") return Object.entries(value).filter(([key]) => key !== "image").map(([, entry]) => textOf(entry)).join(" ");
+  return "";
+}
+
+const readMinutes = post => {
+  const words = textOf([post.intro, post.answer, post.sections]).split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(words / WORDS_PER_MINUTE));
+};
+
+export default function Blog() {
+  // Only what the index needs goes to the client component, not the full article bodies.
+  const posts = blogPosts.map(post => ({
+    slug: post.slug,
+    title: post.title,
+    excerpt: post.excerpt,
+    date: post.date,
+    category: post.category,
+    image: post.image ?? null,
+    readMinutes: readMinutes(post)
+  }));
+  return (
+    <>
+      <Navbar />
+      <main>
+        <BlogIndex posts={posts} />
+      </main>
+      <Footer />
+    </>
+  );
+}
