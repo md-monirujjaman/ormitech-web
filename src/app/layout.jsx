@@ -1,3 +1,4 @@
+import Script from "next/script";
 import "@/styles/globals.css";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import AnnouncementPopup from "@/components/common/AnnouncementPopup";
@@ -42,6 +43,11 @@ export default function RootLayout({ children }) {
         <OrganizationJsonLd />
         <GoogleAnalytics />
         <AnnouncementPopup />
+        <Script
+          src="https://api.ormitechit.com/api/v1/public/chat/widget.js"
+          data-widget-id="wk_qtW3TW8WoEijkWotWme6alyH"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
