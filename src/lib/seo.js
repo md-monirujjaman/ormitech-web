@@ -5,12 +5,16 @@ export const defaultOgImage = { url: "/opengraph-image", width: 1200, height: 63
 
 // Builds page metadata with a self-referencing canonical, Open Graph and Twitter card in one place.
 // `path` is the page path ("/pricing"). `absoluteTitle` skips the "| OrmiTech" title template.
-export function buildMetadata({ title, description, path, absoluteTitle = false, ogTitle, image = defaultOgImage, type = "website", noindex = false, languages, publishedTime }) {
+// Articles also pass `canonical` (an address elsewhere, when the article first appeared there), `keywords`,
+// `modifiedTime`, `authors`, `section` and `tags`.
+export function buildMetadata({ title, description, path, absoluteTitle = false, ogTitle, image = defaultOgImage, type = "website", noindex = false, languages, publishedTime, modifiedTime, canonical, keywords, authors, section, tags }) {
   const socialTitle = ogTitle || (absoluteTitle ? title : `${title} | OrmiTech`);
   return {
     title: absoluteTitle ? { absolute: title } : title,
     description,
-    alternates: { canonical: path, ...(languages ? { languages } : {}) },
+    ...(keywords && keywords.length > 0 ? { keywords } : {}),
+    ...(authors && authors.length > 0 ? { authors: authors.map(name => ({ name })) } : {}),
+    alternates: { canonical: canonical || path, ...(languages ? { languages } : {}) },
     ...(noindex ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       title: socialTitle,
@@ -19,7 +23,11 @@ export function buildMetadata({ title, description, path, absoluteTitle = false,
       siteName: "OrmiTech",
       type,
       images: [image],
-      ...(publishedTime ? { publishedTime } : {})
+      ...(publishedTime ? { publishedTime } : {}),
+      ...(modifiedTime ? { modifiedTime } : {}),
+      ...(authors && authors.length > 0 ? { authors } : {}),
+      ...(section ? { section } : {}),
+      ...(tags && tags.length > 0 ? { tags } : {})
     },
     twitter: { card: "summary_large_image", title: socialTitle, description, images: [image.url] }
   };

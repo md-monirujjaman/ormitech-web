@@ -3,8 +3,6 @@
 // here names prices, plan limits, customers, statistics, integrations or competitors. Keyword targeting comes
 // from OrmiTech_Raw_Keywords_1.xlsx (SEO sheets); each page owns a different primary keyword to avoid cannibalization.
 
-import { blogPosts } from "@/data/site";
-
 const coreEntity =
   "OrmiTech is an AI-powered customer communication platform. It brings Facebook, Instagram, WhatsApp and website chat into one shared inbox, answers routine questions with AI, and hands conversations to your team when a person is needed.";
 
@@ -111,7 +109,7 @@ export const solutionPages = [
       { question: "Can several people manage one Facebook Page inbox?", answer: "Yes. Assign conversations to teammates, leave notes and hand chats between people without losing history." },
       { question: "Does it also cover Instagram and WhatsApp?", answer: "Yes. Facebook, Instagram, WhatsApp and website chat all arrive in the same inbox." }
     ],
-    related: ["/solutions/instagram-dm-automation", "/solutions/whatsapp-ai-chatbot", "/features/automation", "/product/lead-order-management", "/blog/omnichannel-customer-support"]
+    related: ["/solutions/instagram-dm-automation", "/solutions/whatsapp-ai-chatbot", "/features/automation", "/product/lead-order-management"]
   },
   {
     slug: "instagram-dm-automation",
@@ -408,6 +406,3 @@ export const generalFaq = [
   { question: "What happens when the AI cannot answer?", answer: "The conversation is handed to a person with an AI summary and the full history, so the customer does not have to repeat themselves." },
   { question: "Where can I read the documentation?", answer: "Documentation is available at docs.ormitechit.com." }
 ];
-
-// Blog articles are linkable from any RelatedLinks list using their /blog/<slug> path.
-for (const post of blogPosts) relatedLabels[`/blog/${post.slug}`] = { title: post.title, text: post.excerpt };

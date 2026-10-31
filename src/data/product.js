@@ -227,8 +227,8 @@ export const trust = {
   description: "Automation should make your team stronger, not replace judgment. OrmiTech is designed around that idea.",
   quote: {
     text: "The best customer automation is not AI-only. It knows when a human should step in.",
-    source: "From the OrmiTech blog",
-    href: "/blog/ai-with-human-handover"
+    source: "Read the OrmiTech blog",
+    href: "/blog"
   },
   principles: [
     { title: "AI that knows when to hand over", text: "Complex, sensitive or high-value conversations move to a person with the full context.", icon: UserCheck },

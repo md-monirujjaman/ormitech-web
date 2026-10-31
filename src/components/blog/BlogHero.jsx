@@ -1,7 +1,7 @@
 import { Search } from "lucide-react";
 
 /** Heading, search box and the category pills. Filtering state lives in BlogIndex. */
-export default function BlogHero({ query, onQuery, categories, category, onCategory }) {
+export default function BlogHero({ query, onQuery, categories, category, onCategory, empty = false }) {
   return (
     <section className="relative overflow-hidden pb-6 pt-32 sm:pt-36">
       <div aria-hidden className="pointer-events-none absolute -right-32 -top-24 h-[520px] w-[620px] bg-[radial-gradient(closest-side,rgba(242,13,69,.12),transparent)]" />
@@ -17,6 +17,7 @@ export default function BlogHero({ query, onQuery, categories, category, onCateg
           Explore practical guides on AI customer support, omnichannel inboxes and human handover. Real-world advice to help your team talk to customers better.
         </p>
 
+        {!empty && (<>
         <form role="search" onSubmit={event => event.preventDefault()} className="mt-7 flex max-w-xl items-center rounded-xl border border-slate-200 bg-white p-1.5 shadow-[0_10px_30px_-18px_rgba(13,27,61,.35)] focus-within:border-brand/40 focus-within:ring-4 focus-within:ring-brand/10">
           <Search className="mx-3 h-4 w-4 shrink-0 text-brand" aria-hidden />
           <label htmlFor="blog-search" className="sr-only">Search articles</label>
@@ -50,6 +51,7 @@ export default function BlogHero({ query, onQuery, categories, category, onCateg
             );
           })}
         </div>
+        </>)}
       </div>
 
       {/* Decoration only. */}
