@@ -36,7 +36,7 @@ export default function OmnichannelInboxContent() {
       <BridgeCallout {...aiSupportBridge} />
       <BridgeCallout {...leadOrderBridge} />
 
-      <RelatedLinks paths={["/solutions/whatsapp-ai-chatbot", "/solutions/facebook-messenger-automation", "/solutions/instagram-dm-automation", "/ai-chatbot-bangladesh","/blog/omnichannel-vs-multichannel","/blog/why-unified-inbox-matters"]} eyebrow="Solutions" title="Related solutions" />
+      <RelatedLinks paths={["/solutions/whatsapp-ai-chatbot", "/solutions/facebook-messenger-automation", "/solutions/instagram-dm-automation", "/ai-chatbot-bangladesh"]} eyebrow="Solutions" title="Related solutions" />
 
       <UseCaseGrid id={useCases.id} eyebrow={useCases.eyebrow} title={useCases.title} description={useCases.description} items={useCases.items} columns={useCases.columns} />
     </>

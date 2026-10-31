@@ -1,4 +1,5 @@
-import { blogPosts, siteUrl } from "@/data/site";
+import { siteUrl } from "@/data/site";
+import { getBlogPosts } from "@/lib/blog";
 import { banglaFacebookPage } from "@/data/solutions";
 
 // Public, indexable routes only. The API route, the /features redirect (src/app/features/page.jsx) and the
@@ -31,7 +32,7 @@ const staticRoutes = [
   "/data-deletion"
 ];
 
-export default function sitemap() {
+export default async function sitemap() {
   // Home is listed without a trailing slash so it matches its canonical URL exactly.
   const staticEntries = staticRoutes.map(route => {
     const url = route === "/" ? siteUrl : `${siteUrl}${route}`;
@@ -42,10 +43,11 @@ export default function sitemap() {
     return entry;
   });
 
-  const blogEntries = blogPosts.map(post => ({
-    url: `${siteUrl}/blog/${post.slug}`,
-    lastModified: new Date(post.date)
-  }));
+  // Published articles only, and not the ones their writer asked to keep out of search.
+  const posts = await getBlogPosts();
+  const blogEntries = posts
+    .filter(post => !post.noindex)
+    .map(post => ({ url: `${siteUrl}/blog/${post.slug}`, lastModified: new Date(post.updatedAt) }));
 
   return [...staticEntries, ...blogEntries];
 }

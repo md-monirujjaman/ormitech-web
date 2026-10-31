@@ -39,6 +39,20 @@ export default function BlogIndex({ posts }) {
   };
 
   const [lead, ...rest] = sorted;
+  if (!lead) {
+    return (
+      <>
+        <BlogHero empty query="" onQuery={() => {}} categories={[]} category={null} onCategory={() => {}} />
+        <section className="container-x mt-10" aria-live="polite">
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
+            <h2 className="text-lg font-bold text-navy">No articles yet</h2>
+            <p className="mt-2 text-sm text-slate-500">New guides are on the way. Check back soon.</p>
+          </div>
+        </section>
+        <BlogCta />
+      </>
+    );
+  }
   return (
     <>
       <BlogHero query={query} onQuery={setQuery} categories={categories.map(entry => entry.name)} category={category} onCategory={setCategory} />

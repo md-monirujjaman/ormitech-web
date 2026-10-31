@@ -36,7 +36,7 @@ export default function LeadOrderManagementContent() {
       <BridgeCallout {...aiSupportBridge} />
       <BridgeCallout {...omnichannelBridge} />
 
-      <RelatedLinks paths={["/solutions/ecommerce-chatbot", "/solutions/facebook-messenger-automation", "/features/automation", "/pricing","/blog/omnichannel-customer-support"]} eyebrow="Solutions" title="Related solutions" />
+      <RelatedLinks paths={["/solutions/ecommerce-chatbot", "/solutions/facebook-messenger-automation", "/features/automation", "/pricing"]} eyebrow="Solutions" title="Related solutions" />
 
       <UseCaseGrid id={useCases.id} eyebrow={useCases.eyebrow} title={useCases.title} description={useCases.description} items={useCases.items} columns={useCases.columns} />
     </>
