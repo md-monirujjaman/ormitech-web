@@ -28,9 +28,8 @@ const contactDetails = [
   { icon: Clock3, label: "Working hours", lines: [{ text: "Open 24/7" }, { text: "Open 24 hours, 7 days a week" }] }
 ];
 
-const officeMapQuery = "Khulna Sadar, Khulna 9100, Bangladesh";
-const officeMapEmbedSrc = `https://www.google.com/maps?q=${encodeURIComponent(officeMapQuery)}&output=embed`;
-const officeMapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(officeMapQuery)}`;
+const officeMapEmbedSrc = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3677.7!2d89.5535809!3d22.8162085!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xa8290600728005f3%3A0x44a5737122908db!2sOrmiTechIT!5e0!3m2!1sen!2sbd!4v1";
+const officeMapLink = "https://www.google.com/maps/place/OrmiTechIT/@22.8162085,89.5535809,17z/data=!3m1!4b1!4m6!3m5!1s0xa8290600728005f3:0x44a5737122908db!8m2!3d22.8162085!4d89.5535809";
 
 const rise = { hidden: { opacity: 0, y: 22 }, show: { opacity: 1, y: 0, transition: { duration: 0.6, ease } } };
 const group = (gap = 0.08, delay = 0) => ({ hidden: {}, show: { transition: { staggerChildren: gap, delayChildren: delay } } });
