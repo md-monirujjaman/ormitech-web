@@ -60,6 +60,8 @@ export default function ProductPage({ token, product }) {
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
   const [human, setHuman] = useState(null);
+  const [option, setOption] = useState("");
+  const [needOption, setNeedOption] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", address: "", quantity: 1, note: "", couponCode: "" });
   const set = key => event => setForm(current => ({ ...current, [key]: event.target.value }));
 
@@ -78,6 +80,7 @@ export default function ProductPage({ token, product }) {
         phone: form.phone,
         address: form.address,
         quantity: Number(form.quantity),
+        ...(option ? { option } : {}),
         ...(form.note.trim() ? { note: form.note } : {}),
         ...(form.couponCode.trim() ? { couponCode: form.couponCode } : {}),
         ...(human ? { turnstileToken: human } : {})
@@ -131,6 +134,27 @@ export default function ProductPage({ token, product }) {
           </div>
           <p className={`mt-2 text-sm font-medium ${product.inStock ? "text-emerald-700" : "text-red-700"}`}>{product.inStock ? "স্টকে আছে" : "স্টকে নেই"}</p>
 
+          {product.options.length > 0 && !done && (
+            <fieldset className="mt-5">
+              <legend className="text-sm font-semibold">{product.optionLabel || "অপশন বেছে নিন"}</legend>
+              <div className="mt-2 flex flex-wrap gap-2" role="radiogroup">
+                {product.options.map(item => (
+                  <button
+                    key={item}
+                    type="button"
+                    role="radio"
+                    aria-checked={option === item}
+                    onClick={() => { setOption(item); setNeedOption(false); }}
+                    className={`min-w-12 rounded-lg border px-4 py-2 text-sm font-medium ${option === item ? "border-slate-900 bg-slate-900 text-white" : "border-slate-300 bg-white text-slate-900 hover:border-slate-900"}`}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+              {needOption && <p role="alert" className="mt-2 text-sm font-medium text-red-700">অনুগ্রহ করে একটি বেছে নিন।</p>}
+            </fieldset>
+          )}
+
           {done ? (
             <div role="status" className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
               <p className="font-semibold text-emerald-900">আপনার অর্ডার গ্রহণ করা হয়েছে</p>
@@ -140,7 +164,7 @@ export default function ProductPage({ token, product }) {
               {done.couponNoted && <p className="mt-1 text-sm text-emerald-900">কুপন {done.couponNoted} আমাদের টিম অর্ডার নিশ্চিত করার সময় প্রয়োগ করবে।</p>}
             </div>
           ) : product.canOrder ? (
-            <button type="button" onClick={() => setOpen(true)} className="mt-6 w-full rounded-xl bg-slate-900 px-6 py-3.5 text-base font-semibold text-white hover:bg-slate-700 sm:w-auto">
+            <button type="button" onClick={() => (product.options.length > 0 && !option ? setNeedOption(true) : setOpen(true))} className="mt-6 w-full rounded-xl bg-slate-900 px-6 py-3.5 text-base font-semibold text-white hover:bg-slate-700 sm:w-auto">
               এখনই কিনুন
             </button>
           ) : (
@@ -179,7 +203,7 @@ export default function ProductPage({ token, product }) {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-lg font-bold">অর্ডার করুন</h2>
-                <p className="text-sm text-slate-500">{product.name}</p>
+                <p className="text-sm text-slate-500">{product.name}{option ? ` (${option})` : ""}</p>
               </div>
               <button type="button" onClick={() => setOpen(false)} className="rounded-lg px-2 py-1 text-slate-500 hover:bg-slate-100" aria-label="বন্ধ করুন">✕</button>
             </div>
