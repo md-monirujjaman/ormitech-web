@@ -4,7 +4,7 @@ import { siteUrl } from "@/data/site";
 // nothing on this site left to keep out of the index.
 export default function robots() {
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/api/"] },
+    rules: { userAgent: "*", allow: "/", disallow: ["/api/", "/p/"] },
     sitemap: `${siteUrl}/sitemap.xml`
   };
 }
