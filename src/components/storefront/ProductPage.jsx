@@ -4,6 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { placeStorefrontOrder, formatPrice } from "@/lib/storefront";
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
+const STEPS = ["Ordered", "Packed", "On the way", "Delivered"];
+const AREA_LABEL = { inside: "Inside Dhaka", outside: "Outside Dhaka" };
+
+/** The date a delivery of this many days arrives by, like "Mon 16 Nov", in Bangladesh time. */
+function arriveBy(days) {
+  return new Date(Date.now() + days * 86_400_000).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "Asia/Dhaka" });
+}
 
 /** Cloudflare's human check, loaded only when a site key is configured. Reports the token (or null when it expires). */
 function HumanCheck({ onToken }) {
@@ -38,51 +45,97 @@ function HumanCheck({ onToken }) {
       if (widget !== null && window.turnstile) window.turnstile.remove(widget);
     };
   }, [onToken]);
-  return TURNSTILE_SITE_KEY ? <div ref={box} className="min-h-[65px]" /> : null;
+  return TURNSTILE_SITE_KEY ? <div ref={box} className="mt-3 min-h-[65px]" /> : null;
 }
 
-function Price({ currency, price, salePrice, large = false }) {
+const label = "text-[11px] font-semibold uppercase tracking-wider text-neutral-500";
+const input = "mt-1.5 w-full rounded-xl bg-neutral-100 px-3.5 py-3 text-base text-neutral-900 placeholder:text-neutral-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-neutral-900";
+
+function Chips({ items, value, onChange, name }) {
   return (
-    <p className={`flex items-baseline gap-2 ${large ? "text-3xl" : "text-base"} font-bold text-slate-900`}>
+    <div className="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label={name}>
+      {items.map(item => (
+        <button
+          key={item}
+          type="button"
+          role="radio"
+          aria-checked={value === item}
+          onClick={() => onChange(item)}
+          className={`min-h-11 rounded-xl px-5 text-[15px] font-semibold transition ${value === item ? "bg-neutral-900 text-white" : "border border-neutral-300 bg-white text-neutral-900 hover:border-neutral-900"}`}
+        >
+          {item}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function Segmented({ items, value, onChange }) {
+  return (
+    <div className="inline-flex rounded-full border border-neutral-200 bg-white p-1" role="radiogroup">
+      {items.map(item => (
+        <button
+          key={item.key}
+          type="button"
+          role="radio"
+          aria-checked={value === item.key}
+          onClick={() => onChange(item.key)}
+          className={`rounded-full px-4 py-2 text-sm font-semibold transition ${value === item.key ? "bg-neutral-900 text-white" : "text-neutral-600"}`}
+        >
+          {item.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function Price({ currency, price, salePrice, size = "text-base" }) {
+  return (
+    <p className={`flex items-baseline gap-2 font-bold text-neutral-900 ${size}`}>
       {formatPrice(currency, salePrice ?? price)}
-      {salePrice !== null && <span className={`${large ? "text-lg" : "text-sm"} font-normal text-slate-400 line-through`}>{formatPrice(currency, price)}</span>}
+      {salePrice !== null && <span className="text-[0.7em] font-normal text-neutral-400 line-through">{formatPrice(currency, price)}</span>}
     </p>
   );
 }
 
-/** The date a delivery of this many days would arrive by, in Bangla ("১৮ নভেম্বর"). */
-function estimatedDate(days) {
-  const date = new Date(Date.now() + days * 86_400_000);
-  return date.toLocaleDateString("bn-BD", { day: "numeric", month: "long", timeZone: "Asia/Dhaka" });
-}
-
-const field = "mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base text-slate-900 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900";
-
-/** A product's public page: pictures, price, what the seller wrote about it, Buy Now, and similar products. Only what exists is shown. */
+/** A product's public page: pictures, price, choices, delivery, details and similar products, with Buy Now. Only what exists is shown. */
 export default function ProductPage({ token, product }) {
+  const areas = product.delivery ? ["inside", "outside"].filter(key => product.delivery[key]) : [];
   const [active, setActive] = useState(0);
+  const [option, setOption] = useState(product.options.length === 1 ? product.options[0] : "");
+  const [area, setArea] = useState(areas[0] || "");
   const [open, setOpen] = useState(false);
+  const [needOption, setNeedOption] = useState(false);
   const [done, setDone] = useState(null);
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
   const [human, setHuman] = useState(null);
-  const [option, setOption] = useState("");
-  const [needOption, setNeedOption] = useState(false);
-  const delivery = product.delivery;
-  const areas = delivery ? ["inside", "outside"].filter(key => delivery[key]) : [];
-  const [area, setArea] = useState(areas.length === 1 ? areas[0] : "");
   const [form, setForm] = useState({ name: "", phone: "", address: "", quantity: 1, note: "", couponCode: "" });
   const set = key => event => setForm(current => ({ ...current, [key]: event.target.value }));
+  const strip = useRef(null);
+
+  const unit = product.salePrice ?? product.price;
+  const quantity = Math.min(Math.max(Number(form.quantity) || 1, 1), Math.max(product.maxQuantity, 1));
+  const fee = area && product.delivery?.[area] ? product.delivery[area].fee : null;
+  const total = unit * quantity + (fee ?? 0);
+  const terms = area && product.delivery ? product.delivery[area] : null;
+  const images = product.images;
+  const hasOptions = product.options.length > 0;
+
+  function start() {
+    if (hasOptions && !option) {
+      setNeedOption(true);
+      document.getElementById("choices")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    setOpen(true);
+  }
 
   async function submit(event) {
     event.preventDefault();
     if (sending) return;
-    if (areas.length > 1 && !area) {
-      setError("ইনসাইড ঢাকা নাকি আউটসাইড ঢাকা, বেছে নিন।");
-      return;
-    }
     if (TURNSTILE_SITE_KEY && !human) {
-      setError("অনুগ্রহ করে নিচের যাচাইটি সম্পন্ন করুন।");
+      setError("Please complete the check below.");
       return;
     }
     setSending(true);
@@ -92,7 +145,7 @@ export default function ProductPage({ token, product }) {
         name: form.name,
         phone: form.phone,
         address: form.address,
-        quantity: Number(form.quantity),
+        quantity,
         ...(option ? { option } : {}),
         ...(area ? { area } : {}),
         ...(form.note.trim() ? { note: form.note } : {}),
@@ -100,6 +153,8 @@ export default function ProductPage({ token, product }) {
         ...(human ? { turnstileToken: human } : {})
       });
       setDone(result);
+      setOpen(false);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (failure) {
       setError(failure.message);
       // A human-check token works once.
@@ -110,113 +165,126 @@ export default function ProductPage({ token, product }) {
     }
   }
 
-  const images = product.images;
-
   return (
-    <main className="mx-auto min-h-screen max-w-5xl bg-white px-4 py-6 text-slate-900 sm:py-10">
-      <p className="text-sm font-medium text-slate-500">{product.businessName}</p>
-      <div className="mt-4 grid gap-8 md:grid-cols-2">
-        <div>
+    <main className="mx-auto min-h-screen max-w-xl bg-white pb-28 text-neutral-900 md:max-w-5xl md:pb-10">
+      <div className="md:grid md:grid-cols-2 md:gap-10 md:px-6 md:pt-8">
+        <div className="md:sticky md:top-8 md:self-start">
           {images.length > 0 ? (
-            <>
+            <div className="relative">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={images[active]} alt={product.name} className="aspect-square w-full rounded-xl bg-slate-100 object-contain" />
+              <img src={images[active]} alt={product.name} className="aspect-square w-full bg-neutral-100 object-cover md:rounded-2xl" />
               {images.length > 1 && (
-                <ul className="mt-3 flex gap-2">
+                <div className="absolute inset-x-0 bottom-3 flex justify-center gap-1.5">
                   {images.map((src, index) => (
-                    <li key={src}>
-                      <button type="button" onClick={() => setActive(index)} aria-label={`ছবি ${index + 1}`} className={`block h-16 w-16 overflow-hidden rounded-lg border-2 ${index === active ? "border-slate-900" : "border-transparent"}`}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={src} alt="" className="h-full w-full object-cover" />
-                      </button>
-                    </li>
+                    <button key={src} type="button" onClick={() => setActive(index)} aria-label={`Picture ${index + 1}`} className={`h-2 rounded-full transition-all ${index === active ? "w-5 bg-white" : "w-2 bg-white/60"}`} />
                   ))}
-                </ul>
+                </div>
               )}
-            </>
+            </div>
           ) : (
-            <div className="flex aspect-square w-full items-center justify-center rounded-xl bg-slate-100 text-slate-400">ছবি নেই</div>
+            <div className="flex aspect-square w-full items-center justify-center bg-neutral-100 text-neutral-400 md:rounded-2xl">No picture</div>
+          )}
+          {images.length > 1 && (
+            <ul className="hidden gap-2 pt-3 md:flex">
+              {images.map((src, index) => (
+                <li key={src}>
+                  <button type="button" onClick={() => setActive(index)} aria-label={`Picture ${index + 1}`} className={`block h-16 w-16 overflow-hidden rounded-lg border-2 ${index === active ? "border-neutral-900" : "border-transparent"}`}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt="" className="h-full w-full object-cover" />
+                  </button>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
 
-        <div>
-          {product.category && <p className="text-sm text-slate-500">{product.category}</p>}
-          <h1 className="mt-1 text-2xl font-bold sm:text-3xl">{product.name}</h1>
-          <p className="mt-1 text-sm text-slate-500">কোড: {product.code}</p>
-          <div className="mt-4">
-            <Price currency={product.currency} price={product.price} salePrice={product.salePrice} large />
+        <div className="px-5 pt-5 md:px-0 md:pt-0">
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-neutral-900 text-base font-bold text-white" aria-hidden>{product.businessName.slice(0, 1).toUpperCase()}</span>
+            <div>
+              <p className="font-bold leading-tight">{product.businessName}</p>
+              <p className="text-sm text-neutral-500">Official shop page</p>
+            </div>
           </div>
-          <p className={`mt-2 text-sm font-medium ${product.inStock ? "text-emerald-700" : "text-red-700"}`}>{product.inStock ? "স্টকে আছে" : "স্টকে নেই"}</p>
 
-          {product.options.length > 0 && !done && (
-            <fieldset className="mt-5">
-              <legend className="text-sm font-semibold">{product.optionLabel || "অপশন বেছে নিন"}</legend>
-              <div className="mt-2 flex flex-wrap gap-2" role="radiogroup">
-                {product.options.map(item => (
-                  <button
-                    key={item}
-                    type="button"
-                    role="radio"
-                    aria-checked={option === item}
-                    onClick={() => { setOption(item); setNeedOption(false); }}
-                    className={`min-w-12 rounded-lg border px-4 py-2 text-sm font-medium ${option === item ? "border-slate-900 bg-slate-900 text-white" : "border-slate-300 bg-white text-slate-900 hover:border-slate-900"}`}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-              {needOption && <p role="alert" className="mt-2 text-sm font-medium text-red-700">অনুগ্রহ করে একটি বেছে নিন।</p>}
-            </fieldset>
-          )}
+          <h1 className="mt-6 text-3xl font-extrabold tracking-tight">{product.name}</h1>
+          <p className="mt-1 text-neutral-500">Code {product.code}</p>
+          <div className="mt-4"><Price currency={product.currency} price={product.price} salePrice={product.salePrice} size="text-4xl" /></div>
+          {!product.inStock && <p className="mt-2 text-sm font-semibold text-red-700">Out of stock</p>}
 
-          {done ? (
-            <div role="status" className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-              <p className="font-semibold text-emerald-900">আপনার অর্ডার গ্রহণ করা হয়েছে</p>
-              <p className="mt-1 text-sm text-emerald-900">অর্ডার নম্বর: {done.orderNumber}</p>
-              <p className="mt-1 text-sm text-emerald-900">
-                {done.deliveryFee > 0 || area ? `ডেলিভারি সহ মোট: ${formatPrice(done.currency, done.total)}` : `পণ্যের মোট দাম: ${formatPrice(done.currency, done.total)}। ডেলিভারি চার্জ আমাদের টিম জানিয়ে দেবে।`}
-              </p>
-              {done.billSentToChat && <p className="mt-1 text-sm text-emerald-900">বিলটি আপনার চ্যাটেও পাঠানো হয়েছে।</p>}
-              {done.couponNoted && <p className="mt-1 text-sm text-emerald-900">কুপন {done.couponNoted} আমাদের টিম অর্ডার নিশ্চিত করার সময় প্রয়োগ করবে।</p>}
-            </div>
-          ) : product.canOrder ? (
-            <button type="button" onClick={() => (product.options.length > 0 && !option ? setNeedOption(true) : setOpen(true))} className="mt-6 w-full rounded-xl bg-slate-900 px-6 py-3.5 text-base font-semibold text-white hover:bg-slate-700 sm:w-auto">
-              এখনই কিনুন
-            </button>
-          ) : (
-            <p className="mt-6 rounded-xl bg-slate-100 p-3 text-sm text-slate-600">এই পণ্যটি এখন অর্ডার করা যাচ্ছে না।</p>
-          )}
-
-          {delivery && !done && (
-            <div className="mt-5 rounded-xl border border-slate-200 p-4 text-sm">
-              <p className="font-semibold">ডেলিভারি</p>
-              <ul className="mt-2 space-y-1 text-slate-700">
-                {areas.map(key => (
-                  <li key={key}>
-                    {key === "inside" ? "ঢাকার ভিতরে" : "ঢাকার বাইরে"}: {delivery[key].fee === 0 ? "ফ্রি ডেলিভারি" : formatPrice(product.currency, delivery[key].fee)}
-                    {delivery[key].days ? ` · আনুমানিক ${estimatedDate(delivery[key].days)} এর মধ্যে (${delivery[key].days} দিন)` : ""}
-                  </li>
-                ))}
-              </ul>
+          {hasOptions && (
+            <div id="choices" className="mt-7">
+              <p className={label}>{product.optionLabel || "Choose one"}</p>
+              <Chips items={product.options} value={option} onChange={value => { setOption(value); setNeedOption(false); }} name={product.optionLabel || "Options"} />
+              {needOption && <p role="alert" className="mt-2 text-sm font-medium text-red-700">Please choose one.</p>}
             </div>
           )}
 
-          {product.description && <p className="mt-6 whitespace-pre-line text-base leading-7 text-slate-700">{product.description}</p>}
+          {done && (
+            <div role="status" className="mt-7 rounded-2xl bg-emerald-50 p-4 text-emerald-950">
+              <p className="font-bold">Your order is received</p>
+              <p className="mt-1 text-sm">Order {done.orderNumber} · Total {formatPrice(done.currency, done.total)}{done.deliveryFee > 0 ? ` (delivery ${formatPrice(done.currency, done.deliveryFee)} included)` : ""}</p>
+              {done.billSentToChat && <p className="mt-1 text-sm">We also sent the bill to your chat.</p>}
+              {done.couponNoted && <p className="mt-1 text-sm">Coupon {done.couponNoted} will be applied when our team confirms your order.</p>}
+              <p className="mt-1 text-sm">Our team will confirm it with you shortly.</p>
+            </div>
+          )}
+
+          {product.delivery && (
+            <section className="mt-7 rounded-2xl bg-neutral-100 p-4" aria-label="Estimated delivery">
+              <p className={label}>Estimated delivery</p>
+              {areas.length > 1 && <div className="mt-3"><Segmented items={areas.map(key => ({ key, label: AREA_LABEL[key] }))} value={area} onChange={setArea} /></div>}
+              {terms && (
+                <>
+                  {terms.days ? (
+                    <p className="mt-4 text-neutral-600">Order now, get it<br /><span className="text-2xl font-extrabold text-neutral-900">by {arriveBy(terms.days)}</span></p>
+                  ) : null}
+                  <div className="mt-3 flex items-baseline justify-between rounded-xl bg-white px-4 py-3">
+                    <p className="font-semibold">Delivery charge <span className="text-xl font-extrabold">{terms.fee === 0 ? "Free" : formatPrice(product.currency, terms.fee)}</span></p>
+                    {areas.length === 1 && <p className="text-sm text-neutral-500">· {AREA_LABEL[area]}</p>}
+                    {areas.length > 1 && <p className="text-sm text-neutral-500">· {AREA_LABEL[area]}</p>}
+                  </div>
+                  <ol className="mt-4 grid grid-cols-4 text-center text-xs text-neutral-600">
+                    {STEPS.map((step, index) => (
+                      <li key={step} className="relative flex flex-col items-center">
+                        <span className={`z-10 h-3 w-3 rounded-full border-2 ${index === 0 ? "border-emerald-700 bg-emerald-700" : index === STEPS.length - 1 ? "border-emerald-700 bg-emerald-200" : "border-neutral-400 bg-white"}`} />
+                        {index < STEPS.length - 1 && <span className="absolute left-1/2 top-[5px] h-px w-full bg-neutral-300" />}
+                        <span className="mt-1.5">{step}</span>
+                      </li>
+                    ))}
+                  </ol>
+                  <p className="mt-3 text-sm text-neutral-500">Cash on delivery</p>
+                </>
+              )}
+            </section>
+          )}
+
+          {(product.description || product.category) && (
+            <section className="mt-8" aria-label="Details">
+              <p className={label}>Details</p>
+              {product.description && <p className="mt-2 whitespace-pre-line text-base leading-7">{product.description}</p>}
+              {product.category && (
+                <dl className="mt-3 divide-y divide-neutral-200 border-y border-neutral-200 text-[15px]">
+                  <div className="flex gap-6 py-3"><dt className="w-24 shrink-0 text-neutral-500">Category</dt><dd>{product.category}</dd></div>
+                </dl>
+              )}
+            </section>
+          )}
         </div>
       </div>
 
       {product.similar.length > 0 && (
-        <section className="mt-12" aria-labelledby="similar">
-          <h2 id="similar" className="text-lg font-bold">অনুরূপ পণ্য</h2>
-          <ul className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <section className="mt-9 md:px-6" aria-label="Similar products">
+          <p className={`${label} px-5 md:px-0`}>Similar products</p>
+          <ul ref={strip} className="mt-3 flex snap-x gap-3 overflow-x-auto px-5 pb-2 md:px-0">
             {product.similar.map(item => (
-              <li key={item.token}>
+              <li key={item.token} className="w-40 shrink-0 snap-start">
                 <a href={`/p/${item.token}`} className="block">
                   {item.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={item.image} alt={item.name} className="aspect-square w-full rounded-lg bg-slate-100 object-cover" loading="lazy" />
+                    <img src={item.image} alt={item.name} className="aspect-[4/5] w-full rounded-2xl bg-neutral-100 object-cover" loading="lazy" />
                   ) : (
-                    <div className="aspect-square w-full rounded-lg bg-slate-100" />
+                    <div className="aspect-[4/5] w-full rounded-2xl bg-neutral-100" />
                   )}
                   <p className="mt-2 line-clamp-2 text-sm font-medium">{item.name}</p>
                   <Price currency={item.currency} price={item.price} salePrice={item.salePrice} />
@@ -227,61 +295,88 @@ export default function ProductPage({ token, product }) {
         </section>
       )}
 
-      {open && !done && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center" role="dialog" aria-modal="true" aria-label="অর্ডার ফর্ম">
-          <form onSubmit={submit} className="max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-2xl bg-white p-5 sm:rounded-2xl">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-lg font-bold">অর্ডার করুন</h2>
-                <p className="text-sm text-slate-500">{product.name}{option ? ` (${option})` : ""}</p>
+      <p className="mt-10 text-center text-sm text-neutral-500">Powered by <a href="https://www.ormitechit.com" className="font-bold text-neutral-900">OrmiTech</a></p>
+
+      {product.canOrder && !done && (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-200 bg-white/95 px-4 py-3 backdrop-blur md:hidden">
+          <button type="button" onClick={start} className="w-full rounded-2xl bg-neutral-900 py-4 text-base font-bold text-white active:bg-neutral-700">
+            Buy Now · {formatPrice(product.currency, unit)}
+          </button>
+        </div>
+      )}
+      {product.canOrder && !done && (
+        <div className="hidden md:mx-6 md:mt-8 md:block">
+          <button type="button" onClick={start} className="rounded-2xl bg-neutral-900 px-10 py-4 text-base font-bold text-white hover:bg-neutral-700">
+            Buy Now · {formatPrice(product.currency, unit)}
+          </button>
+        </div>
+      )}
+      {!product.canOrder && !done && <p className="mx-5 mt-8 rounded-2xl bg-neutral-100 p-4 text-sm text-neutral-600">This product can't be ordered right now.</p>}
+
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 md:items-center" role="dialog" aria-modal="true" aria-label="Order form">
+          <form onSubmit={submit} className="max-h-[94vh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white p-5 md:rounded-3xl">
+            <div className="flex items-center gap-3">
+              {images[0] && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={images[0]} alt="" className="h-16 w-16 rounded-xl object-cover" />
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-lg font-bold">{product.name}</p>
+                <p className="text-sm text-neutral-500">Code {product.code}</p>
               </div>
-              <button type="button" onClick={() => setOpen(false)} className="rounded-lg px-2 py-1 text-slate-500 hover:bg-slate-100" aria-label="বন্ধ করুন">✕</button>
+              <button type="button" onClick={() => setOpen(false)} className="h-10 w-10 rounded-full bg-neutral-100 text-lg" aria-label="Close">✕</button>
             </div>
 
-            <label className="mt-4 block text-sm font-medium">আপনার নাম
-              <input className={field} value={form.name} onChange={set("name")} required minLength={2} maxLength={120} autoComplete="name" />
-            </label>
-            <label className="mt-3 block text-sm font-medium">মোবাইল নম্বর
-              <input className={field} value={form.phone} onChange={set("phone")} required inputMode="tel" placeholder="01XXXXXXXXX" autoComplete="tel" />
-            </label>
-            <label className="mt-3 block text-sm font-medium">ডেলিভারি ঠিকানা
-              <textarea className={field} value={form.address} onChange={set("address")} required minLength={8} maxLength={400} rows={3} autoComplete="street-address" />
-            </label>
-            <label className="mt-3 block text-sm font-medium">পরিমাণ
-              <input className={field} type="number" min={1} max={product.maxQuantity} value={form.quantity} onChange={set("quantity")} required />
-            </label>
-            <label className="mt-3 block text-sm font-medium">বিশেষ কিছু জানাতে চান? (যেমন সাইজ বা রঙ)
-              <input className={field} value={form.note} onChange={set("note")} maxLength={300} />
-            </label>
-            <label className="mt-3 block text-sm font-medium">কুপন কোড (থাকলে)
-              <input className={field} value={form.couponCode} onChange={set("couponCode")} maxLength={40} autoCapitalize="characters" />
-            </label>
-
-            {areas.length > 1 && (
-              <fieldset className="mt-3">
-                <legend className="text-sm font-medium">ডেলিভারি এলাকা</legend>
-                <div className="mt-1 flex gap-4">
-                  {areas.map(key => (
-                    <label key={key} className="flex items-center gap-2 text-sm">
-                      <input type="radio" name="area" value={key} checked={area === key} onChange={() => setArea(key)} />
-                      {key === "inside" ? "ঢাকার ভিতরে" : "ঢাকার বাইরে"}
-                    </label>
-                  ))}
+            <div className="mt-5 flex items-start justify-between gap-4">
+              {hasOptions ? (
+                <div className="min-w-0">
+                  <p className={label}>{product.optionLabel || "Choice"}</p>
+                  <Chips items={product.options} value={option} onChange={setOption} name={product.optionLabel || "Options"} />
                 </div>
-              </fieldset>
-            )}
-            {area && delivery?.[area] && (
-              <p className="mt-3 text-sm text-slate-700">
-                পণ্যের দাম {formatPrice(product.currency, (product.salePrice ?? product.price) * Number(form.quantity || 1))} + ডেলিভারি {delivery[area].fee === 0 ? "ফ্রি" : formatPrice(product.currency, delivery[area].fee)} = <strong>{formatPrice(product.currency, (product.salePrice ?? product.price) * Number(form.quantity || 1) + delivery[area].fee)}</strong>
-              </p>
-            )}
+              ) : <span />}
+              <div>
+                <p className={`${label} text-right`}>Quantity</p>
+                <div className="mt-2 flex items-center rounded-xl border border-neutral-300">
+                  <button type="button" onClick={() => setForm(c => ({ ...c, quantity: Math.max(quantity - 1, 1) }))} className="h-11 w-11 text-xl" aria-label="Fewer">−</button>
+                  <span className="w-8 text-center font-bold" aria-live="polite">{quantity}</span>
+                  <button type="button" onClick={() => setForm(c => ({ ...c, quantity: Math.min(quantity + 1, Math.max(product.maxQuantity, 1)) }))} className="h-11 w-11 text-xl" aria-label="More">+</button>
+                </div>
+              </div>
+            </div>
 
-            <div className="mt-4"><HumanCheck onToken={setHuman} /></div>
-            {error && <p role="alert" className="mt-3 text-sm font-medium text-red-700">{error}</p>}
-            <button type="submit" disabled={sending} className="mt-4 w-full rounded-xl bg-slate-900 px-6 py-3.5 text-base font-semibold text-white hover:bg-slate-700 disabled:opacity-60">
-              {sending ? "পাঠানো হচ্ছে…" : "অর্ডার নিশ্চিত করুন"}
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <label className={label}>Your name
+                <input className={input} value={form.name} onChange={set("name")} required minLength={2} maxLength={120} autoComplete="name" placeholder="Full name" />
+              </label>
+              <label className={label}>Mobile number
+                <input className={input} value={form.phone} onChange={set("phone")} required inputMode="tel" autoComplete="tel" placeholder="01XXXXXXXXX" />
+              </label>
+            </div>
+            <label className={`${label} mt-3 block`}>Delivery address
+              <textarea className={input} value={form.address} onChange={set("address")} required minLength={8} maxLength={400} rows={3} autoComplete="street-address" placeholder="House, road, area, district" />
+            </label>
+
+            {areas.length > 1 && <div className="mt-4"><Segmented items={areas.map(key => ({ key, label: AREA_LABEL[key] }))} value={area} onChange={setArea} /></div>}
+            <label className={`${label} mt-3 block`}>Coupon code (optional)
+              <input className={input} value={form.couponCode} onChange={set("couponCode")} maxLength={40} autoCapitalize="characters" placeholder="Coupon code" />
+            </label>
+            <label className={`${label} mt-3 block`}>Note (optional)
+              <input className={input} value={form.note} onChange={set("note")} maxLength={300} placeholder="Anything we should know" />
+            </label>
+
+            <dl className="mt-5 space-y-1.5 border-t border-dashed border-neutral-300 pt-4 text-[15px] text-neutral-600">
+              <div className="flex justify-between"><dt>Product × {quantity}</dt><dd>{formatPrice(product.currency, unit * quantity)}</dd></div>
+              {fee !== null && <div className="flex justify-between"><dt>Delivery</dt><dd>{fee === 0 ? "Free" : formatPrice(product.currency, fee)}</dd></div>}
+              <div className="flex justify-between text-lg font-extrabold text-neutral-900"><dt>Total · Cash on delivery</dt><dd>{formatPrice(product.currency, total)}</dd></div>
+            </dl>
+
+            <HumanCheck onToken={setHuman} />
+            {error && <p role="alert" className="mt-3 text-sm font-semibold text-red-700">{error}</p>}
+            <button type="submit" disabled={sending} className="mt-4 w-full rounded-2xl bg-neutral-900 py-4 text-base font-bold text-white disabled:opacity-60">
+              {sending ? "Sending…" : `Confirm order · ${formatPrice(product.currency, total)}`}
             </button>
-            {areas.length === 0 && <p className="mt-2 text-center text-xs text-slate-500">ডেলিভারি চার্জ আমাদের টিম আপনাকে জানিয়ে দেবে।</p>}
+            {fee === null && <p className="mt-2 text-center text-xs text-neutral-500">Our team will tell you the delivery charge.</p>}
           </form>
         </div>
       )}
