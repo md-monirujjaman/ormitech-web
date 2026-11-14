@@ -50,6 +50,12 @@ function Price({ currency, price, salePrice, large = false }) {
   );
 }
 
+/** The date a delivery of this many days would arrive by, in Bangla ("১৮ নভেম্বর"). */
+function estimatedDate(days) {
+  const date = new Date(Date.now() + days * 86_400_000);
+  return date.toLocaleDateString("bn-BD", { day: "numeric", month: "long", timeZone: "Asia/Dhaka" });
+}
+
 const field = "mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base text-slate-900 focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900";
 
 /** A product's public page: pictures, price, what the seller wrote about it, Buy Now, and similar products. Only what exists is shown. */
@@ -62,12 +68,19 @@ export default function ProductPage({ token, product }) {
   const [human, setHuman] = useState(null);
   const [option, setOption] = useState("");
   const [needOption, setNeedOption] = useState(false);
+  const delivery = product.delivery;
+  const areas = delivery ? ["inside", "outside"].filter(key => delivery[key]) : [];
+  const [area, setArea] = useState(areas.length === 1 ? areas[0] : "");
   const [form, setForm] = useState({ name: "", phone: "", address: "", quantity: 1, note: "", couponCode: "" });
   const set = key => event => setForm(current => ({ ...current, [key]: event.target.value }));
 
   async function submit(event) {
     event.preventDefault();
     if (sending) return;
+    if (areas.length > 1 && !area) {
+      setError("ইনসাইড ঢাকা নাকি আউটসাইড ঢাকা, বেছে নিন।");
+      return;
+    }
     if (TURNSTILE_SITE_KEY && !human) {
       setError("অনুগ্রহ করে নিচের যাচাইটি সম্পন্ন করুন।");
       return;
@@ -81,6 +94,7 @@ export default function ProductPage({ token, product }) {
         address: form.address,
         quantity: Number(form.quantity),
         ...(option ? { option } : {}),
+        ...(area ? { area } : {}),
         ...(form.note.trim() ? { note: form.note } : {}),
         ...(form.couponCode.trim() ? { couponCode: form.couponCode } : {}),
         ...(human ? { turnstileToken: human } : {})
@@ -159,7 +173,9 @@ export default function ProductPage({ token, product }) {
             <div role="status" className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
               <p className="font-semibold text-emerald-900">আপনার অর্ডার গ্রহণ করা হয়েছে</p>
               <p className="mt-1 text-sm text-emerald-900">অর্ডার নম্বর: {done.orderNumber}</p>
-              <p className="mt-1 text-sm text-emerald-900">পণ্যের মোট দাম: {formatPrice(done.currency, done.total)}। ডেলিভারি চার্জ আমাদের টিম জানিয়ে দেবে।</p>
+              <p className="mt-1 text-sm text-emerald-900">
+                {done.deliveryFee > 0 || area ? `ডেলিভারি সহ মোট: ${formatPrice(done.currency, done.total)}` : `পণ্যের মোট দাম: ${formatPrice(done.currency, done.total)}। ডেলিভারি চার্জ আমাদের টিম জানিয়ে দেবে।`}
+              </p>
               {done.billSentToChat && <p className="mt-1 text-sm text-emerald-900">বিলটি আপনার চ্যাটেও পাঠানো হয়েছে।</p>}
               {done.couponNoted && <p className="mt-1 text-sm text-emerald-900">কুপন {done.couponNoted} আমাদের টিম অর্ডার নিশ্চিত করার সময় প্রয়োগ করবে।</p>}
             </div>
@@ -169,6 +185,20 @@ export default function ProductPage({ token, product }) {
             </button>
           ) : (
             <p className="mt-6 rounded-xl bg-slate-100 p-3 text-sm text-slate-600">এই পণ্যটি এখন অর্ডার করা যাচ্ছে না।</p>
+          )}
+
+          {delivery && !done && (
+            <div className="mt-5 rounded-xl border border-slate-200 p-4 text-sm">
+              <p className="font-semibold">ডেলিভারি</p>
+              <ul className="mt-2 space-y-1 text-slate-700">
+                {areas.map(key => (
+                  <li key={key}>
+                    {key === "inside" ? "ঢাকার ভিতরে" : "ঢাকার বাইরে"}: {delivery[key].fee === 0 ? "ফ্রি ডেলিভারি" : formatPrice(product.currency, delivery[key].fee)}
+                    {delivery[key].days ? ` · আনুমানিক ${estimatedDate(delivery[key].days)} এর মধ্যে (${delivery[key].days} দিন)` : ""}
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
 
           {product.description && <p className="mt-6 whitespace-pre-line text-base leading-7 text-slate-700">{product.description}</p>}
@@ -227,12 +257,31 @@ export default function ProductPage({ token, product }) {
               <input className={field} value={form.couponCode} onChange={set("couponCode")} maxLength={40} autoCapitalize="characters" />
             </label>
 
+            {areas.length > 1 && (
+              <fieldset className="mt-3">
+                <legend className="text-sm font-medium">ডেলিভারি এলাকা</legend>
+                <div className="mt-1 flex gap-4">
+                  {areas.map(key => (
+                    <label key={key} className="flex items-center gap-2 text-sm">
+                      <input type="radio" name="area" value={key} checked={area === key} onChange={() => setArea(key)} />
+                      {key === "inside" ? "ঢাকার ভিতরে" : "ঢাকার বাইরে"}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            )}
+            {area && delivery?.[area] && (
+              <p className="mt-3 text-sm text-slate-700">
+                পণ্যের দাম {formatPrice(product.currency, (product.salePrice ?? product.price) * Number(form.quantity || 1))} + ডেলিভারি {delivery[area].fee === 0 ? "ফ্রি" : formatPrice(product.currency, delivery[area].fee)} = <strong>{formatPrice(product.currency, (product.salePrice ?? product.price) * Number(form.quantity || 1) + delivery[area].fee)}</strong>
+              </p>
+            )}
+
             <div className="mt-4"><HumanCheck onToken={setHuman} /></div>
             {error && <p role="alert" className="mt-3 text-sm font-medium text-red-700">{error}</p>}
             <button type="submit" disabled={sending} className="mt-4 w-full rounded-xl bg-slate-900 px-6 py-3.5 text-base font-semibold text-white hover:bg-slate-700 disabled:opacity-60">
               {sending ? "পাঠানো হচ্ছে…" : "অর্ডার নিশ্চিত করুন"}
             </button>
-            <p className="mt-2 text-center text-xs text-slate-500">ডেলিভারি চার্জ আমাদের টিম আপনাকে জানিয়ে দেবে।</p>
+            {areas.length === 0 && <p className="mt-2 text-center text-xs text-slate-500">ডেলিভারি চার্জ আমাদের টিম আপনাকে জানিয়ে দেবে।</p>}
           </form>
         </div>
       )}
