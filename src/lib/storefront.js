@@ -35,3 +35,20 @@ export async function placeStorefrontOrder(token, order) {
 export function formatPrice(currency, amount) {
   return `${currency === "BDT" ? "৳" : `${currency} `}${Number(amount).toLocaleString("en-US")}`;
 }
+
+/** Looks an order up by its number and the phone it was placed with; null when there is no such order. */
+export async function trackStorefrontOrder(token, orderNumber, phone) {
+  const response = await fetch(`${apiUrl}/api/v1/public/storefront/products/${encodeURIComponent(token)}/track`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ orderNumber, phone })
+  });
+  const body = await response.json().catch(() => null);
+  if (response.status === 404) return null;
+  if (!response.ok) {
+    const error = new Error(body?.error?.details?.[0]?.messages?.[0] || body?.error?.message || body?.message || "Could not look that up. Try again.");
+    error.status = response.status;
+    throw error;
+  }
+  return body.data;
+}

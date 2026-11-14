@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { placeStorefrontOrder, formatPrice } from "@/lib/storefront";
+import { placeStorefrontOrder, trackStorefrontOrder, formatPrice } from "@/lib/storefront";
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 const STEPS = ["Ordered", "Packed", "On the way", "Delivered"];
-const AREA_LABEL = { inside: "Inside Dhaka", outside: "Outside Dhaka" };
 
 /** The date a delivery of this many days arrives by, like "Mon 16 Nov", in Bangladesh time. */
 function arriveBy(days) {
@@ -72,7 +71,7 @@ function Chips({ items, value, onChange, name }) {
 
 function Segmented({ items, value, onChange }) {
   return (
-    <div className="inline-flex rounded-full border border-neutral-200 bg-white p-1" role="radiogroup">
+    <div className="flex flex-wrap gap-1 rounded-2xl border border-neutral-200 bg-white p-1" role="radiogroup">
       {items.map(item => (
         <button
           key={item.key}
@@ -98,12 +97,93 @@ function Price({ currency, price, salePrice, size = "text-base" }) {
   );
 }
 
+const STAGE_OF = { pending: 0, confirmed: 1, processing: 1, shipped: 2, delivered: 3 };
+
+/** "Where is my order": the order number and phone it was placed with, and what is known: status, courier, tracking id and updates. */
+function TrackOrder({ token, placed }) {
+  const [number, setNumber] = useState("");
+  const [phone, setPhone] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [result, setResult] = useState(null);
+
+  useEffect(() => {
+    if (placed?.orderNumber) setNumber(placed.orderNumber);
+  }, [placed]);
+
+  async function look(event) {
+    event.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    setResult(null);
+    try {
+      const found = await trackStorefrontOrder(token, number, phone);
+      if (found) setResult(found);
+      else setError("We could not find an order with that number and phone.");
+    } catch (failure) {
+      setError(failure.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const stage = result ? (result.status === "cancelled" ? -1 : (STAGE_OF[result.status] ?? 0)) : 0;
+  return (
+    <section className="mx-5 mt-10 rounded-2xl bg-neutral-100 p-4 md:mx-6" aria-label="Track your order">
+      <p className={label}>Track your order</p>
+      <form onSubmit={look} className="mt-3 grid grid-cols-2 gap-3">
+        <input className={`${input} !bg-white`} value={number} onChange={event => setNumber(event.target.value)} required placeholder="Order number" aria-label="Order number" autoCapitalize="characters" />
+        <input className={`${input} !bg-white`} value={phone} onChange={event => setPhone(event.target.value)} required inputMode="tel" placeholder="Phone used" aria-label="Phone number used for the order" autoComplete="tel" />
+        <button type="submit" disabled={busy} className="col-span-2 rounded-xl bg-neutral-900 py-3 font-bold text-white disabled:opacity-60">{busy ? "Looking…" : "Track"}</button>
+      </form>
+      {error && <p role="alert" className="mt-3 text-sm font-semibold text-red-700">{error}</p>}
+      {result && (
+        <div className="mt-4" role="status">
+          <p className="font-bold">{result.orderNumber} · {formatPrice(result.currency, result.total)}</p>
+          <p className="text-sm text-neutral-600">{result.items.map(item => `${item.name} × ${item.quantity}`).join(", ")}</p>
+          {stage === -1 ? (
+            <p className="mt-3 font-semibold text-red-700">This order was cancelled.</p>
+          ) : (
+            <ol className="mt-4 grid grid-cols-4 text-center text-xs text-neutral-600">
+              {STEPS.map((step, index) => (
+                <li key={step} className="relative flex flex-col items-center">
+                  <span className={`z-10 h-3 w-3 rounded-full border-2 ${index <= stage ? "border-emerald-700 bg-emerald-700" : "border-neutral-400 bg-white"}`} />
+                  {index < STEPS.length - 1 && <span className={`absolute left-1/2 top-[5px] h-px w-full ${index < stage ? "bg-emerald-700" : "bg-neutral-300"}`} />}
+                  <span className="mt-1.5">{step}</span>
+                </li>
+              ))}
+            </ol>
+          )}
+          {result.parcel ? (
+            <div className="mt-4 rounded-xl bg-white p-3 text-sm">
+              <p className="font-semibold">{result.parcel.courier}{result.parcel.trackingId ? ` · Tracking ${result.parcel.trackingId}` : ""}</p>
+              <p className="text-neutral-600">Status: {result.parcel.status}</p>
+              {result.parcel.events.length > 0 && (
+                <ul className="mt-2 space-y-1 border-t border-neutral-200 pt-2">
+                  {[...result.parcel.events].reverse().map((entry, index) => (
+                    <li key={index}>
+                      <span className="text-neutral-500">{new Date(entry.at).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Dhaka" })}</span> · {entry.message || entry.status}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ) : (
+            stage !== -1 && <p className="mt-3 text-sm text-neutral-600">Not handed to the courier yet. This updates once your order is on its way.</p>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
 /** A product's public page: pictures, price, choices, delivery, details and similar products, with Buy Now. Only what exists is shown. */
 export default function ProductPage({ token, product }) {
-  const areas = product.delivery ? ["inside", "outside"].filter(key => product.delivery[key]) : [];
+  const areas = product.delivery ? product.delivery.areas : [];
   const [active, setActive] = useState(0);
   const [option, setOption] = useState(product.options.length === 1 ? product.options[0] : "");
-  const [area, setArea] = useState(areas[0] || "");
+  const [area, setArea] = useState(areas[0]?.name || "");
   const [open, setOpen] = useState(false);
   const [needOption, setNeedOption] = useState(false);
   const [done, setDone] = useState(null);
@@ -116,9 +196,9 @@ export default function ProductPage({ token, product }) {
 
   const unit = product.salePrice ?? product.price;
   const quantity = Math.min(Math.max(Number(form.quantity) || 1, 1), Math.max(product.maxQuantity, 1));
-  const fee = area && product.delivery?.[area] ? product.delivery[area].fee : null;
+  const terms = areas.find(candidate => candidate.name === area) ?? null;
+  const fee = terms ? terms.fee : null;
   const total = unit * quantity + (fee ?? 0);
-  const terms = area && product.delivery ? product.delivery[area] : null;
   const images = product.images;
   const hasOptions = product.options.length > 0;
 
@@ -233,7 +313,7 @@ export default function ProductPage({ token, product }) {
           {product.delivery && (
             <section className="mt-7 rounded-2xl bg-neutral-100 p-4" aria-label="Estimated delivery">
               <p className={label}>Estimated delivery</p>
-              {areas.length > 1 && <div className="mt-3"><Segmented items={areas.map(key => ({ key, label: AREA_LABEL[key] }))} value={area} onChange={setArea} /></div>}
+              {areas.length > 1 && <div className="mt-3"><Segmented items={areas.map(item => ({ key: item.name, label: item.name }))} value={area} onChange={setArea} /></div>}
               {terms && (
                 <>
                   {terms.days ? (
@@ -241,8 +321,7 @@ export default function ProductPage({ token, product }) {
                   ) : null}
                   <div className="mt-3 flex items-baseline justify-between rounded-xl bg-white px-4 py-3">
                     <p className="font-semibold">Delivery charge <span className="text-xl font-extrabold">{terms.fee === 0 ? "Free" : formatPrice(product.currency, terms.fee)}</span></p>
-                    {areas.length === 1 && <p className="text-sm text-neutral-500">· {AREA_LABEL[area]}</p>}
-                    {areas.length > 1 && <p className="text-sm text-neutral-500">· {AREA_LABEL[area]}</p>}
+                    <p className="text-sm text-neutral-500">· {terms.name}</p>
                   </div>
                   <ol className="mt-4 grid grid-cols-4 text-center text-xs text-neutral-600">
                     {STEPS.map((step, index) => (
@@ -259,13 +338,16 @@ export default function ProductPage({ token, product }) {
             </section>
           )}
 
-          {(product.description || product.category) && (
+          {(product.description || product.category || product.attributes.length > 0) && (
             <section className="mt-8" aria-label="Details">
               <p className={label}>Details</p>
               {product.description && <p className="mt-2 whitespace-pre-line text-base leading-7">{product.description}</p>}
-              {product.category && (
+              {(product.category || product.attributes.length > 0) && (
                 <dl className="mt-3 divide-y divide-neutral-200 border-y border-neutral-200 text-[15px]">
-                  <div className="flex gap-6 py-3"><dt className="w-24 shrink-0 text-neutral-500">Category</dt><dd>{product.category}</dd></div>
+                  {product.attributes.map(row => (
+                    <div key={row.label} className="flex gap-6 py-3"><dt className="w-24 shrink-0 text-neutral-500">{row.label}</dt><dd className="min-w-0">{row.value}</dd></div>
+                  ))}
+                  {product.category && <div className="flex gap-6 py-3"><dt className="w-24 shrink-0 text-neutral-500">Category</dt><dd>{product.category}</dd></div>}
                 </dl>
               )}
             </section>
@@ -294,6 +376,8 @@ export default function ProductPage({ token, product }) {
           </ul>
         </section>
       )}
+
+      <TrackOrder token={token} placed={done} />
 
       <p className="mt-10 text-center text-sm text-neutral-500">Powered by <a href="https://www.ormitechit.com" className="font-bold text-neutral-900">OrmiTech</a></p>
 
@@ -357,7 +441,7 @@ export default function ProductPage({ token, product }) {
               <textarea className={input} value={form.address} onChange={set("address")} required minLength={8} maxLength={400} rows={3} autoComplete="street-address" placeholder="House, road, area, district" />
             </label>
 
-            {areas.length > 1 && <div className="mt-4"><Segmented items={areas.map(key => ({ key, label: AREA_LABEL[key] }))} value={area} onChange={setArea} /></div>}
+            {areas.length > 1 && <div className="mt-4"><Segmented items={areas.map(item => ({ key: item.name, label: item.name }))} value={area} onChange={setArea} /></div>}
             <label className={`${label} mt-3 block`}>Coupon code (optional)
               <input className={input} value={form.couponCode} onChange={set("couponCode")} maxLength={40} autoCapitalize="characters" placeholder="Coupon code" />
             </label>
