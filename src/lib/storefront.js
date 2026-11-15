@@ -16,11 +16,25 @@ export async function getStorefrontProduct(token) {
 
 /** Sends the order. Returns the API's data, or throws an Error carrying the API's message in plain words. */
 export async function placeStorefrontOrder(token, order) {
-  const response = await fetch(`${apiUrl}/api/v1/public/storefront/products/${encodeURIComponent(token)}/orders`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify(order)
-  });
+  const send = () =>
+    fetch(`${apiUrl}/api/v1/public/storefront/products/${encodeURIComponent(token)}/orders`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(order)
+    });
+  // A dropped connection (the server restarting, a bad signal) is tried once more after a moment. The API treats a repeated order as
+  // the same order, so this cannot place it twice. If it still fails the customer reads a plain message, not "Failed to fetch".
+  let response;
+  try {
+    response = await send();
+  } catch {
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      response = await send();
+    } catch {
+      throw new Error("ইন্টারনেট সংযোগে সমস্যা হয়েছে। একটু পরে আবার চেষ্টা করুন।");
+    }
+  }
   const body = await response.json().catch(() => null);
   if (!response.ok) {
     const field = body?.error?.details?.[0]?.messages?.[0];
