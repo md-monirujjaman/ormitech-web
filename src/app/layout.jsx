@@ -1,6 +1,7 @@
 import Script from "next/script";
 import "@/styles/globals.css";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
+import CookieConsent from "@/components/analytics/CookieConsent";
 import MarketingOnly from "@/components/common/MarketingOnly";
 import AnnouncementPopup from "@/components/common/AnnouncementPopup";
 import SmoothScroll from "@/components/common/SmoothScroll";
@@ -43,6 +44,7 @@ export default function RootLayout({ children }) {
         {children}
         <OrganizationJsonLd />
         <GoogleAnalytics />
+        <CookieConsent />
         <MarketingOnly>
           <AnnouncementPopup />
           <Script

@@ -8,6 +8,7 @@ import PlanFinder from "@/components/pricing/PlanFinder";
 import PricingPlans from "@/components/pricing/PricingPlans";
 import { PricingProvider } from "@/components/pricing/PricingProvider";
 import PricingValue from "@/components/pricing/PricingValue";
+import TrackOnMount from "@/components/analytics/TrackOnMount";
 import { ScrollProgress } from "@/components/ui/effects";
 import FaqJsonLd from "@/components/ui/FaqJsonLd";
 import FaqSection from "@/components/ui/FaqSection";
@@ -40,6 +41,7 @@ export default async function PricingPage() {
         <MotionProvider>
           <PricingProvider value={pricing}>
           <ScrollProgress />
+          <TrackOnMount event="view_pricing" />
           <PricingPlans />
           <PlanComparison />
           <PricingValue />

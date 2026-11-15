@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, MotionConfig, motion, useScroll, useTransform } from "framer-motion";
 import { ArrowUpRight, CheckCircle2, Clock3, Loader2, Mail, MapPin, Phone, Send, UserRound } from "lucide-react";
 import { ease } from "@/components/ui/Reveal";
+import { EVENTS, trackEvent } from "@/lib/analytics";
 import { interTight } from "@/styles/fonts";
 
 // Enquiry types that other pages can link to with /contact?topic=…
@@ -59,6 +60,14 @@ export default function Contact({ headingLevel: Heading = "h2" }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const messageRef = useRef(null);
   const sectionRef = useRef(null);
+  const formStarted = useRef(false);
+
+  // form_start fires once, on the first interaction with the form, until the next successful submit.
+  function startForm() {
+    if (formStarted.current) return;
+    formStarted.current = true;
+    trackEvent(EVENTS.FORM_START, { form_name: "contact" });
+  }
 
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
   const blobY = useTransform(scrollYProgress, [0, 1], [60, -60]);
@@ -82,6 +91,12 @@ export default function Contact({ headingLevel: Heading = "h2" }) {
       const res = await fetch("/api/contact", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       const result = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(result.error || "Unable to send message");
+      // Events fire only after the API accepted the message. generate_lead needs the message to have been
+      // delivered to the webhook, not just accepted without a configured destination.
+      const topicName = topic || "general";
+      trackEvent(EVENTS.FORM_SUBMIT, { form_name: "contact", topic: topicName });
+      if (result.delivered === true) trackEvent(EVENTS.GENERATE_LEAD, { form_name: "contact", topic: topicName });
+      formStarted.current = false;
       formElement.reset();
       setTopic("");
       setSubject("");
@@ -149,7 +164,7 @@ export default function Contact({ headingLevel: Heading = "h2" }) {
               </motion.ul>
             </div>
 
-            <motion.form onSubmit={submit} initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={view} transition={{ duration: 0.7, delay: 0.1, ease }} className="relative overflow-hidden rounded-[28px] border border-white bg-white p-6 shadow-[0_50px_100px_-46px_rgba(242,13,69,.4),0_24px_48px_-32px_rgba(13,27,61,.3)] ring-1 ring-slate-100 sm:p-9">
+            <motion.form onSubmit={submit} onFocus={startForm} initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={view} transition={{ duration: 0.7, delay: 0.1, ease }} className="relative overflow-hidden rounded-[28px] border border-white bg-white p-6 shadow-[0_50px_100px_-46px_rgba(242,13,69,.4),0_24px_48px_-32px_rgba(13,27,61,.3)] ring-1 ring-slate-100 sm:p-9">
               <div aria-hidden className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand via-[#FF5C85] to-[#C1093A]" />
               <p className="inline-flex items-center gap-2 rounded-full bg-brand/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[.14em] text-brandInk">
                 <Send className="h-3 w-3" aria-hidden /> Send us a message

@@ -1,6 +1,7 @@
 # Internal Data-Flow Audit
 
 **Reviewed:** 14 October 2026  
+**Update 15 November 2026:** The Google Analytics rows below describe the state before the consent change. GA4 now loads only after the visitor accepts analytics cookies, with Consent Mode v2 defaults set to denied. See [analytics-tracking.md](analytics-tracking.md).  
 **Scope:** This `ormitech-web` checkout only. It is the Next.js marketing site, not the OrmiTech dashboard, backend, admin panel or docs service. This is an implementation inventory, not a security assessment or legal opinion.
 
 ## Confirmed flows in this repository

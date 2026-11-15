@@ -8,6 +8,7 @@ import { buttonClasses, ButtonShine } from "@/components/common/ButtonLink";
 import { DotGrid, Pill } from "@/components/sections/kit";
 import { Spotlight } from "@/components/ui/effects";
 import { Stagger, StaggerItem, ease } from "@/components/ui/Reveal";
+import { EVENTS, trackEvent } from "@/lib/analytics";
 import { formatMoney, getPlanPrice, getPricingConfig } from "@/data/pricing";
 import { usePricing } from "./PricingProvider";
 import EnterpriseBanner from "./EnterpriseBanner";
@@ -184,7 +185,11 @@ function PlanCard({ plan, period, currency, billing, reserveOfferRow }) {
         </div>
         <p className="relative mt-1.5 min-h-[18px] text-[12px] text-slate-500">{priceNote(plan, period, price, currency, billing)}</p>
 
-        <Link href={plan.cta.href} className={`relative mt-4 ${ctaClass(plan)}`}>
+        <Link
+          href={plan.cta.href}
+          onClick={() => trackEvent(EVENTS.SELECT_PLAN, { item_id: plan.id, item_name: plan.name, billing_period: period })}
+          className={`relative mt-4 ${ctaClass(plan)}`}
+        >
           {plan.popular && <ButtonShine />}
           {plan.cta.label}
           <ArrowRight aria-hidden className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />

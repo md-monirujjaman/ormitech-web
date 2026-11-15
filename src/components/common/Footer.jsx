@@ -1,3 +1,4 @@
+import CookieSettingsButton from "@/components/common/CookieSettingsButton";
 import FooterWordmark from "@/components/common/FooterWordmark";
 import { FooterBrand, FooterLink, FooterSocials } from "@/components/common/FooterInteractive";
 import { appLinks, authLinks, socialProfiles } from "@/data/site";
@@ -66,7 +67,10 @@ export default function Footer() {
       <div className="relative z-10 shrink-0 border-t border-white/10">
         <div className="container-x flex flex-col items-center justify-between gap-4 py-5 text-[13px] text-white/50 sm:flex-row lg:py-6 lg:text-[14.5px]">
           <p>© {new Date().getFullYear()} <span className="font-semibold text-white">OrmiTech</span> IT. All rights reserved.</p>
-          <FooterSocials profiles={socials} />
+          <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
+            <CookieSettingsButton />
+            <FooterSocials profiles={socials} />
+          </div>
         </div>
       </div>
     </footer>
