@@ -3,48 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { placeStorefrontOrder, trackStorefrontOrder, formatPrice } from "@/lib/storefront";
 
-const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 const STEPS = ["Ordered", "Packed", "On the way", "Delivered"];
 
 /** The date a delivery of this many days arrives by, like "Mon 16 Nov", in Bangladesh time. */
 function arriveBy(days) {
   return new Date(Date.now() + days * 86_400_000).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "Asia/Dhaka" });
-}
-
-/** Cloudflare's human check, loaded only when a site key is configured. Reports the token (or null when it expires). */
-function HumanCheck({ onToken }) {
-  const box = useRef(null);
-  useEffect(() => {
-    if (!TURNSTILE_SITE_KEY) return undefined;
-    let widget = null;
-    let cancelled = false;
-    const render = () => {
-      if (cancelled || !box.current || !window.turnstile) return;
-      widget = window.turnstile.render(box.current, {
-        sitekey: TURNSTILE_SITE_KEY,
-        callback: token => onToken(token),
-        "expired-callback": () => onToken(null),
-        "error-callback": () => onToken(null)
-      });
-    };
-    if (window.turnstile) render();
-    else {
-      let script = document.querySelector("script[data-turnstile]");
-      if (!script) {
-        script = document.createElement("script");
-        script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-        script.async = true;
-        script.dataset.turnstile = "1";
-        document.head.appendChild(script);
-      }
-      script.addEventListener("load", render);
-    }
-    return () => {
-      cancelled = true;
-      if (widget !== null && window.turnstile) window.turnstile.remove(widget);
-    };
-  }, [onToken]);
-  return TURNSTILE_SITE_KEY ? <div ref={box} className="mt-3 min-h-[65px]" /> : null;
 }
 
 const label = "text-[11px] font-semibold uppercase tracking-wider text-neutral-500";
@@ -189,7 +152,6 @@ export default function ProductPage({ token, product }) {
   const [done, setDone] = useState(null);
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
-  const [human, setHuman] = useState(null);
   const [form, setForm] = useState({ name: "", phone: "", address: "", quantity: 1, note: "", couponCode: "" });
   const set = key => event => setForm(current => ({ ...current, [key]: event.target.value }));
   const slides = useRef(null);
@@ -227,10 +189,6 @@ export default function ProductPage({ token, product }) {
   async function submit(event) {
     event.preventDefault();
     if (sending) return;
-    if (TURNSTILE_SITE_KEY && !human) {
-      setError("Please complete the check below.");
-      return;
-    }
     setSending(true);
     setError("");
     try {
@@ -242,17 +200,15 @@ export default function ProductPage({ token, product }) {
         ...(option ? { option } : {}),
         ...(area ? { area } : {}),
         ...(form.note.trim() ? { note: form.note } : {}),
-        ...(form.couponCode.trim() ? { couponCode: form.couponCode } : {}),
-        ...(human ? { turnstileToken: human } : {})
+        ...(form.couponCode.trim() ? { couponCode: form.couponCode } : {})
       });
       setDone(result);
       setOpen(false);
       window.scrollTo({ top: 0, behavior: "smooth" });
+      // The order details are already in their chat: take them back there.
+      if (result.chatUrl) window.setTimeout(() => window.location.assign(result.chatUrl), 3000);
     } catch (failure) {
       setError(failure.message);
-      // A human-check token works once.
-      setHuman(null);
-      if (window.turnstile) window.turnstile.reset();
     } finally {
       setSending(false);
     }
@@ -319,6 +275,7 @@ export default function ProductPage({ token, product }) {
               <p className="mt-1 text-sm">Order {done.orderNumber} · Total {formatPrice(done.currency, done.total)}{done.deliveryFee > 0 ? ` (delivery ${formatPrice(done.currency, done.deliveryFee)} included)` : ""}</p>
               {done.billSentToChat && <p className="mt-1 text-sm">We also sent the bill to your chat.</p>}
               {done.couponNoted && <p className="mt-1 text-sm">Coupon {done.couponNoted} will be applied when our team confirms your order.</p>}
+              {done.chatUrl && <p className="mt-2 text-sm">Taking you back to your chat… <a href={done.chatUrl} className="font-bold underline">Open chat now</a></p>}
               <p className="mt-1 text-sm">{product.paymentMode === "full" ? "Your order is being verified. We will confirm it once our team has checked your payment." : "Our team will confirm it with you shortly."}</p>
             </div>
           )}
@@ -429,7 +386,7 @@ export default function ProductPage({ token, product }) {
               </label>
             </div>
             <label className={`${label} mt-3 block`}>Delivery address
-              <textarea className={input} value={form.address} onChange={set("address")} required minLength={8} maxLength={400} rows={3} autoComplete="street-address" placeholder="House, road, area, district" />
+              <textarea className={input} value={form.address} onChange={set("address")} required minLength={4} maxLength={400} rows={3} autoComplete="street-address" placeholder="House, road, area, district" />
             </label>
 
             {areas.length > 1 && <div className="mt-4"><Segmented items={areas.map(item => ({ key: item.name, label: item.name }))} value={area} onChange={setArea} /></div>}
@@ -446,7 +403,6 @@ export default function ProductPage({ token, product }) {
               <div className="flex justify-between text-lg font-extrabold text-neutral-900"><dt>Total · {paymentLabel}</dt><dd>{formatPrice(product.currency, total)}</dd></div>
             </dl>
 
-            <HumanCheck onToken={setHuman} />
             {error && <p role="alert" className="mt-3 text-sm font-semibold text-red-700">{error}</p>}
             <button type="submit" disabled={sending} className="mt-4 w-full rounded-2xl bg-neutral-900 py-4 text-base font-bold text-white disabled:opacity-60">
               {sending ? "Sending…" : `Confirm order · ${formatPrice(product.currency, total)}`}
