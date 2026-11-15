@@ -6,6 +6,8 @@ export const siteUrl = trimSlash(process.env.NEXT_PUBLIC_SITE_URL || "https://ww
 
 // GA4 measurement ID. Public by design (embedded in the page), so a fallback here is safe.
 export const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-HFH88XV2FG";
+// Public GTM container ID (not a secret). Loaded only after analytics consent, see TagManager.jsx.
+export const gtmContainerId = process.env.NEXT_PUBLIC_GTM_ID || "GTM-NNKKSCVF";
 
 export const appLinks = {
   app: trimSlash(process.env.NEXT_PUBLIC_APP_URL || "https://app.ormitechit.com"),

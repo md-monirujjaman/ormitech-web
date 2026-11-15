@@ -32,6 +32,7 @@ Checked against `origin/main` (commit `3afeb1c`), not against Cloudflare or any 
 | Consent banner | `src/components/analytics/CookieConsent.jsx` | "Essential only" and "Accept analytics" buttons with equal weight. Shown until a choice is saved. Mounted in `src/app/layout.jsx`. |
 | Withdrawal | `src/components/common/CookieSettingsButton.jsx`, `Footer.jsx` | "Cookie settings" button in the footer reopens the banner. |
 | GA4 loader | `src/components/analytics/GoogleAnalytics.jsx` | Renders nothing until analytics is accepted, and never starts on a private route (`/p/...`, `/blog/preview/...`). Then loads `gtag.js`, with Consent Mode v2 defaults set to denied and updated to granted. Sends the first page view by hand with a sanitised URL (`send_page_view: false`). Withdrawal sets `ga-disable-<ID>` and updates consent to denied. |
+| Tag Manager loader | `src/components/analytics/TagManager.jsx` | Loads `gtm.js` for container `GTM-NNKKSCVF` (`src/data/site.js`, overridable with `NEXT_PUBLIC_GTM_ID`) only after GA4 has started, so only after accepted consent on a public page. The container has no tags yet. Does not send analytics by itself. |
 | URL sanitising | `src/lib/analytics-url.js` | Single place for page URL, path, title and referrer rules (section 4b). Also installs a history guard that updates the sanitised `page_location` on each navigation. |
 | SPA page views | `src/components/analytics/AnalyticsPageview.jsx` | One sanitised `page_view` per client-side route change, consent-gated. Replaces the earlier `config` call with `page_path`. |
 | Event helper | `src/lib/analytics.js` | `trackEvent` only sends in production, only with consent, never on private routes, strips unsafe parameters, and queues events requested before gtag exists. |
@@ -126,7 +127,8 @@ Limit of the test: the `/p/` and `/blog/preview/` routes were tested with fake t
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Yes | Public. Falls back to `G-HFH88XV2FG`. |
 | `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_DOCS_URL`, `NEXT_PUBLIC_API_URL` | Yes | Unchanged. |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Yes | Unchanged. |
-| `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_CLARITY_PROJECT_ID`, `NEXT_PUBLIC_META_PIXEL_ID`, `NEXT_PUBLIC_LINKEDIN_PARTNER_ID`, `NEXT_PUBLIC_SENTRY_DSN` | No | Commented placeholders in `.env.example`. Not read by code yet. |
+| `NEXT_PUBLIC_GTM_ID` | Yes | Public container ID. Defaults to `GTM-NNKKSCVF`. Loaded only after analytics consent. |
+| `NEXT_PUBLIC_CLARITY_PROJECT_ID`, `NEXT_PUBLIC_META_PIXEL_ID`, `NEXT_PUBLIC_LINKEDIN_PARTNER_ID`, `NEXT_PUBLIC_SENTRY_DSN` | No | Commented placeholders in `.env.example`. Not read by code yet. |
 | `META_CONVERSIONS_API_TOKEN`, `SENTRY_AUTH_TOKEN` | No | Server-only secrets. Must never use a `NEXT_PUBLIC_` prefix. Not configured. |
 
 Set real values in the hosting platform's environment settings, not in a committed file.
@@ -175,6 +177,26 @@ Leak check: 0 matches for the leak strings in every hit of every step.
 
 Not tested: a real private page with a valid token (needs live API data). Real-browser runs with the owner's own GA4 DebugView or Realtime were not done (no access).
 
+### 6d. Google Tag Manager loader tests (15 Nov 2026)
+
+Method: production build, headless Chrome for Testing, CDP network events for `googletagmanager.com` and `google-analytics.com`. Counts are per step, by request type.
+
+| Step | Requests seen |
+|---|---|
+| S1: no consent, public page load | none (no `gtm.js`, no `gtag/js`) |
+| S2: accept analytics on `/pricing` | `gtm.js` 1 (after GA4 ready), `gtag/js` 2, collect 2 |
+| S3: SPA `/pricing` to `/faq` | collect 1, no `gtm.js` |
+| S4: full load, consented, public page | `gtm.js` 1, `gtag/js` 1, collect 1 |
+| S5: `/p/TESTTOKEN123` full load | none (no `gtm.js`, no `gtag/js`, no collect) |
+| S6: `/blog/preview/TESTTOKEN123` full load | none |
+| S7: private page to `/pricing`, consented | `gtm.js` 1, `gtag/js` 1, collect 1 |
+| S8: withdraw, SPA navigation and scroll | none after withdrawal |
+| S9: reload with withdrawn consent | none |
+
+Notes:
+- `gtag/js` appears twice in S2. The first request is Next.js preloading the GA script. The second is initiated by `gtm.js` itself. The dataLayer holds one `config` call (ours) and one `page_view` event. One collect request per step carries the hits, so this is not a duplicate page view. Confirm in GTM Preview before publishing any tag.
+- The container is empty, so GTM sends nothing by itself. Adding a GA4 tag inside GTM now would duplicate tracking with the direct GA4 code.
+
 ### 6b. URL sanitisation tests, before the Enhanced Measurement settings were turned off (15 Nov 2026)
 
 Method: production build, headless Chrome for Testing, `sendBeacon`/`fetch` hooked before page scripts, every GA call recorded with URL and POST body. Full harness is local, outside the repository.
@@ -215,7 +237,7 @@ Not verified (needs real accounts or a deployed environment):
 |---|---|---|---|---|---|
 | Consent banner + Consent Mode v2 | Implemented | Browser-verified (local production build) | Not applicable | Review banner wording and legal copy with counsel. Decide whether a region-specific banner is needed. | Counsel review. Decide scope (all visitors vs regional). |
 | Google Analytics 4 | Implemented (consent-gated, URL-sanitised) | Browser-verified locally (network payloads, section 6c); not verified in GA4 admin | Existing property `G-HFH88XV2FG`; access not checked | Owner reports Enhanced Measurement "Page changes based on browser history events" and "Outbound clicks" were turned off (section 4b). Confirm in GA4 admin. Decide on Scroll and File downloads. Mark `generate_lead` and `form_submit` as key events. Enable internal traffic filter. Check data retention and Google Signals settings. | Create GA4 key events. Verify DebugView after deployment. |
-| Google Tag Manager | Not implemented | Not applicable | No container exists | Create a GTM container (Google login, human only). Give the container ID. | Decide whether to migrate GA4 into GTM. If yes, remove direct `gtag.js` to avoid two GA4 tags. |
+| Google Tag Manager | Loader implemented (consent-gated, empty container) | Network-verified locally (section 6d). Not verified in GTM Preview. | Container `GTM-NNKKSCVF` (web, empty, never published). Duplicate account with container `GTM-NSGW9J7G` also exists. | Decide which container to keep and delete the other, in GTM account settings. Decide whether to migrate GA4 into GTM. If yes, remove direct `gtag.js` to avoid two GA4 tags. Publish only after GTM Preview checks. | Migration plan (phase 5). |
 | Google Search Console | Not changed | Not verified | Not checked (requires login) | Log into search.google.com/search-console. Check ownership. If DNS TXT verification is needed, the record name and value will be given and you add it in Cloudflare yourself. | Sitemap and indexing review after login. |
 | Google Ads conversion tracking | Not implemented | Not applicable | Not checked | Log into ads.google.com. Create conversion actions for `generate_lead` (and `form_submit` if wanted). Enhanced conversions only after consent review. No campaign spend without approval. | Mapping the conversion to GA4 or direct tag. |
 | Microsoft Clarity | Not implemented | Not applicable | Account not checked | Create the Clarity project (human only). Give the project ID. Masking of inputs must be confirmed. | Loader gated by analytics consent, with masking. |

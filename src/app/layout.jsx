@@ -1,6 +1,7 @@
 import Script from "next/script";
 import "@/styles/globals.css";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
+import TagManager from "@/components/analytics/TagManager";
 import CookieConsent from "@/components/analytics/CookieConsent";
 import MarketingOnly from "@/components/common/MarketingOnly";
 import AnnouncementPopup from "@/components/common/AnnouncementPopup";
@@ -44,6 +45,7 @@ export default function RootLayout({ children }) {
         {children}
         <OrganizationJsonLd />
         <GoogleAnalytics />
+        <TagManager />
         <CookieConsent />
         <MarketingOnly>
           <AnnouncementPopup />
