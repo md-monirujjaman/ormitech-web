@@ -178,7 +178,7 @@ function TrackOrder({ token, placed }) {
   );
 }
 
-/** A product's public page: pictures, price, choices, delivery, details and similar products, with Buy Now. Only what exists is shown. */
+/** A product's public page: pictures, price, choices, delivery and details, with Buy Now. Only what exists is shown. */
 export default function ProductPage({ token, product }) {
   const areas = product.delivery ? product.delivery.areas : [];
   const [active, setActive] = useState(0);
@@ -192,7 +192,19 @@ export default function ProductPage({ token, product }) {
   const [human, setHuman] = useState(null);
   const [form, setForm] = useState({ name: "", phone: "", address: "", quantity: 1, note: "", couponCode: "" });
   const set = key => event => setForm(current => ({ ...current, [key]: event.target.value }));
-  const strip = useRef(null);
+  const slides = useRef(null);
+
+  function goTo(index) {
+    const box = slides.current;
+    if (!box) return;
+    const next = Math.min(Math.max(index, 0), product.images.length - 1);
+    box.scrollTo({ left: next * box.clientWidth, behavior: "smooth" });
+    setActive(next);
+  }
+  function onSlide() {
+    const box = slides.current;
+    if (box && box.clientWidth > 0) setActive(Math.round(box.scrollLeft / box.clientWidth));
+  }
 
   const unit = product.salePrice ?? product.price;
   const quantity = Math.min(Math.max(Number(form.quantity) || 1, 1), Math.max(product.maxQuantity, 1));
@@ -201,6 +213,7 @@ export default function ProductPage({ token, product }) {
   const total = unit * quantity + (fee ?? 0);
   const images = product.images;
   const hasOptions = product.options.length > 0;
+  const paymentLabel = product.paymentMode === "full" ? "Full payment before delivery" : "Cash on delivery";
 
   function start() {
     if (hasOptions && !option) {
@@ -251,14 +264,23 @@ export default function ProductPage({ token, product }) {
         <div className="md:sticky md:top-8 md:self-start">
           {images.length > 0 ? (
             <div className="relative">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={images[active]} alt={product.name} className="aspect-square w-full bg-neutral-100 object-cover md:rounded-2xl" />
+              {/* Swipe on a phone, arrows or dots anywhere; the whole picture is shown, never cropped. */}
+              <div ref={slides} onScroll={onSlide} className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth bg-neutral-100 [scrollbar-width:none] md:rounded-2xl [&::-webkit-scrollbar]:hidden">
+                {images.map((src, index) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img key={src} src={src} alt={index === 0 ? product.name : `${product.name} ${index + 1}`} className="aspect-square w-full shrink-0 snap-center object-contain" draggable={false} />
+                ))}
+              </div>
               {images.length > 1 && (
-                <div className="absolute inset-x-0 bottom-3 flex justify-center gap-1.5">
-                  {images.map((src, index) => (
-                    <button key={src} type="button" onClick={() => setActive(index)} aria-label={`Picture ${index + 1}`} className={`h-2 rounded-full transition-all ${index === active ? "w-5 bg-white" : "w-2 bg-white/60"}`} />
-                  ))}
-                </div>
+                <>
+                  <button type="button" onClick={() => goTo(active - 1)} disabled={active === 0} aria-label="Previous picture" className="absolute left-2 top-1/2 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-lg shadow disabled:opacity-30 md:flex">‹</button>
+                  <button type="button" onClick={() => goTo(active + 1)} disabled={active === images.length - 1} aria-label="Next picture" className="absolute right-2 top-1/2 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-lg shadow disabled:opacity-30 md:flex">›</button>
+                  <div className="absolute inset-x-0 bottom-3 flex justify-center gap-1.5">
+                    {images.map((src, index) => (
+                      <button key={src} type="button" onClick={() => goTo(index)} aria-label={`Picture ${index + 1}`} className={`h-2 rounded-full transition-all ${index === active ? "w-5 bg-neutral-900" : "w-2 bg-neutral-900/30"}`} />
+                    ))}
+                  </div>
+                </>
               )}
             </div>
           ) : (
@@ -268,9 +290,9 @@ export default function ProductPage({ token, product }) {
             <ul className="hidden gap-2 pt-3 md:flex">
               {images.map((src, index) => (
                 <li key={src}>
-                  <button type="button" onClick={() => setActive(index)} aria-label={`Picture ${index + 1}`} className={`block h-16 w-16 overflow-hidden rounded-lg border-2 ${index === active ? "border-neutral-900" : "border-transparent"}`}>
+                  <button type="button" onClick={() => goTo(index)} aria-label={`Picture ${index + 1}`} className={`block h-16 w-16 overflow-hidden rounded-lg border-2 bg-neutral-100 ${index === active ? "border-neutral-900" : "border-transparent"}`}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={src} alt="" className="h-full w-full object-cover" />
+                    <img src={src} alt="" className="h-full w-full object-contain" />
                   </button>
                 </li>
               ))}
@@ -279,17 +301,8 @@ export default function ProductPage({ token, product }) {
         </div>
 
         <div className="px-5 pt-5 md:px-0 md:pt-0">
-          <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-neutral-900 text-base font-bold text-white" aria-hidden>{product.businessName.slice(0, 1).toUpperCase()}</span>
-            <div>
-              <p className="font-bold leading-tight">{product.businessName}</p>
-              <p className="text-sm text-neutral-500">Official shop page</p>
-            </div>
-          </div>
-
-          <h1 className="mt-6 text-3xl font-extrabold tracking-tight">{product.name}</h1>
-          <p className="mt-1 text-neutral-500">Code {product.code}</p>
-          <div className="mt-4"><Price currency={product.currency} price={product.price} salePrice={product.salePrice} size="text-4xl" /></div>
+          <h1 className="text-3xl font-extrabold tracking-tight">{product.name}</h1>
+          <div className="mt-3"><Price currency={product.currency} price={product.price} salePrice={product.salePrice} size="text-4xl" /></div>
           {!product.inStock && <p className="mt-2 text-sm font-semibold text-red-700">Out of stock</p>}
 
           {hasOptions && (
@@ -332,7 +345,7 @@ export default function ProductPage({ token, product }) {
                       </li>
                     ))}
                   </ol>
-                  <p className="mt-3 text-sm text-neutral-500">Cash on delivery</p>
+                  <p className="mt-3 text-sm text-neutral-500">{paymentLabel}</p>
                 </>
               )}
             </section>
@@ -354,28 +367,6 @@ export default function ProductPage({ token, product }) {
           )}
         </div>
       </div>
-
-      {product.similar.length > 0 && (
-        <section className="mt-9 md:px-6" aria-label="Similar products">
-          <p className={`${label} px-5 md:px-0`}>Similar products</p>
-          <ul ref={strip} className="mt-3 flex snap-x gap-3 overflow-x-auto px-5 pb-2 md:px-0">
-            {product.similar.map(item => (
-              <li key={item.token} className="w-40 shrink-0 snap-start">
-                <a href={`/p/${item.token}`} className="block">
-                  {item.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={item.image} alt={item.name} className="aspect-[4/5] w-full rounded-2xl bg-neutral-100 object-cover" loading="lazy" />
-                  ) : (
-                    <div className="aspect-[4/5] w-full rounded-2xl bg-neutral-100" />
-                  )}
-                  <p className="mt-2 line-clamp-2 text-sm font-medium">{item.name}</p>
-                  <Price currency={item.currency} price={item.price} salePrice={item.salePrice} />
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
 
       <TrackOrder token={token} placed={done} />
 
@@ -452,7 +443,7 @@ export default function ProductPage({ token, product }) {
             <dl className="mt-5 space-y-1.5 border-t border-dashed border-neutral-300 pt-4 text-[15px] text-neutral-600">
               <div className="flex justify-between"><dt>Product × {quantity}</dt><dd>{formatPrice(product.currency, unit * quantity)}</dd></div>
               {fee !== null && <div className="flex justify-between"><dt>Delivery</dt><dd>{fee === 0 ? "Free" : formatPrice(product.currency, fee)}</dd></div>}
-              <div className="flex justify-between text-lg font-extrabold text-neutral-900"><dt>Total · Cash on delivery</dt><dd>{formatPrice(product.currency, total)}</dd></div>
+              <div className="flex justify-between text-lg font-extrabold text-neutral-900"><dt>Total · {paymentLabel}</dt><dd>{formatPrice(product.currency, total)}</dd></div>
             </dl>
 
             <HumanCheck onToken={setHuman} />
