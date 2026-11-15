@@ -6,6 +6,7 @@
 // Callers must only fire an event after the real action succeeded (for example after the API accepted a
 // form), never on a click alone.
 
+import { isPrivatePath } from "@/lib/analytics-url";
 import { readConsent } from "@/lib/consent";
 
 export const ANALYTICS_ENABLED = process.env.NODE_ENV === "production";
@@ -68,6 +69,8 @@ if (typeof window !== "undefined") {
 /** Sends one GA4 event when allowed. Returns true when the event was sent or queued for sending. */
 export function trackEvent(name, params = {}) {
   if (!canTrackAnalytics()) return false;
+  // Private routes (draft previews, customer product links) never send custom events.
+  if (isPrivatePath(window.location.pathname)) return false;
   const clean = cleanParams(params);
   if (!ready || typeof window.gtag !== "function") {
     if (queue.length >= MAX_QUEUED) return false;
