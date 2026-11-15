@@ -319,7 +319,7 @@ export default function ProductPage({ token, product }) {
               <p className="mt-1 text-sm">Order {done.orderNumber} · Total {formatPrice(done.currency, done.total)}{done.deliveryFee > 0 ? ` (delivery ${formatPrice(done.currency, done.deliveryFee)} included)` : ""}</p>
               {done.billSentToChat && <p className="mt-1 text-sm">We also sent the bill to your chat.</p>}
               {done.couponNoted && <p className="mt-1 text-sm">Coupon {done.couponNoted} will be applied when our team confirms your order.</p>}
-              <p className="mt-1 text-sm">Our team will confirm it with you shortly.</p>
+              <p className="mt-1 text-sm">{product.paymentMode === "full" ? "Your order is being verified. We will confirm it once our team has checked your payment." : "Our team will confirm it with you shortly."}</p>
             </div>
           )}
 
