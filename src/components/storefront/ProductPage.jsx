@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { placeStorefrontOrder, quoteStorefrontCoupon, trackStorefrontOrder, formatPrice } from "@/lib/storefront";
+import { getPaymentOptions, placeStorefrontOrder, quoteStorefrontCoupon, trackStorefrontOrder, formatPrice } from "@/lib/storefront";
+import PaymentModal from "./PaymentModal";
+import PaymentSection from "./PaymentSection";
 
 const STEPS = ["Ordered", "Packed", "On the way", "Delivered"];
 
@@ -163,6 +165,13 @@ export default function ProductPage({ token, product }) {
   const [coupon, setCoupon] = useState(null);
   const [couponError, setCouponError] = useState("");
   const [checking, setChecking] = useState(false);
+  // How this order can be paid (from the API, for the area and quantity chosen): null until it is known or when the API has no answer,
+  // in which case the page behaves as it always did (cash on delivery).
+  const [payOptions, setPayOptions] = useState(null);
+  const [payMethod, setPayMethod] = useState("");
+  const [payOpen, setPayOpen] = useState(false);
+  const [transactionId, setTransactionId] = useState("");
+  const [senderNumber, setSenderNumber] = useState("");
   const slides = useRef(null);
 
   function goTo(index) {
@@ -189,6 +198,11 @@ export default function ProductPage({ token, product }) {
   const images = product.images;
   const hasOptions = product.options.length > 0;
   const paymentLabel = product.paymentMode === "full" ? "Full payment before delivery" : "Cash on delivery";
+
+  const chosenPay = payOptions?.methods.find(candidate => candidate.method === payMethod) ?? null;
+  const prepay = chosenPay !== null && chosenPay.method !== "cod";
+  // No way to pay for this place (and no old-style full payment): the order cannot be placed here.
+  const noWayToPay = payOptions !== null && payOptions.methods.length === 0 && product.paymentMode !== "full";
 
   async function applyCoupon() {
     const code = form.couponCode.trim();
@@ -223,6 +237,21 @@ export default function ProductPage({ token, product }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quantity, area]);
 
+  // The ways to pay follow the area, quantity and coupon: asked again whenever one changes while the order form is open.
+  useEffect(() => {
+    if (!open) return undefined;
+    let current = true;
+    getPaymentOptions(token, { quantity, ...(area ? { area } : {}), ...(coupon ? { couponCode: coupon.code } : {}) })
+      .then(data => {
+        if (!current) return;
+        setPayOptions(data);
+        setPayMethod(previous => (data.methods.some(candidate => candidate.method === previous) ? previous : data.methods.length === 1 ? data.methods[0].method : data.methods.find(candidate => candidate.method === "cod")?.method ?? ""));
+      })
+      .catch(() => { if (current) setPayOptions(null); });
+    return () => { current = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, quantity, area, coupon?.code]);
+
   function start() {
     if (hasOptions && !option) {
       setNeedOption(true);
@@ -232,8 +261,24 @@ export default function ProductPage({ token, product }) {
     setOpen(true);
   }
 
-  async function submit(event) {
+  // The form's own Confirm: cash on delivery places the order; mobile money first asks for the payment.
+  function submit(event) {
     event.preventDefault();
+    if (sending) return;
+    if (noWayToPay) return;
+    if (payOptions && payOptions.methods.length > 0 && !chosenPay) {
+      setError("Choose how you will pay.");
+      return;
+    }
+    if (prepay) {
+      setError("");
+      setPayOpen(true);
+      return;
+    }
+    placeOrder();
+  }
+
+  async function placeOrder() {
     if (sending) return;
     setSending(true);
     setError("");
@@ -247,10 +292,13 @@ export default function ProductPage({ token, product }) {
         ...(area ? { area } : {}),
         ...(form.note.trim() ? { note: form.note } : {}),
         // Only a coupon the page has shown working goes with the order; one typed but never applied would take nothing off.
-        ...(coupon ? { couponCode: coupon.code } : {})
+        ...(coupon ? { couponCode: coupon.code } : {}),
+        ...(chosenPay ? { paymentMethod: chosenPay.method } : {}),
+        ...(prepay ? { transactionId: transactionId.trim(), ...(senderNumber.trim() ? { senderNumber: senderNumber.trim() } : {}) } : {})
       });
       setDone(result);
       setOpen(false);
+      setPayOpen(false);
       window.scrollTo({ top: 0, behavior: "smooth" });
       // The order details are already in their chat: take them back there.
       if (result.chatUrl) window.setTimeout(() => window.location.assign(result.chatUrl), 3000);
@@ -323,7 +371,8 @@ export default function ProductPage({ token, product }) {
               {done.billSentToChat && <p className="mt-1 text-sm">We also sent the bill to your chat.</p>}
               {done.couponApplied && done.discount > 0 && <p className="mt-1 text-sm">Coupon {done.couponApplied} applied: {formatPrice(done.currency, done.discount)} off.</p>}
               {done.chatUrl && <p className="mt-2 text-sm">Taking you back to your chat… <a href={done.chatUrl} className="font-bold underline">Open chat now</a></p>}
-              <p className="mt-1 text-sm">{product.paymentMode === "full" ? "Your order is being verified. We will confirm it once our team has checked your payment." : "Our team will confirm it with you shortly."}</p>
+              {done.paymentStatus === "advance_submitted" && <p className="mt-1 text-sm">Payment submitted: {formatPrice(done.currency, done.advancePaid)}{done.remaining > 0 ? `. ${formatPrice(done.currency, done.remaining)} is paid on delivery.` : "."}</p>}
+              <p className="mt-1 text-sm">{done.paymentStatus === "advance_submitted" ? "We will confirm your order once our team has checked your payment." : product.paymentMode === "full" ? "Your order is being verified. We will confirm it once our team has checked your payment." : "Our team will confirm it with you shortly."}</p>
             </div>
           )}
 
@@ -462,6 +511,8 @@ export default function ProductPage({ token, product }) {
               {coupon && <p role="status" className="mt-2 text-sm font-semibold text-emerald-700">Coupon {coupon.code} applied: {formatPrice(product.currency, discount)} off</p>}
               {couponError && <p role="alert" className="mt-2 text-sm font-semibold text-red-700">{couponError}</p>}
             </div>
+            {payOptions && payOptions.methods.length > 0 && <PaymentSection currency={product.currency} methods={payOptions.methods} value={payMethod} onChange={method => { setPayMethod(method); setError(""); }} />}
+            {noWayToPay && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-800">No way to pay is available for this place right now. Please contact the shop.</p>}
             <label className={`${label} mt-3 block`}>Note (optional)
               <input className={input} value={form.note} onChange={set("note")} maxLength={300} placeholder="Anything we should know" />
             </label>
@@ -470,16 +521,32 @@ export default function ProductPage({ token, product }) {
               <div className="flex justify-between"><dt>Product × {quantity}</dt><dd>{formatPrice(product.currency, unit * quantity)}</dd></div>
               {fee !== null && <div className="flex justify-between"><dt>Delivery</dt><dd>{fee === 0 ? "Free" : formatPrice(product.currency, fee)}</dd></div>}
               {coupon && <div className="flex justify-between font-semibold text-emerald-700"><dt>Coupon {coupon.code}</dt><dd>−{formatPrice(product.currency, discount)}</dd></div>}
-              <div className="flex justify-between text-lg font-extrabold text-neutral-900"><dt>Total · {paymentLabel}</dt><dd>{formatPrice(product.currency, total)}</dd></div>
+              <div className="flex justify-between text-lg font-extrabold text-neutral-900"><dt>Total · {chosenPay ? chosenPay.label : paymentLabel}</dt><dd>{formatPrice(product.currency, total)}</dd></div>
+              {chosenPay && chosenPay.payNow > 0 && <div className="flex justify-between font-semibold text-neutral-900"><dt>{chosenPay.remaining > 0 ? "Advance to pay now" : "To pay now"}</dt><dd>{formatPrice(product.currency, chosenPay.payNow)}</dd></div>}
+              {chosenPay && chosenPay.payNow > 0 && chosenPay.remaining > 0 && <div className="flex justify-between"><dt>Remaining on delivery</dt><dd>{formatPrice(product.currency, chosenPay.remaining)}</dd></div>}
             </dl>
 
             {error && <p role="alert" className="mt-3 text-sm font-semibold text-red-700">{error}</p>}
-            <button type="submit" disabled={sending} className="mt-4 w-full rounded-2xl bg-neutral-900 py-4 text-base font-bold text-white disabled:opacity-60">
-              {sending ? "Sending…" : `Confirm order · ${formatPrice(product.currency, total)}`}
+            <button type="submit" disabled={sending || noWayToPay} className="mt-4 w-full rounded-2xl bg-neutral-900 py-4 text-base font-bold text-white disabled:opacity-60">
+              {sending ? "Sending…" : prepay ? `Continue to payment · ${formatPrice(product.currency, chosenPay.payNow)}` : `Confirm order · ${formatPrice(product.currency, total)}`}
             </button>
             {fee === null && <p className="mt-2 text-center text-xs text-neutral-500">Our team will tell you the delivery charge.</p>}
           </form>
         </div>
+      )}
+      {open && payOpen && prepay && (
+        <PaymentModal
+          currency={product.currency}
+          method={chosenPay}
+          transactionId={transactionId}
+          senderNumber={senderNumber}
+          onTransactionId={setTransactionId}
+          onSenderNumber={setSenderNumber}
+          onBack={() => { setPayOpen(false); setError(""); }}
+          onConfirm={placeOrder}
+          sending={sending}
+          error={error}
+        />
       )}
     </main>
   );
