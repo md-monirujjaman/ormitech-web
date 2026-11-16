@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { getPaymentOptions, placeStorefrontOrder, quoteStorefrontCoupon, trackStorefrontOrder, formatPrice } from "@/lib/storefront";
+import Description from "./Description";
+import Gallery from "./Gallery";
 import PaymentModal from "./PaymentModal";
 import PaymentSection from "./PaymentSection";
 
@@ -97,7 +99,7 @@ function TrackOrder({ token, placed }) {
 
   const stage = result ? (result.status === "cancelled" ? -1 : (STAGE_OF[result.status] ?? 0)) : 0;
   return (
-    <section className="mx-5 mt-10 rounded-2xl bg-neutral-100 p-4 md:mx-6" aria-label="Track your order">
+    <section className="rounded-2xl bg-neutral-100 p-4" aria-label="Track your order">
       <p className={label}>Track your order</p>
       <form onSubmit={look} className="mt-3 grid grid-cols-2 gap-3">
         <input className={`${input} !bg-white`} value={number} onChange={event => setNumber(event.target.value)} required placeholder="Order number" aria-label="Order number" autoCapitalize="characters" />
@@ -148,7 +150,6 @@ function TrackOrder({ token, placed }) {
 /** A product's public page: pictures, price, choices, delivery and details, with Buy Now. Only what exists is shown. */
 export default function ProductPage({ token, product }) {
   const areas = product.delivery ? product.delivery.areas : [];
-  const [active, setActive] = useState(0);
   // Options with no units left, when the business counts stock per option: shown crossed out and cannot be chosen.
   const soldOut = product.optionStock ? product.options.filter(item => (product.optionStock[item] ?? 0) <= 0) : [];
   const [option, setOption] = useState(product.options.length === 1 && !soldOut.includes(product.options[0]) ? product.options[0] : "");
@@ -172,19 +173,7 @@ export default function ProductPage({ token, product }) {
   const [payOpen, setPayOpen] = useState(false);
   const [transactionId, setTransactionId] = useState("");
   const [senderNumber, setSenderNumber] = useState("");
-  const slides = useRef(null);
-
-  function goTo(index) {
-    const box = slides.current;
-    if (!box) return;
-    const next = Math.min(Math.max(index, 0), product.images.length - 1);
-    box.scrollTo({ left: next * box.clientWidth, behavior: "smooth" });
-    setActive(next);
-  }
-  function onSlide() {
-    const box = slides.current;
-    if (box && box.clientWidth > 0) setActive(Math.round(box.scrollLeft / box.clientWidth));
-  }
+  const [tab, setTab] = useState("description");
 
   const unit = product.salePrice ?? product.price;
   // With stock counted per option, how many can be ordered depends on the option chosen.
@@ -309,55 +298,49 @@ export default function ProductPage({ token, product }) {
     }
   }
 
+  const off = product.salePrice !== null && product.price > 0 ? Math.round((1 - product.salePrice / product.price) * 100) : 0;
+  // The cheapest charge and the shortest time across the places, for a one-line summary above the buy button.
+  const cheapest = areas.length > 0 ? Math.min(...areas.map(item => item.fee)) : null;
+  const tabs = [
+    ...(product.description ? [{ id: "description", label: "Description" }] : []),
+    ...(product.delivery ? [{ id: "delivery", label: "Delivery" }] : []),
+    { id: "track", label: "Track order" }
+  ];
+  const shownTab = tabs.some(item => item.id === tab) ? tab : tabs[0].id;
+
+  const buyButton = product.canOrder && !done && (
+    <button type="button" onClick={start} className="w-full rounded-2xl bg-neutral-900 px-10 py-4 text-base font-bold text-white transition hover:bg-neutral-700 md:w-auto md:min-w-64">
+      Buy Now · {formatPrice(product.currency, unit)}
+    </button>
+  );
+
   return (
-    <main className="mx-auto min-h-screen max-w-xl bg-white pb-28 text-neutral-900 md:max-w-5xl md:pb-10">
-      <div className="md:grid md:grid-cols-2 md:gap-10 md:px-6 md:pt-8">
-        <div className="md:sticky md:top-8 md:self-start">
-          {images.length > 0 ? (
-            <div className="relative">
-              {/* Swipe on a phone, arrows or dots anywhere; the whole picture is shown, never cropped. */}
-              <div ref={slides} onScroll={onSlide} className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth bg-neutral-100 [scrollbar-width:none] md:rounded-2xl [&::-webkit-scrollbar]:hidden">
-                {images.map((src, index) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img key={src} src={src} alt={index === 0 ? product.name : `${product.name} ${index + 1}`} className="aspect-square w-full shrink-0 snap-center object-contain" draggable={false} />
-                ))}
-              </div>
-              {images.length > 1 && (
-                <>
-                  <button type="button" onClick={() => goTo(active - 1)} disabled={active === 0} aria-label="Previous picture" className="absolute left-2 top-1/2 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-lg shadow disabled:opacity-30 md:flex">‹</button>
-                  <button type="button" onClick={() => goTo(active + 1)} disabled={active === images.length - 1} aria-label="Next picture" className="absolute right-2 top-1/2 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-lg shadow disabled:opacity-30 md:flex">›</button>
-                  <div className="absolute inset-x-0 bottom-3 flex justify-center gap-1.5">
-                    {images.map((src, index) => (
-                      <button key={src} type="button" onClick={() => goTo(index)} aria-label={`Picture ${index + 1}`} className={`h-2 rounded-full transition-all ${index === active ? "w-5 bg-neutral-900" : "w-2 bg-neutral-900/30"}`} />
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          ) : (
-            <div className="flex aspect-square w-full items-center justify-center bg-neutral-100 text-neutral-400 md:rounded-2xl">No picture</div>
-          )}
-          {images.length > 1 && (
-            <ul className="hidden gap-2 pt-3 md:flex">
-              {images.map((src, index) => (
-                <li key={src}>
-                  <button type="button" onClick={() => goTo(index)} aria-label={`Picture ${index + 1}`} className={`block h-16 w-16 overflow-hidden rounded-lg border-2 bg-neutral-100 ${index === active ? "border-neutral-900" : "border-transparent"}`}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={src} alt="" className="h-full w-full object-contain" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+    <main className="mx-auto min-h-screen max-w-6xl bg-white pb-28 text-neutral-900 md:pb-12">
+      <p className="truncate px-5 pt-4 text-sm text-neutral-500 md:px-6 md:pt-6">
+        {product.businessName}
+        {product.category ? <> <span aria-hidden="true">›</span> {product.category}</> : null}
+      </p>
+
+      <div className="mt-3 md:grid md:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] md:gap-10 md:px-6 lg:gap-14">
+        <div className="px-5 md:sticky md:top-6 md:self-start md:px-0">
+          <Gallery images={product.images} name={product.name} />
         </div>
 
-        <div className="px-5 pt-5 md:px-0 md:pt-0">
-          <h1 className="text-3xl font-extrabold tracking-tight">{product.name}</h1>
-          <div className="mt-3"><Price currency={product.currency} price={product.price} salePrice={product.salePrice} size="text-4xl" /></div>
-          {!product.inStock && <p className="mt-2 text-sm font-semibold text-red-700">Out of stock</p>}
+        <div className="px-5 pt-6 md:px-0 md:pt-0">
+          <h1 className="text-2xl font-extrabold leading-tight tracking-tight md:text-3xl">{product.name}</h1>
+          <p className="mt-1 text-sm text-neutral-500">Code {product.code}</p>
+
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <Price currency={product.currency} price={product.price} salePrice={product.salePrice} size="text-3xl md:text-4xl" />
+            {off > 0 && <span className="rounded-full bg-red-50 px-2.5 py-1 text-sm font-bold text-red-700">−{off}%</span>}
+          </div>
+          <p className={`mt-3 inline-flex items-center gap-2 text-sm font-semibold ${product.inStock ? "text-emerald-700" : "text-red-700"}`}>
+            <span className={`h-2 w-2 rounded-full ${product.inStock ? "bg-emerald-600" : "bg-red-600"}`} aria-hidden="true" />
+            {product.inStock ? "In stock" : "Out of stock"}
+          </p>
 
           {hasOptions && (
-            <div id="choices" className="mt-7">
+            <div id="choices" className="mt-6">
               <p className={label}>{product.optionLabel || "Choose one"}</p>
               <Chips items={product.options} value={option} onChange={value => { setOption(value); setNeedOption(false); }} name={product.optionLabel || "Options"} soldOut={soldOut} />
               {needOption && <p role="alert" className="mt-2 text-sm font-medium text-red-700">Please choose one.</p>}
@@ -365,7 +348,7 @@ export default function ProductPage({ token, product }) {
           )}
 
           {done && (
-            <div role="status" className="mt-7 rounded-2xl bg-emerald-50 p-4 text-emerald-950">
+            <div role="status" className="mt-6 rounded-2xl bg-emerald-50 p-4 text-emerald-950">
               <p className="font-bold">Your order is received</p>
               <p className="mt-1 text-sm">Order {done.orderNumber} · Total {formatPrice(done.currency, done.total)}{done.deliveryFee > 0 ? ` (delivery ${formatPrice(done.currency, done.deliveryFee)} included)` : ""}</p>
               {done.billSentToChat && <p className="mt-1 text-sm">We also sent the bill to your chat.</p>}
@@ -377,69 +360,99 @@ export default function ProductPage({ token, product }) {
           )}
 
           {product.delivery && (
-            <section className="mt-7 rounded-2xl bg-neutral-100 p-4" aria-label="Estimated delivery">
-              <p className={label}>Estimated delivery</p>
+            <section className="mt-6 rounded-2xl border border-neutral-200 p-4" aria-label="Estimated delivery">
+              <p className={label}>Delivery</p>
               {areas.length > 1 && <div className="mt-3"><Segmented items={areas.map(item => ({ key: item.name, label: item.name }))} value={area} onChange={setArea} /></div>}
-              {terms && (
-                <>
-                  {terms.days ? (
-                    <p className="mt-4 text-neutral-600">Order now, get it<br /><span className="text-2xl font-extrabold text-neutral-900">by {arriveBy(terms.days)}</span></p>
-                  ) : null}
-                  <div className="mt-3 flex items-baseline justify-between rounded-xl bg-white px-4 py-3">
-                    <p className="font-semibold">Delivery charge <span className="text-xl font-extrabold">{terms.fee === 0 ? "Free" : formatPrice(product.currency, terms.fee)}</span></p>
-                    <p className="text-sm text-neutral-500">· {terms.name}</p>
-                  </div>
-                  <ol className="mt-4 grid grid-cols-4 text-center text-xs text-neutral-600">
-                    {STEPS.map((step, index) => (
-                      <li key={step} className="relative flex flex-col items-center">
-                        <span className={`z-10 h-3 w-3 rounded-full border-2 ${index === 0 ? "border-emerald-700 bg-emerald-700" : index === STEPS.length - 1 ? "border-emerald-700 bg-emerald-200" : "border-neutral-400 bg-white"}`} />
-                        {index < STEPS.length - 1 && <span className="absolute left-1/2 top-[5px] h-px w-full bg-neutral-300" />}
-                        <span className="mt-1.5">{step}</span>
-                      </li>
-                    ))}
-                  </ol>
-                  <p className="mt-3 text-sm text-neutral-500">{paymentLabel}</p>
-                </>
-              )}
+              {terms ? (
+                <p className="mt-3 text-[15px] text-neutral-700">
+                  <strong className="text-neutral-900">{terms.fee === 0 ? "Free delivery" : `${formatPrice(product.currency, terms.fee)} delivery`}</strong> to {terms.name}
+                  {terms.days ? <> · get it by <strong className="text-neutral-900">{arriveBy(terms.days)}</strong></> : null}
+                </p>
+              ) : cheapest !== null ? (
+                <p className="mt-3 text-[15px] text-neutral-700">Delivery from <strong className="text-neutral-900">{cheapest === 0 ? "free" : formatPrice(product.currency, cheapest)}</strong>. Choose where to deliver.</p>
+              ) : null}
             </section>
           )}
 
-          {(product.description || product.category || product.attributes.length > 0) && (
-            <section className="mt-8" aria-label="Details">
-              <p className={label}>Details</p>
-              {product.description && <p className="mt-2 whitespace-pre-line text-base leading-7">{product.description}</p>}
-              {(product.category || product.attributes.length > 0) && (
-                <dl className="mt-3 divide-y divide-neutral-200 border-y border-neutral-200 text-[15px]">
-                  {product.attributes.map(row => (
-                    <div key={row.label} className="flex gap-6 py-3"><dt className="w-24 shrink-0 text-neutral-500">{row.label}</dt><dd className="min-w-0">{row.value}</dd></div>
-                  ))}
-                  {product.category && <div className="flex gap-6 py-3"><dt className="w-24 shrink-0 text-neutral-500">Category</dt><dd>{product.category}</dd></div>}
-                </dl>
-              )}
-            </section>
-          )}
+          <div className="mt-6 hidden md:block">{buyButton}</div>
+          {!product.canOrder && !done && <p className="mt-6 rounded-2xl bg-neutral-100 p-4 text-sm text-neutral-600">This product can't be ordered right now.</p>}
         </div>
       </div>
 
-      <TrackOrder token={token} placed={done} />
+      <section className="mt-10 md:mt-14" aria-label="More about this product">
+        <div role="tablist" aria-label="Product information" className="sticky top-0 z-30 flex gap-1 overflow-x-auto border-b border-neutral-200 bg-white/95 px-5 backdrop-blur [scrollbar-width:none] md:px-6 [&::-webkit-scrollbar]:hidden">
+          {tabs.map(item => (
+            <button
+              key={item.id}
+              type="button"
+              role="tab"
+              id={`tab-${item.id}`}
+              aria-selected={shownTab === item.id}
+              aria-controls={`panel-${item.id}`}
+              onClick={() => setTab(item.id)}
+              className={`shrink-0 border-b-2 px-4 py-3.5 text-[15px] font-bold transition ${shownTab === item.id ? "border-neutral-900 text-neutral-900" : "border-transparent text-neutral-500 hover:text-neutral-900"}`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+        <div role="tabpanel" id={`panel-${shownTab}`} aria-labelledby={`tab-${shownTab}`} className="px-5 py-6 md:px-6 md:py-8">
+          <div className="max-w-3xl">
+            {shownTab === "description" && <Description text={product.description} />}
+            {shownTab === "delivery" && (
+              <div>
+                {areas.length > 0 && (
+                  <ul className="divide-y divide-neutral-200 rounded-2xl border border-neutral-200 text-[15px]">
+                    {areas.map(item => (
+                      <li key={item.name} className="flex items-center justify-between gap-4 px-4 py-3">
+                        <span className="font-semibold">{item.name}</span>
+                        <span className="text-right text-neutral-600">{item.fee === 0 ? "Free" : formatPrice(product.currency, item.fee)}{item.days ? ` · ${item.days} day${item.days === 1 ? "" : "s"}` : ""}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <ol className="mt-6 grid grid-cols-4 text-center text-xs text-neutral-600">
+                  {STEPS.map((step, index) => (
+                    <li key={step} className="relative flex flex-col items-center">
+                      <span className={`z-10 h-3 w-3 rounded-full border-2 ${index === 0 ? "border-emerald-700 bg-emerald-700" : index === STEPS.length - 1 ? "border-emerald-700 bg-emerald-200" : "border-neutral-400 bg-white"}`} />
+                      {index < STEPS.length - 1 && <span className="absolute left-1/2 top-[5px] h-px w-full bg-neutral-300" />}
+                      <span className="mt-1.5">{step}</span>
+                    </li>
+                  ))}
+                </ol>
+                <p className="mt-4 text-sm text-neutral-500">{paymentLabel}. Payment options are shown when you place the order.</p>
+              </div>
+            )}
+            {shownTab === "track" && <TrackOrder token={token} placed={done} />}
+          </div>
+        </div>
+      </section>
+
+      {product.similar.length > 0 && (
+        <section className="mt-4 px-5 md:px-6" aria-label="You may also like">
+          <h2 className="text-xl font-extrabold tracking-tight">You may also like</h2>
+          <ul className="mt-4 flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {product.similar.map(item => (
+              <li key={item.token} className="w-40 shrink-0 md:w-52">
+                <a href={`/p/${item.token}`} className="block rounded-2xl border border-neutral-200 p-2 transition hover:border-neutral-900">
+                  {item.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={item.image} alt="" className="aspect-square w-full rounded-xl bg-neutral-50 object-contain" />
+                  ) : (
+                    <span className="flex aspect-square w-full items-center justify-center rounded-xl bg-neutral-100 text-xs text-neutral-400">No picture</span>
+                  )}
+                  <span className="mt-2 block truncate px-1 text-sm font-semibold">{item.name}</span>
+                  <span className="block px-1 pb-1 text-sm font-bold">{formatPrice(item.currency, item.salePrice ?? item.price)}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <p className="mt-10 text-center text-sm text-neutral-500">Powered by <a href="https://www.ormitechit.com" className="font-bold text-neutral-900">OrmiTech</a></p>
 
-      {product.canOrder && !done && (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-200 bg-white/95 px-4 py-3 backdrop-blur md:hidden">
-          <button type="button" onClick={start} className="w-full rounded-2xl bg-neutral-900 py-4 text-base font-bold text-white active:bg-neutral-700">
-            Buy Now · {formatPrice(product.currency, unit)}
-          </button>
-        </div>
-      )}
-      {product.canOrder && !done && (
-        <div className="hidden md:mx-6 md:mt-8 md:block">
-          <button type="button" onClick={start} className="rounded-2xl bg-neutral-900 px-10 py-4 text-base font-bold text-white hover:bg-neutral-700">
-            Buy Now · {formatPrice(product.currency, unit)}
-          </button>
-        </div>
-      )}
-      {!product.canOrder && !done && <p className="mx-5 mt-8 rounded-2xl bg-neutral-100 p-4 text-sm text-neutral-600">This product can't be ordered right now.</p>}
+      {buyButton && <div className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-200 bg-white/95 px-4 py-3 backdrop-blur md:hidden">{buyButton}</div>}
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 md:items-center" role="dialog" aria-modal="true" aria-label="Order form">
