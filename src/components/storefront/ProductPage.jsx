@@ -13,7 +13,7 @@ function arriveBy(days) {
 const label = "text-[11px] font-semibold uppercase tracking-wider text-neutral-500";
 const input = "mt-1.5 w-full rounded-xl bg-neutral-100 px-3.5 py-3 text-base text-neutral-900 placeholder:text-neutral-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-neutral-900";
 
-function Chips({ items, value, onChange, name }) {
+function Chips({ items, value, onChange, name, soldOut = [] }) {
   return (
     <div className="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label={name}>
       {items.map(item => (
@@ -22,8 +22,10 @@ function Chips({ items, value, onChange, name }) {
           type="button"
           role="radio"
           aria-checked={value === item}
+          aria-disabled={soldOut.includes(item)}
+          disabled={soldOut.includes(item)}
           onClick={() => onChange(item)}
-          className={`min-h-11 rounded-xl px-5 text-[15px] font-semibold transition ${value === item ? "bg-neutral-900 text-white" : "border border-neutral-300 bg-white text-neutral-900 hover:border-neutral-900"}`}
+          className={`min-h-11 rounded-xl px-5 text-[15px] font-semibold transition ${soldOut.includes(item) ? "cursor-not-allowed border border-neutral-200 bg-neutral-50 text-neutral-400 line-through" : value === item ? "bg-neutral-900 text-white" : "border border-neutral-300 bg-white text-neutral-900 hover:border-neutral-900"}`}
         >
           {item}
         </button>
@@ -145,7 +147,9 @@ function TrackOrder({ token, placed }) {
 export default function ProductPage({ token, product }) {
   const areas = product.delivery ? product.delivery.areas : [];
   const [active, setActive] = useState(0);
-  const [option, setOption] = useState(product.options.length === 1 ? product.options[0] : "");
+  // Options with no units left, when the business counts stock per option: shown crossed out and cannot be chosen.
+  const soldOut = product.optionStock ? product.options.filter(item => (product.optionStock[item] ?? 0) <= 0) : [];
+  const [option, setOption] = useState(product.options.length === 1 && !soldOut.includes(product.options[0]) ? product.options[0] : "");
   const [area, setArea] = useState(areas[0]?.name || "");
   const [open, setOpen] = useState(false);
   const [needOption, setNeedOption] = useState(false);
@@ -174,7 +178,10 @@ export default function ProductPage({ token, product }) {
   }
 
   const unit = product.salePrice ?? product.price;
-  const quantity = Math.min(Math.max(Number(form.quantity) || 1, 1), Math.max(product.maxQuantity, 1));
+  // With stock counted per option, how many can be ordered depends on the option chosen.
+  const maxQuantity = product.optionStock && option ? Math.min(product.maxQuantity, product.optionStock[option] ?? 0) : product.maxQuantity;
+  const quantity = Math.min(Math.max(Number(form.quantity) || 1, 1), Math.max(maxQuantity, 1));
+  const optionLeft = product.optionStock && option ? product.optionStock[option] ?? 0 : null;
   const terms = areas.find(candidate => candidate.name === area) ?? null;
   const fee = terms ? terms.fee : null;
   const discount = coupon ? Math.min(coupon.discount, unit * quantity + (fee ?? 0)) : 0;
@@ -304,7 +311,7 @@ export default function ProductPage({ token, product }) {
           {hasOptions && (
             <div id="choices" className="mt-7">
               <p className={label}>{product.optionLabel || "Choose one"}</p>
-              <Chips items={product.options} value={option} onChange={value => { setOption(value); setNeedOption(false); }} name={product.optionLabel || "Options"} />
+              <Chips items={product.options} value={option} onChange={value => { setOption(value); setNeedOption(false); }} name={product.optionLabel || "Options"} soldOut={soldOut} />
               {needOption && <p role="alert" className="mt-2 text-sm font-medium text-red-700">Please choose one.</p>}
             </div>
           )}
@@ -404,15 +411,16 @@ export default function ProductPage({ token, product }) {
               {hasOptions ? (
                 <div className="min-w-0">
                   <p className={label}>{product.optionLabel || "Choice"}</p>
-                  <Chips items={product.options} value={option} onChange={setOption} name={product.optionLabel || "Options"} />
+                  <Chips items={product.options} value={option} onChange={setOption} name={product.optionLabel || "Options"} soldOut={soldOut} />
                 </div>
               ) : <span />}
               <div>
                 <p className={`${label} text-right`}>Quantity</p>
+                {optionLeft !== null && optionLeft <= 5 && <p className="mt-1 text-right text-xs font-semibold text-amber-700">Only {optionLeft} left</p>}
                 <div className="mt-2 flex items-center rounded-xl border border-neutral-300">
                   <button type="button" onClick={() => setForm(c => ({ ...c, quantity: Math.max(quantity - 1, 1) }))} className="h-11 w-11 text-xl" aria-label="Fewer">−</button>
                   <span className="w-8 text-center font-bold" aria-live="polite">{quantity}</span>
-                  <button type="button" onClick={() => setForm(c => ({ ...c, quantity: Math.min(quantity + 1, Math.max(product.maxQuantity, 1)) }))} className="h-11 w-11 text-xl" aria-label="More">+</button>
+                  <button type="button" onClick={() => setForm(c => ({ ...c, quantity: Math.min(quantity + 1, Math.max(maxQuantity, 1)) }))} className="h-11 w-11 text-xl" aria-label="More">+</button>
                 </div>
               </div>
             </div>
