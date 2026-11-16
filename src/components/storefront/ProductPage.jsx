@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { placeStorefrontOrder, trackStorefrontOrder, formatPrice } from "@/lib/storefront";
+import { placeStorefrontOrder, quoteStorefrontCoupon, trackStorefrontOrder, formatPrice } from "@/lib/storefront";
 
 const STEPS = ["Ordered", "Packed", "On the way", "Delivered"];
 
@@ -154,6 +154,11 @@ export default function ProductPage({ token, product }) {
   const [sending, setSending] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", address: "", quantity: 1, note: "", couponCode: "" });
   const set = key => event => setForm(current => ({ ...current, [key]: event.target.value }));
+  // A coupon the API has checked: { code, discount }. It is dropped whenever the code is edited, and worked out again when the
+  // quantity or delivery area changes, because what it takes off depends on both.
+  const [coupon, setCoupon] = useState(null);
+  const [couponError, setCouponError] = useState("");
+  const [checking, setChecking] = useState(false);
   const slides = useRef(null);
 
   function goTo(index) {
@@ -172,10 +177,44 @@ export default function ProductPage({ token, product }) {
   const quantity = Math.min(Math.max(Number(form.quantity) || 1, 1), Math.max(product.maxQuantity, 1));
   const terms = areas.find(candidate => candidate.name === area) ?? null;
   const fee = terms ? terms.fee : null;
-  const total = unit * quantity + (fee ?? 0);
+  const discount = coupon ? Math.min(coupon.discount, unit * quantity + (fee ?? 0)) : 0;
+  const total = unit * quantity + (fee ?? 0) - discount;
   const images = product.images;
   const hasOptions = product.options.length > 0;
   const paymentLabel = product.paymentMode === "full" ? "Full payment before delivery" : "Cash on delivery";
+
+  async function applyCoupon() {
+    const code = form.couponCode.trim();
+    if (!code || checking) return;
+    setChecking(true);
+    setCouponError("");
+    try {
+      const quote = await quoteStorefrontCoupon(token, { code, quantity, ...(area ? { area } : {}), ...(form.phone.trim() ? { phone: form.phone } : {}) });
+      setCoupon({ code: quote.code, discount: quote.discount });
+    } catch (failure) {
+      setCoupon(null);
+      setCouponError(failure.message);
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  function removeCoupon() {
+    setCoupon(null);
+    setCouponError("");
+    setForm(current => ({ ...current, couponCode: "" }));
+  }
+
+  // Quantity or area changed under an applied coupon: ask again so the amount on screen is the one the order will get.
+  useEffect(() => {
+    if (!coupon) return undefined;
+    let current = true;
+    quoteStorefrontCoupon(token, { code: coupon.code, quantity, ...(area ? { area } : {}) })
+      .then(quote => { if (current) setCoupon({ code: quote.code, discount: quote.discount }); })
+      .catch(failure => { if (current) { setCoupon(null); setCouponError(failure.message); } });
+    return () => { current = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quantity, area]);
 
   function start() {
     if (hasOptions && !option) {
@@ -200,7 +239,8 @@ export default function ProductPage({ token, product }) {
         ...(option ? { option } : {}),
         ...(area ? { area } : {}),
         ...(form.note.trim() ? { note: form.note } : {}),
-        ...(form.couponCode.trim() ? { couponCode: form.couponCode } : {})
+        // Only a coupon the page has shown working goes with the order; one typed but never applied would take nothing off.
+        ...(coupon ? { couponCode: coupon.code } : {})
       });
       setDone(result);
       setOpen(false);
@@ -274,7 +314,7 @@ export default function ProductPage({ token, product }) {
               <p className="font-bold">Your order is received</p>
               <p className="mt-1 text-sm">Order {done.orderNumber} · Total {formatPrice(done.currency, done.total)}{done.deliveryFee > 0 ? ` (delivery ${formatPrice(done.currency, done.deliveryFee)} included)` : ""}</p>
               {done.billSentToChat && <p className="mt-1 text-sm">We also sent the bill to your chat.</p>}
-              {done.couponNoted && <p className="mt-1 text-sm">Coupon {done.couponNoted} will be applied when our team confirms your order.</p>}
+              {done.couponApplied && done.discount > 0 && <p className="mt-1 text-sm">Coupon {done.couponApplied} applied: {formatPrice(done.currency, done.discount)} off.</p>}
               {done.chatUrl && <p className="mt-2 text-sm">Taking you back to your chat… <a href={done.chatUrl} className="font-bold underline">Open chat now</a></p>}
               <p className="mt-1 text-sm">{product.paymentMode === "full" ? "Your order is being verified. We will confirm it once our team has checked your payment." : "Our team will confirm it with you shortly."}</p>
             </div>
@@ -390,9 +430,30 @@ export default function ProductPage({ token, product }) {
             </label>
 
             {areas.length > 1 && <div className="mt-4"><Segmented items={areas.map(item => ({ key: item.name, label: item.name }))} value={area} onChange={setArea} /></div>}
-            <label className={`${label} mt-3 block`}>Coupon code (optional)
-              <input className={input} value={form.couponCode} onChange={set("couponCode")} maxLength={40} autoCapitalize="characters" placeholder="Coupon code" />
-            </label>
+            <div className="mt-3">
+              <label htmlFor="coupon-code" className={label}>Coupon code (optional)</label>
+              <div className="mt-1.5 flex gap-2">
+                <input
+                  id="coupon-code"
+                  className={`${input} !mt-0 min-w-0 flex-1 uppercase`}
+                  value={form.couponCode}
+                  onChange={event => { set("couponCode")(event); setCoupon(null); setCouponError(""); }}
+                  onKeyDown={event => { if (event.key === "Enter") { event.preventDefault(); applyCoupon(); } }}
+                  maxLength={40}
+                  autoCapitalize="characters"
+                  autoComplete="off"
+                  placeholder="Coupon code"
+                  disabled={Boolean(coupon)}
+                />
+                {coupon ? (
+                  <button type="button" onClick={removeCoupon} className="shrink-0 rounded-xl border border-neutral-300 px-4 text-sm font-bold text-neutral-900">Remove</button>
+                ) : (
+                  <button type="button" onClick={applyCoupon} disabled={checking || !form.couponCode.trim()} className="shrink-0 rounded-xl bg-neutral-900 px-5 text-sm font-bold text-white disabled:opacity-50">{checking ? "Checking…" : "Apply"}</button>
+                )}
+              </div>
+              {coupon && <p role="status" className="mt-2 text-sm font-semibold text-emerald-700">Coupon {coupon.code} applied: {formatPrice(product.currency, discount)} off</p>}
+              {couponError && <p role="alert" className="mt-2 text-sm font-semibold text-red-700">{couponError}</p>}
+            </div>
             <label className={`${label} mt-3 block`}>Note (optional)
               <input className={input} value={form.note} onChange={set("note")} maxLength={300} placeholder="Anything we should know" />
             </label>
@@ -400,6 +461,7 @@ export default function ProductPage({ token, product }) {
             <dl className="mt-5 space-y-1.5 border-t border-dashed border-neutral-300 pt-4 text-[15px] text-neutral-600">
               <div className="flex justify-between"><dt>Product × {quantity}</dt><dd>{formatPrice(product.currency, unit * quantity)}</dd></div>
               {fee !== null && <div className="flex justify-between"><dt>Delivery</dt><dd>{fee === 0 ? "Free" : formatPrice(product.currency, fee)}</dd></div>}
+              {coupon && <div className="flex justify-between font-semibold text-emerald-700"><dt>Coupon {coupon.code}</dt><dd>−{formatPrice(product.currency, discount)}</dd></div>}
               <div className="flex justify-between text-lg font-extrabold text-neutral-900"><dt>Total · {paymentLabel}</dt><dd>{formatPrice(product.currency, total)}</dd></div>
             </dl>
 

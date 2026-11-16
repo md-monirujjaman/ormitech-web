@@ -45,6 +45,27 @@ export async function placeStorefrontOrder(token, order) {
   return body.data;
 }
 
+/** What a coupon would take off this order, worked out by the API. Throws an Error carrying the reason in plain words when it does not work. */
+export async function quoteStorefrontCoupon(token, request) {
+  let response;
+  try {
+    response = await fetch(`${apiUrl}/api/v1/public/storefront/products/${encodeURIComponent(token)}/coupon`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(request)
+    });
+  } catch {
+    throw new Error("ইন্টারনেট সংযোগে সমস্যা হয়েছে। একটু পরে আবার চেষ্টা করুন।");
+  }
+  const body = await response.json().catch(() => null);
+  if (!response.ok) {
+    const error = new Error(body?.error?.details?.[0]?.messages?.[0] || body?.error?.message || body?.message || "Could not check that coupon. Try again.");
+    error.status = response.status;
+    throw error;
+  }
+  return body.data;
+}
+
 /** "BDT 1,200" style price. */
 export function formatPrice(currency, amount) {
   return `${currency === "BDT" ? "৳" : `${currency} `}${Number(amount).toLocaleString("en-US")}`;
