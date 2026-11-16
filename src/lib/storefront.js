@@ -66,6 +66,30 @@ export async function quoteStorefrontCoupon(token, request) {
   return body.data;
 }
 
+/**
+ * How this order can be paid for in the chosen area: the totals, the advance to pay now, and the ways to pay that the business has
+ * on (mobile money carries the account to send to). Throws an Error with the reason in plain words.
+ */
+export async function getPaymentOptions(token, request) {
+  let response;
+  try {
+    response = await fetch(`${apiUrl}/api/v1/public/storefront/products/${encodeURIComponent(token)}/payment-options`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(request)
+    });
+  } catch {
+    throw new Error("ইন্টারনেট সংযোগে সমস্যা হয়েছে। একটু পরে আবার চেষ্টা করুন।");
+  }
+  const body = await response.json().catch(() => null);
+  if (!response.ok) {
+    const error = new Error(body?.error?.details?.[0]?.messages?.[0] || body?.error?.message || body?.message || "Could not load the payment options.");
+    error.status = response.status;
+    throw error;
+  }
+  return body.data;
+}
+
 /** "BDT 1,200" style price. */
 export function formatPrice(currency, amount) {
   return `${currency === "BDT" ? "৳" : `${currency} `}${Number(amount).toLocaleString("en-US")}`;
